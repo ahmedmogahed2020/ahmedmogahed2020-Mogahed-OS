@@ -194,7 +194,8 @@ export function addTimedNote(id) {
   autoSave();
   toast('تم حفظ الملاحظة على توقيت الفيديو');
   const list = input.closest('.knowledge-section');
-  if (list) list.querySelector('.timed-notes, .meta')?.outerHTML = renderTimedNotes(item);
+  const notesNode = list?.querySelector('.timed-notes, .meta');
+  if (notesNode) notesNode.outerHTML = renderTimedNotes(item);
 }
 
 export function seekVideoNote(id, noteId) {
