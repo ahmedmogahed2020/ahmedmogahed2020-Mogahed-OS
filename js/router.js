@@ -30,12 +30,14 @@ const routes = {
 export function navigate(page = 'home') {
   const target = routes[page] ? page : 'home';
   setActivePage(target);
+  document.body.dataset.page = target;
   renderPage();
   saveData();
 }
 
 export function renderPage() {
   const main = qs('#mainView');
+  document.body.dataset.page = appState.activePage || 'home';
   const renderer = routes[appState.activePage] || routes.home;
   main.innerHTML = renderer();
   qsa('.nav-item').forEach(btn => btn.classList.toggle('active', btn.dataset.route === appState.activePage));

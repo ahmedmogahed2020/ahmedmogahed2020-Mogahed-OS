@@ -409,3 +409,12 @@ The Knowledge module supports local uploads in addition to links:
 - Videos can be saved as local video uploads or by YouTube/external links.
 
 Because this phase is still backend-free and stores data locally in the browser, very large media files should be stored as external links to avoid LocalStorage quota limits.
+
+## V15 Mobile Layout Cleanup
+
+- تم إخفاء الهيدر العلوي الثابت داخل صفحة المزيد على الموبايل فقط حتى لا يزحم الصفحة.
+- تم تحويل أزرار Hero في الرئيسية إلى Grid واضح حتى لا تختفي أزرار إضافة مهمة / إضافة معرفة / Dashboard.
+- تم تحويل مؤشرات الرئيسية إلى Grid منظم بعمودين على الموبايل بدل كروت طويلة عمود واحد.
+- تم تثبيت شبكة المزيد على الموبايل ككروت منظمة بعمودين.
+- تم ضبط المسافات لتجنب التداخل مع Bottom Navigation والزر العائم.
+- تم فحص Syntax لكل ملفات JavaScript بعد التعديل.

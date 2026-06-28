@@ -185,3 +185,102 @@
   .nav-item b { font-size: .62rem; }
   .btn { padding-inline: 11px; }
 }
+
+/* V15 Mobile Layout Cleanup - clean grids, no hidden hero actions, no fixed app header on More */
+@media (max-width: 679px) {
+  body[data-page="more"] .app-header {
+    display: none;
+  }
+  body[data-page="more"] .main-view {
+    padding-top: 14px;
+  }
+
+  /* Home hero: actions must be visible as a neat grid, not clipped by horizontal scrolling */
+  .home-stack .command-hero {
+    padding: 18px;
+    border-radius: 30px;
+    overflow: hidden;
+  }
+  .home-stack .command-hero .btn-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    overflow: visible;
+    flex-wrap: initial;
+    width: 100%;
+    padding-bottom: 0;
+  }
+  .home-stack .command-hero .btn-row .btn {
+    width: 100%;
+    min-width: 0;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.35;
+    padding-inline: 10px;
+  }
+
+  /* Home KPIs: keep metrics organized in 2-column mobile grid */
+  .home-stack .command-kpis,
+  .home-stack > .kpi-grid.command-kpis {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px;
+  }
+  .home-stack .command-kpis .kpi-card {
+    min-height: 96px;
+    align-content: center;
+  }
+  .home-stack .command-kpis .kpi-card small {
+    font-size: .82rem;
+    line-height: 1.4;
+  }
+  .home-stack .command-kpis .kpi-card strong {
+    font-size: 1.65rem;
+  }
+
+  /* Keep compact home summary cards in a mobile grid when possible */
+  .home-stack > .grid.grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .home-stack > .grid.grid-2 .card {
+    min-height: 118px;
+  }
+
+  /* More page: keep tools as clean 2-column cards and prevent panel collision */
+  body[data-page="more"] .more-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px;
+  }
+  body[data-page="more"] .more-tile {
+    min-height: 132px;
+    border-radius: 24px;
+    padding: 14px 10px;
+  }
+  body[data-page="more"] .more-tile b {
+    line-height: 1.45;
+  }
+  body[data-page="more"] .more-tile small {
+    line-height: 1.5;
+  }
+  body[data-page="more"] #morePanel {
+    margin-top: 10px;
+  }
+
+  /* Do not let horizontal filter rules affect command hero buttons */
+  .home-stack .command-hero .btn-row::-webkit-scrollbar { display: none; }
+}
+
+@media (max-width: 390px) {
+  .home-stack .command-hero .btn-row {
+    grid-template-columns: 1fr;
+  }
+  .home-stack .command-kpis,
+  .home-stack > .kpi-grid.command-kpis,
+  .home-stack > .grid.grid-2,
+  body[data-page="more"] .more-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  body[data-page="more"] .more-tile {
+    min-height: 124px;
+  }
+}
