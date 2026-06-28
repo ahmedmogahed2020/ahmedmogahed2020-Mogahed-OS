@@ -6,3 +6,29 @@
 .knowledge-section h4 { font-size: .95rem; font-weight: 900; }
 .chip-list { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { border-radius: 999px; padding: 7px 10px; background: var(--surface-soft); color: var(--muted); font-weight: 900; font-size: .8rem; }
+.video-shell { aspect-ratio: 16 / 9; width: 100%; border-radius: var(--radius-lg); overflow: hidden; background: #111827; box-shadow: var(--shadow-sm); }
+.youtube-player, .youtube-player iframe { width: 100%; height: 100%; border: 0; display: block; }
+.input-action { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+.field-hint { display: block; margin-top: 7px; color: var(--muted); font-weight: 800; line-height: 1.7; }
+.knowledge-progress { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.58), rgba(255,250,243,.92)); border-radius: var(--radius-md); }
+.progress-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: .9rem; }
+.progress-line span { color: var(--muted); font-weight: 900; direction: ltr; }
+.playlist-box { max-height: 360px; overflow: auto; }
+.playlist-list { display: grid; gap: 8px; }
+.playlist-item { display: grid; grid-template-columns: 32px 1fr auto auto; gap: 8px; align-items: center; width: 100%; text-align: start; padding: 10px; border-radius: 16px; border: 1px solid var(--line); background: rgba(255,255,255,.64); }
+.playlist-item.active { border-color: rgba(109,61,46,.45); background: var(--surface-soft); }
+.playlist-item span { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 999px; background: var(--surface-2); color: var(--muted); font-weight: 900; }
+.playlist-item b { font-size: .88rem; line-height: 1.6; }
+.playlist-item small { color: var(--muted); font-weight: 900; direction: ltr; }
+.playlist-item em { font-style: normal; font-size: .78rem; color: var(--success); font-weight: 900; }
+.timed-note-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+.timed-notes { display: grid; gap: 8px; }
+.timed-note { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; text-align: start; padding: 10px; border-radius: 15px; border: 1px solid var(--line); background: rgba(255,255,255,.66); }
+.timed-note span { direction: ltr; min-width: 52px; color: #fff; background: var(--primary); border-radius: 999px; padding: 5px 8px; font-weight: 900; text-align: center; }
+.timed-note b { line-height: 1.7; font-size: .9rem; }
+@media (max-width: 560px) {
+  .input-action, .timed-note-form { grid-template-columns: 1fr; }
+  .playlist-item { grid-template-columns: 28px 1fr; }
+  .playlist-item small, .playlist-item em { grid-column: 2; }
+  .progress-line { align-items: flex-start; flex-direction: column; }
+}

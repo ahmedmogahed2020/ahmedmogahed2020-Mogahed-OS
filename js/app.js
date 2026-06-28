@@ -5,20 +5,20 @@ import { closeModal, qs, toast } from './ui.js';
 import { openGoalModal, editGoal, deleteGoal } from './modules/goals.js';
 import { openProjectModal, editProject, deleteProject } from './modules/projects.js';
 import { openTaskModal, editTask, deleteTask, completeTask, setTaskFilter } from './modules/tasks.js';
-import { openKnowledgeModal, editKnowledge, deleteKnowledge, knowledgeToTask, reviewKnowledge, knowledgeToGoal, knowledgeToProject } from './modules/knowledge.js';
+import { openKnowledgeModal, editKnowledge, deleteKnowledge, knowledgeToTask, reviewKnowledge, knowledgeToGoal, knowledgeToProject, fetchKnowledgeMetadataFromForm, addTimedNote, seekVideoNote, selectKnowledgeVideo } from './modules/knowledge.js';
 import { openEmergencyModal, pickEmergency, emergencyToTask } from './modules/emergency.js';
 import { openDecisionModal, editDecision, deleteDecision, reviewDecision } from './modules/decisions.js';
 import { openReviewModal, editReview, deleteReview } from './modules/reviews.js';
 import { openWinModal, editWin, deleteWin } from './modules/wins.js';
 import { openCampaignModal, editCampaign, deleteCampaign, viewCampaign } from './modules/campaigns.js';
 import { openSearchModal, jumpTo } from './modules/search.js';
-import { doBackup, doClear, doExport, doImport, showBackup, showSettings, updateUserName } from './modules/backup.js';
+import { doBackup, doClear, doExport, doImport, showBackup, showSettings, updateUserName, updateYouTubeApiKey } from './modules/backup.js';
 
 const actionMap = {
   'open-goal-modal': () => openGoalModal(), 'edit-goal': id => editGoal(id), 'delete-goal': id => deleteGoal(id),
   'open-project-modal': () => openProjectModal(), 'edit-project': id => editProject(id), 'delete-project': id => deleteProject(id),
   'open-task-modal': () => openTaskModal(), 'edit-task': id => editTask(id), 'delete-task': id => deleteTask(id), 'complete-task': id => completeTask(id),
-  'open-knowledge-modal': () => openKnowledgeModal(), 'edit-knowledge': id => editKnowledge(id), 'delete-knowledge': id => deleteKnowledge(id), 'knowledge-to-task': id => knowledgeToTask(id), 'review-knowledge': id => reviewKnowledge(id), 'knowledge-to-goal': id => knowledgeToGoal(id), 'knowledge-to-project': id => knowledgeToProject(id),
+  'open-knowledge-modal': () => openKnowledgeModal(), 'edit-knowledge': id => editKnowledge(id), 'delete-knowledge': id => deleteKnowledge(id), 'knowledge-to-task': id => knowledgeToTask(id), 'review-knowledge': id => reviewKnowledge(id), 'knowledge-to-goal': id => knowledgeToGoal(id), 'knowledge-to-project': id => knowledgeToProject(id), 'fetch-knowledge-metadata': () => fetchKnowledgeMetadataFromForm(), 'add-video-note': id => addTimedNote(id), 'seek-video-note': (id, el) => seekVideoNote(id, el.dataset.noteId), 'knowledge-select-video': (id, el) => selectKnowledgeVideo(id, el.dataset.videoId),
   'open-emergency': () => openEmergencyModal(), 'emergency-pick': (_, el) => pickEmergency(el.dataset.state), 'emergency-to-task': () => emergencyToTask(),
   'open-decision-modal': () => openDecisionModal(), 'edit-decision': id => editDecision(id), 'delete-decision': id => deleteDecision(id), 'review-decision': id => reviewDecision(id),
   'open-review-modal': (_, el) => openReviewModal('', el.dataset.type), 'edit-review': id => editReview(id), 'delete-review': id => deleteReview(id),
@@ -56,6 +56,7 @@ function handleChange(event) {
 function handleInput(event) {
   const el = event.target;
   if (el.matches('[data-action="settings-name"]')) updateUserName(el.value);
+  if (el.matches('[data-action="settings-youtube-key"]')) updateYouTubeApiKey(el.value);
   if (el.matches('[data-action="filter-list"]')) filterCards(el.value, el.dataset.list);
 }
 

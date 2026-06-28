@@ -5,7 +5,8 @@ export const defaultSettings = {
   lastSavedAt: null,
   lastPage: 'home',
   seedLoaded: false,
-  autoSave: true
+  autoSave: true,
+  youtubeApiKey: ''
 };
 
 export function createEmptyData() {
