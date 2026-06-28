@@ -1,23 +1,107 @@
-import { appState } from '../state.js';
+import { appState, setFilter } from '../state.js';
 import { autoSave, saveData } from '../storage.js';
 import { closeModal, emptyState, objectFromForm, openModal, pageHeader, toast } from '../ui.js';
-import { generateId, linesToText, parseLines, safeNumber, safeText, todayISO } from '../utils.js';
+import { addDaysISO, formatDate, generateId, linesToText, parseLines, safeNumber, safeText, todayISO } from '../utils.js';
 import { linkedFields, removeItem, simpleCard, upsert } from './shared.js';
 import { openTaskModal } from './tasks.js';
 import { buildEmbedUrl, fetchYouTubeMetadata, parseYouTubeUrl, secondsToTime } from './youtube.js';
 
 const types = ['فيديو','Playlist','بودكاست','كتاب PDF','مقال','رابط','ملاحظة','فكرة'];
 const statuses = ['جديد','قيد المراجعة','تم تلخيصه','تحول لأفعال','مؤرشف'];
+const learningStatuses = ['لم أبدأ','جاري المشاهدة','انتهيت','أحتاج مراجعة','تم تحويله لتنفيذ'];
+const knowledgeFilters = [
+  ['all', 'كل المعرفة'],
+  ['needs-review', 'يحتاج مراجعة'],
+  ['not-completed', 'غير مكتمل'],
+  ['completed', 'مكتمل'],
+  ['converted', 'تحول لتنفيذ'],
+  ['video', 'فيديو'],
+  ['playlist', 'Playlist']
+];
 const youtubePlayers = new Map();
 const progressTimers = new Map();
 let youtubeApiPromise = null;
 
 export function renderKnowledge() {
   const actions = '<button class="btn primary" data-action="open-knowledge-modal">إضافة معرفة</button>';
+  const filtered = getFilteredKnowledge();
   window.setTimeout(initYouTubePlayers, 0);
-  return `<section class="page">${pageHeader('المعرفة', 'اجمع الفيديوهات والبلاي ليست والكتب، وتابع تقدمك وملاحظاتك المرتبطة بالوقت.', actions)}
-    <div class="grid grid-2">${appState.data.knowledge.length ? appState.data.knowledge.map(knowledgeCard).join('') : emptyState('صفحة المعرفة جاهزة وليست فارغة', 'أضف رابط فيديو أو Playlist ثم اضغط جلب البيانات ليتم ملء التفاصيل تلقائيًا.', actions)}</div>
+  return `<section class="page">${pageHeader('المعرفة', 'نظام تعلم عملي: شاهد، لخّص، استخرج أفعال، راجع، وحوّل المعرفة لتنفيذ.', actions)}
+    ${renderKnowledgeLearningSummary()}
+    ${renderKnowledgeFilters()}
+    <div class="grid grid-2">${filtered.length ? filtered.map(knowledgeCard).join('') : emptyState('لا توجد نتائج مطابقة', 'غيّر الفلتر أو البحث، أو أضف معرفة جديدة من YouTube أو رابط خارجي.', actions)}</div>
   </section>`;
+ }
+
+function getVideoEntries(item) {
+  const youtube = item.youtube || {};
+  const videos = youtube.playlistItems?.length ? youtube.playlistItems : [{ videoId: youtube.videoId || 'general', title: item.title, durationSeconds: youtube.durationSeconds || 0 }];
+  return videos.map(video => {
+    const id = video.videoId || 'general';
+    return { ...video, content: getVideoContent(item, id), id };
+  });
+}
+
+function isReviewDue(content = {}) {
+  return Boolean(content.reviewAt && content.reviewAt <= todayISO() && content.learningStatus !== 'تم تحويله لتنفيذ');
+}
+
+function getKnowledgeMetrics() {
+  const entries = appState.data.knowledge.flatMap(getVideoEntries);
+  const total = entries.length;
+  const completed = entries.filter(entry => ['انتهيت', 'تم تحويله لتنفيذ'].includes(entry.content.learningStatus)).length;
+  const needsReview = entries.filter(entry => entry.content.learningStatus === 'أحتاج مراجعة' || isReviewDue(entry.content)).length;
+  const converted = entries.filter(entry => entry.content.learningStatus === 'تم تحويله لتنفيذ' || entry.content.convertedAt).length;
+  const totalDuration = entries.reduce((sum, entry) => sum + safeNumber(entry.durationSeconds), 0);
+  return { total, completed, needsReview, converted, totalDuration };
+}
+
+function getAllKnowledgeTags() {
+  return [...new Set(appState.data.knowledge.flatMap(item => getVideoEntries(item).flatMap(entry => entry.content.tags || [])))].filter(Boolean).sort();
+}
+
+function itemMatchesLearningFilter(item, filter) {
+  if (filter === 'all') return true;
+  if (filter === 'video') return item.youtube?.kind === 'video' || item.type === 'فيديو';
+  if (filter === 'playlist') return item.youtube?.kind === 'playlist' || item.type === 'Playlist';
+  const entries = getVideoEntries(item);
+  if (filter === 'needs-review') return entries.some(entry => entry.content.learningStatus === 'أحتاج مراجعة' || isReviewDue(entry.content));
+  if (filter === 'not-completed') return entries.some(entry => !['انتهيت', 'تم تحويله لتنفيذ'].includes(entry.content.learningStatus));
+  if (filter === 'completed') return entries.some(entry => ['انتهيت', 'تم تحويله لتنفيذ'].includes(entry.content.learningStatus));
+  if (filter === 'converted') return entries.some(entry => entry.content.learningStatus === 'تم تحويله لتنفيذ' || entry.content.convertedAt);
+  return true;
+}
+
+function getFilteredKnowledge() {
+  const filter = appState.filters.knowledge || 'all';
+  const query = (appState.searchQuery || '').trim().toLowerCase();
+  return appState.data.knowledge.filter(item => {
+    const text = [item.title, item.category, item.type, item.fileName, item.url, ...getVideoEntries(item).flatMap(entry => [entry.title, entry.content.summary, entry.content.notes, ...(entry.content.tags || []), ...(entry.content.extractedIdeas || []), ...(entry.content.extractedActions || [])])].join(' ').toLowerCase();
+    return itemMatchesLearningFilter(item, filter) && (!query || text.includes(query));
+  });
+}
+
+function renderKnowledgeLearningSummary() {
+  const metrics = getKnowledgeMetrics();
+  const completion = metrics.total ? Math.round((metrics.completed / metrics.total) * 100) : 0;
+  return `<div class="knowledge-learning-summary">
+    <article class="mini-kpi"><span>فيديوهات/دروس</span><b>${safeText(metrics.total)}</b></article>
+    <article class="mini-kpi"><span>مكتمل</span><b>${safeText(metrics.completed)}</b></article>
+    <article class="mini-kpi warning"><span>يحتاج مراجعة</span><b>${safeText(metrics.needsReview)}</b></article>
+    <article class="mini-kpi"><span>تحول لتنفيذ</span><b>${safeText(metrics.converted)}</b></article>
+    <article class="mini-kpi"><span>إجمالي الوقت</span><b>${safeText(secondsToTime(metrics.totalDuration))}</b></article>
+    <article class="mini-kpi"><span>اكتمال التعلم</span><b>${safeText(completion)}%</b></article>
+  </div>`;
+}
+
+function renderKnowledgeFilters() {
+  const selected = appState.filters.knowledge || 'all';
+  const tags = getAllKnowledgeTags();
+  return `<div class="knowledge-filter-bar">
+    <label>فلترة التعلم<select data-action="knowledge-filter">${knowledgeFilters.map(([value, label]) => `<option value="${safeText(value)}" ${value === selected ? 'selected' : ''}>${safeText(label)}</option>`).join('')}</select></label>
+    <label>بحث داخل المعرفة<input data-action="knowledge-search" value="${safeText(appState.searchQuery || '')}" placeholder="ابحث بعنوان، Tag، فكرة، فعل..."></label>
+    <div class="knowledge-tags-cloud">${tags.length ? tags.slice(0, 14).map(tag => `<button class="tag-pill" data-action="knowledge-search-tag" data-tag="${safeText(tag)}">#${safeText(tag)}</button>`).join('') : '<span class="meta">أضف Tags داخل كل فيديو لتظهر هنا.</span>'}</div>
+  </div>`;
 }
 
 function knowledgeCard(item) {
@@ -39,6 +123,7 @@ function knowledgeCard(item) {
 
   return simpleCard('knowledge', item, `${preview}
     <div class="meta"><span>${safeText(item.type)}</span><span>${safeText(item.category || 'عام')}</span>${youtube.channelTitle ? `<span>${safeText(youtube.channelTitle)}</span>` : ''}</div>
+    ${renderItemLearningBadges(item, activeVideoId)}
     ${progress}
     ${playlist}
     ${videoWorkspace}
@@ -67,8 +152,41 @@ function getVideoContent(item, videoId = '') {
     summary: current.summary ?? video.description ?? item.summary ?? '',
     notes: current.notes ?? '',
     extractedIdeas: current.extractedIdeas || [],
-    extractedActions: current.extractedActions || []
+    extractedActions: current.extractedActions || [],
+    learningStatus: current.learningStatus || 'لم أبدأ',
+    tags: Array.isArray(current.tags) ? current.tags : parseLines(current.tags || ''),
+    reviewAt: current.reviewAt || '',
+    linkedGoalId: current.linkedGoalId || item.linkedGoalId || '',
+    linkedProjectId: current.linkedProjectId || item.linkedProjectId || '',
+    convertedAt: current.convertedAt || ''
   };
+}
+
+function renderItemLearningBadges(item, activeVideoId = '') {
+  const entries = getVideoEntries(item);
+  const active = getVideoContent(item, activeVideoId);
+  const tags = active.tags || [];
+  const completedCount = entries.filter(entry => ['انتهيت', 'تم تحويله لتنفيذ'].includes(entry.content.learningStatus)).length;
+  const needsReviewCount = entries.filter(entry => entry.content.learningStatus === 'أحتاج مراجعة' || isReviewDue(entry.content)).length;
+  return `<div class="learning-badges">
+    <span class="learning-status-chip">${safeText(active.learningStatus)}</span>
+    <span>${safeText(completedCount)} / ${safeText(entries.length)} مكتمل</span>
+    ${needsReviewCount ? `<span class="danger-chip">${safeText(needsReviewCount)} يحتاج مراجعة</span>` : ''}
+    ${tags.slice(0, 5).map(tag => `<span class="tag-pill passive">#${safeText(tag)}</span>`).join('')}
+  </div>`;
+}
+
+function goalOptions(selected = '') {
+  return `<option value="">بدون هدف</option>${appState.data.goals.map(goal => `<option value="${safeText(goal.id)}" ${goal.id === selected ? 'selected' : ''}>${safeText(goal.title)}</option>`).join('')}`;
+}
+
+function projectOptions(selected = '') {
+  return `<option value="">بدون مشروع</option>${appState.data.projects.map(project => `<option value="${safeText(project.id)}" ${project.id === selected ? 'selected' : ''}>${safeText(project.title)}</option>`).join('')}`;
+}
+
+function renderReviewInfo(content) {
+  if (!content.reviewAt) return '<span>لا توجد مراجعة مجدولة</span>';
+  return `<span class="${isReviewDue(content) ? 'review-due' : ''}">مراجعة: ${safeText(formatDate(content.reviewAt))}</span>`;
 }
 
 function renderCurrentVideoWorkspace(item, activeVideoId = '') {
@@ -78,12 +196,24 @@ function renderCurrentVideoWorkspace(item, activeVideoId = '') {
   return `<div class="knowledge-section video-workspace" data-video-workspace="${safeText(item.id)}">
     <div class="workspace-head">
       <div><h4>محتوى هذا الفيديو</h4><p>${safeText(video.title || item.title || 'الفيديو الحالي')}</p></div>
-      <button class="btn primary" data-action="save-video-content" data-id="${safeText(item.id)}">حفظ محتوى الفيديو</button>
+      <div class="workspace-actions">
+        <button class="btn ghost" data-action="mark-video-complete" data-id="${safeText(item.id)}">تمت المشاهدة</button>
+        <button class="btn ghost" data-action="schedule-video-review" data-id="${safeText(item.id)}">مراجعة بعد 7 أيام</button>
+        <button class="btn primary" data-action="save-video-content" data-id="${safeText(item.id)}">حفظ محتوى الفيديو</button>
+      </div>
     </div>
+    <div class="learning-control-grid">
+      <label>حالة التعلم<select data-video-field="learningStatus" data-video-id="${safeText(videoId)}">${learningStatuses.map(status => `<option ${status === content.learningStatus ? 'selected' : ''}>${safeText(status)}</option>`).join('')}</select></label>
+      <label>Tags — افصل كل Tag بسطر أو فاصلة<input data-video-field="tags" data-video-id="${safeText(videoId)}" value="${safeText((content.tags || []).join(', '))}" placeholder="تسويق, يوتيوب, مبيعات"></label>
+      <label>ربط بهدف<select data-video-field="linkedGoalId" data-video-id="${safeText(videoId)}">${goalOptions(content.linkedGoalId)}</select></label>
+      <label>ربط بمشروع<select data-video-field="linkedProjectId" data-video-id="${safeText(videoId)}">${projectOptions(content.linkedProjectId)}</select></label>
+    </div>
+    <div class="learning-review-row">${renderReviewInfo(content)}${content.convertedAt ? `<span>تحول لتنفيذ: ${safeText(formatDate(content.convertedAt))}</span>` : ''}</div>
     <label>الملخص<textarea data-video-field="summary" data-video-id="${safeText(videoId)}" placeholder="اكتب ملخص هذا الفيديو فقط">${safeText(content.summary)}</textarea></label>
     <label>الملاحظات العامة<textarea data-video-field="notes" data-video-id="${safeText(videoId)}" placeholder="ملاحظات عامة على هذا الفيديو فقط">${safeText(content.notes)}</textarea></label>
     <label>أفكار مستخرجة — كل فكرة في سطر<textarea data-video-field="extractedIdeas" data-video-id="${safeText(videoId)}" placeholder="فكرة 1\nفكرة 2">${safeText(linesToText(content.extractedIdeas))}</textarea></label>
     <label>أفعال مستخرجة — كل فعل في سطر<textarea data-video-field="extractedActions" data-video-id="${safeText(videoId)}" placeholder="فعل 1\nفعل 2">${safeText(linesToText(content.extractedActions))}</textarea></label>
+    <div class="btn-row"><button class="btn primary" data-action="video-content-to-tasks" data-id="${safeText(item.id)}">استخرج خطة تنفيذ</button><button class="btn ghost" data-action="knowledge-to-task" data-id="${safeText(item.id)}">تحويل لمهمة واحدة</button></div>
   </div>`;
 }
 
@@ -228,28 +358,44 @@ function buildInitialVideoContent(youtube = {}) {
       summary: video.description || '',
       notes: '',
       extractedIdeas: [],
-      extractedActions: []
+      extractedActions: [],
+      learningStatus: 'لم أبدأ',
+      tags: [],
+      reviewAt: '',
+      linkedGoalId: '',
+      linkedProjectId: '',
+      convertedAt: ''
     };
   });
   return entries;
 }
 
-export function saveVideoContent(id) {
+export function saveVideoContent(id, quiet = false) {
   const item = appState.data.knowledge.find(k => k.id === id);
-  if (!item) return;
+  if (!item) return null;
   const videoId = getActiveVideoId(item);
   const root = document.querySelector(`[data-video-workspace="${CSS.escape(id)}"]`);
-  if (!root) return;
+  if (!root) return null;
+  const existing = getVideoContent(item, videoId);
+  const tagsValue = root.querySelector('[data-video-field="tags"]')?.value || '';
   item.videoContent = item.videoContent || {};
   item.videoContent[videoId] = {
+    ...existing,
     summary: root.querySelector('[data-video-field="summary"]')?.value?.trim() || '',
     notes: root.querySelector('[data-video-field="notes"]')?.value?.trim() || '',
     extractedIdeas: parseLines(root.querySelector('[data-video-field="extractedIdeas"]')?.value || ''),
     extractedActions: parseLines(root.querySelector('[data-video-field="extractedActions"]')?.value || ''),
+    learningStatus: root.querySelector('[data-video-field="learningStatus"]')?.value || existing.learningStatus || 'لم أبدأ',
+    tags: tagsValue.split(/[,\n]/).map(x => x.trim()).filter(Boolean),
+    linkedGoalId: root.querySelector('[data-video-field="linkedGoalId"]')?.value || '',
+    linkedProjectId: root.querySelector('[data-video-field="linkedProjectId"]')?.value || '',
+    reviewAt: existing.reviewAt || '',
+    convertedAt: existing.convertedAt || '',
     updatedAt: new Date().toISOString()
   };
   autoSave();
-  toast('تم حفظ محتوى هذا الفيديو فقط');
+  if (!quiet) toast('تم حفظ محتوى هذا الفيديو فقط');
+  return item.videoContent[videoId];
 }
 
 export function addTimedNote(id) {
@@ -315,12 +461,91 @@ export function selectKnowledgeVideo(id, videoId) {
   import('../router.js').then(({ renderPage }) => renderPage());
 }
 
+export function setKnowledgeFilter(value) {
+  setFilter('knowledge', value || 'all');
+  import('../router.js').then(({ renderPage }) => renderPage());
+}
+
+export function setKnowledgeSearch(value = '') {
+  appState.searchQuery = value;
+  import('../router.js').then(({ renderPage }) => renderPage());
+}
+
+export function searchKnowledgeTag(tag = '') {
+  appState.searchQuery = tag;
+  import('../router.js').then(({ renderPage }) => renderPage());
+}
+
+export function markVideoComplete(id) {
+  const item = appState.data.knowledge.find(k => k.id === id);
+  if (!item) return;
+  const videoId = getActiveVideoId(item);
+  const content = saveVideoContent(id, true) || getVideoContent(item, videoId);
+  item.videoContent = item.videoContent || {};
+  item.videoContent[videoId] = { ...content, learningStatus: 'انتهيت', reviewAt: content.reviewAt || addDaysISO(7), updatedAt: new Date().toISOString() };
+  const video = getActiveVideo(item, videoId);
+  item.videoProgress = item.videoProgress || { byVideo: {}, completedVideoIds: [], watchedSeconds: 0, percentage: 0 };
+  item.videoProgress.completedVideoIds = item.videoProgress.completedVideoIds || [];
+  if (!item.videoProgress.completedVideoIds.includes(videoId)) item.videoProgress.completedVideoIds.push(videoId);
+  if (video.durationSeconds) item.videoProgress.byVideo = { ...(item.videoProgress.byVideo || {}), [videoId]: video.durationSeconds };
+  autoSave();
+  refreshKnowledgeCardMedia(id);
+  toast('تم تعليم الفيديو كمكتمل وجدولة مراجعة بعد 7 أيام');
+}
+
+export function scheduleVideoReview(id, days = 7) {
+  const item = appState.data.knowledge.find(k => k.id === id);
+  if (!item) return;
+  const videoId = getActiveVideoId(item);
+  const content = saveVideoContent(id, true) || getVideoContent(item, videoId);
+  item.videoContent = item.videoContent || {};
+  item.videoContent[videoId] = { ...content, reviewAt: addDaysISO(days), learningStatus: content.learningStatus === 'لم أبدأ' ? 'أحتاج مراجعة' : content.learningStatus, updatedAt: new Date().toISOString() };
+  autoSave();
+  refreshKnowledgeCardMedia(id);
+  toast('تم جدولة مراجعة هذا الفيديو بعد 7 أيام');
+}
+
+export function videoContentToTasks(id) {
+  const item = appState.data.knowledge.find(k => k.id === id);
+  if (!item) return;
+  const videoId = getActiveVideoId(item);
+  const content = saveVideoContent(id, true) || getVideoContent(item, videoId);
+  const video = getActiveVideo(item, videoId);
+  const actions = content.extractedActions?.length ? content.extractedActions : content.extractedIdeas || [];
+  if (!actions.length) return toast('اكتب أفعال أو أفكار مستخرجة أولًا لتحويلها لخطة تنفيذ', 'error');
+  const now = new Date().toISOString();
+  actions.forEach((action, index) => {
+    appState.data.tasks.unshift({
+      id: generateId('task'),
+      title: action,
+      description: `من معرفة: ${item.title}${video.title ? ` — ${video.title}` : ''}\n${content.summary || content.notes || ''}`.trim(),
+      goalId: content.linkedGoalId || item.linkedGoalId || '',
+      projectId: content.linkedProjectId || item.linkedProjectId || '',
+      type: 'إجراء سريع',
+      priority: index === 0 ? 'عالية' : 'متوسطة',
+      status: 'مفتوحة',
+      dueDate: '',
+      dueTime: '',
+      reminder: '',
+      repeat: '',
+      notes: item.url || '',
+      createdAt: now,
+      updatedAt: now,
+      completedAt: ''
+    });
+  });
+  item.videoContent[videoId] = { ...content, learningStatus: 'تم تحويله لتنفيذ', convertedAt: now, updatedAt: now };
+  autoSave();
+  import('../router.js').then(({ renderPage }) => renderPage());
+  toast(`تم إنشاء ${actions.length} مهمة من هذا الفيديو`);
+}
+
 export function knowledgeToTask(id) {
   const item = appState.data.knowledge.find(k => k.id === id);
   if (!item && document.getElementById('entityForm')) { saveKnowledge({}); return; }
   if (!item) return toast('احفظ المعرفة أولًا');
   const content = getVideoContent(item);
-  openTaskModal('', { title: `إجراء من: ${item.title}`, description: content.summary || content.notes || item.summary || item.notes, type: 'إجراء سريع', priority: 'متوسطة', status: 'مفتوحة', goalId: item.linkedGoalId, projectId: item.linkedProjectId });
+  openTaskModal('', { title: `إجراء من: ${item.title}`, description: content.summary || content.notes || item.summary || item.notes, type: 'إجراء سريع', priority: 'متوسطة', status: 'مفتوحة', goalId: content.linkedGoalId || item.linkedGoalId, projectId: content.linkedProjectId || item.linkedProjectId });
 }
 export function knowledgeToGoal(id) { const item = appState.data.knowledge.find(k=>k.id===id); if (!item) return toast('احفظ المعرفة أولًا'); const content = getVideoContent(item); upsert('goals', { id: generateId('goal'), title: item.title, description: content.summary || content.notes || item.summary || item.notes, reason: 'تم تحويله من المعرفة', status: 'نشط', priority: 'متوسطة', startDate: todayISO(), targetDate: '', progress: 0, linkedProjects: [], notes: item.url }); toast('تم تحويل المعرفة إلى هدف'); }
 export function knowledgeToProject(id) { const item = appState.data.knowledge.find(k=>k.id===id); if (!item) return toast('احفظ المعرفة أولًا'); const content = getVideoContent(item); upsert('projects', { id: generateId('project'), title: item.title, description: content.summary || content.notes || item.summary || item.notes, goalId: item.linkedGoalId || '', status: 'قيد التنفيذ', priority: 'متوسطة', startDate: todayISO(), targetDate: '', progress: 0, notes: item.url }); toast('تم تحويل المعرفة إلى مشروع'); }
@@ -440,6 +665,8 @@ function refreshKnowledgeCardMedia(id) {
   const card = document.querySelector(`[data-knowledge-id="${CSS.escape(id)}"]`)?.closest('.item-card');
   if (!item || !card) return;
   updateProgressView(id);
+  const badgesNode = card.querySelector('.learning-badges');
+  if (badgesNode) badgesNode.outerHTML = renderItemLearningBadges(item, item.youtube.currentVideoId);
   const workspaceNode = card.querySelector('[data-video-workspace]');
   if (workspaceNode) workspaceNode.outerHTML = renderCurrentVideoWorkspace(item, item.youtube.currentVideoId);
   const notesSection = card.querySelector('.timed-note-form')?.closest('.knowledge-section');
