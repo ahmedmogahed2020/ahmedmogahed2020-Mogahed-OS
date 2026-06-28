@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.0.0';
+export const APP_VERSION = '1.5.0';
 
 export const defaultSettings = {
   userName: 'مجاهد',
@@ -6,7 +6,16 @@ export const defaultSettings = {
   lastPage: 'home',
   seedLoaded: false,
   autoSave: true,
-  youtubeApiKey: ''
+  youtubeApiKey: '',
+  storeName: 'Mogahed OS',
+  currency: 'EGP',
+  dailyTaskTarget: 5,
+  learningMinutesTarget: 30,
+  quietMode: false,
+  compactMode: false,
+  enableSeedData: true,
+  lastSystemTestAt: null,
+  lastSystemTestSummary: null
 };
 
 export function createEmptyData() {

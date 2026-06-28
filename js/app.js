@@ -12,7 +12,7 @@ import { openReviewModal, editReview, deleteReview } from './modules/reviews.js'
 import { openWinModal, editWin, deleteWin } from './modules/wins.js';
 import { openCampaignModal, editCampaign, deleteCampaign, viewCampaign, campaignToTasks, openCampaignCompare, setCampaignFilter, setCampaignSearch } from './modules/campaigns.js';
 import { openSearchModal, jumpTo } from './modules/search.js';
-import { doBackup, doClear, doExport, doImport, showBackup, showSettings, updateUserName, updateYouTubeApiKey } from './modules/backup.js';
+import { doBackup, doClear, doExport, doImport, showBackup, showSettings, showQA, runQA, updateUserName, updateYouTubeApiKey, updateStoreName, updateCurrency, updateDailyTaskTarget, updateLearningMinutesTarget, updateQuietMode, updateCompactMode, updateSeedData } from './modules/backup.js';
 
 const actionMap = {
   'open-goal-modal': () => openGoalModal(), 'edit-goal': id => editGoal(id), 'delete-goal': id => deleteGoal(id),
@@ -25,7 +25,7 @@ const actionMap = {
   'open-win-modal': () => openWinModal(), 'edit-win': id => editWin(id), 'delete-win': id => deleteWin(id),
   'open-campaign-modal': () => openCampaignModal(), 'edit-campaign': id => editCampaign(id), 'delete-campaign': id => deleteCampaign(id), 'view-campaign': id => viewCampaign(id), 'campaign-to-tasks': id => campaignToTasks(id), 'open-campaign-compare': () => openCampaignCompare(), 'set-campaign-filter': (_, el) => { setCampaignFilter(el.dataset.filter); },
   'open-search': () => openSearchModal(), 'search-jump': (_, el) => { closeModal(); jumpTo(el.dataset.routeTarget); },
-  'show-backup': () => showBackup(), 'show-settings': () => showSettings(), 'export-json': () => doExport(), 'backup-date': () => doBackup(), 'clear-data': () => doClear(),
+  'show-backup': () => showBackup(), 'show-settings': () => showSettings(), 'show-qa': () => showQA(), 'run-system-test': () => runQA(), 'export-json': () => doExport(), 'backup-date': () => doBackup(), 'clear-data': () => doClear(),
   'close-modal': () => closeModal(), 'toggle-quick-actions': () => toggleQuickActions(), 'set-task-filter': (_, el) => { setTaskFilter(el.dataset.filter); renderPage(); }
 };
 
@@ -52,12 +52,19 @@ function handleChange(event) {
   const el = event.target;
   if (el.matches('[data-action="import-json"]')) doImport(el.files?.[0]);
   if (el.matches('[data-action="knowledge-filter"]')) setKnowledgeFilter(el.value);
+  if (el.matches('[data-action="settings-currency"]')) updateCurrency(el.value);
+  if (el.matches('[data-action="settings-quiet-mode"]')) updateQuietMode(el.checked);
+  if (el.matches('[data-action="settings-compact-mode"]')) updateCompactMode(el.checked);
+  if (el.matches('[data-action="settings-seed-data"]')) updateSeedData(el.checked);
 }
 
 function handleInput(event) {
   const el = event.target;
   if (el.matches('[data-action="settings-name"]')) updateUserName(el.value);
   if (el.matches('[data-action="settings-youtube-key"]')) updateYouTubeApiKey(el.value);
+  if (el.matches('[data-action="settings-store-name"]')) updateStoreName(el.value);
+  if (el.matches('[data-action="settings-daily-task-target"]')) updateDailyTaskTarget(el.value);
+  if (el.matches('[data-action="settings-learning-minutes-target"]')) updateLearningMinutesTarget(el.value);
   if (el.matches('[data-action="filter-list"]')) filterCards(el.value, el.dataset.list);
   if (el.matches('[data-action="knowledge-search"]')) setKnowledgeSearch(el.value);
   if (el.matches('[data-action="task-search"]')) setTaskSearch(el.value);
@@ -73,6 +80,7 @@ function filterCards(query, listId) {
 
 function init() {
   loadData();
+  document.body.classList.toggle('compact-mode', Boolean(appState.data.settings.compactMode));
   document.addEventListener('click', handleClick);
   document.addEventListener('change', handleChange);
   document.addEventListener('input', handleInput);
