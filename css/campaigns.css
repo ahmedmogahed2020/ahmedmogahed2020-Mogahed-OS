@@ -6,3 +6,35 @@
 .scenario-table td:last-child { border-radius: 14px 0 0 14px; border-left: 1px solid var(--line); }
 .recommendation { background: linear-gradient(135deg, rgba(22,132,91,.12), rgba(109,61,46,.10)); border: 1px solid rgba(22,132,91,.18); border-radius: var(--radius-lg); padding: 15px; line-height: 1.85; }
 .warning-box { background: rgba(189,123,22,.12); color: #7a4a05; border-radius: var(--radius-md); padding: 12px; font-weight: 800; line-height: 1.75; }
+
+/* V4 Campaign Analyzer Pro */
+.campaign-pro .page-header { align-items: flex-start; }
+.campaign-intel-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+.campaign-toolbar { display: grid; gap: 10px; margin-bottom: 14px; }
+.campaign-toolbar input { width: 100%; }
+.campaign-risk-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; color: var(--muted); font-weight: 800; }
+.campaign-pro-modal { gap: 14px; }
+.campaign-final-call { display: grid; grid-template-columns: minmax(0, 1fr) 130px; gap: 14px; align-items: center; background: linear-gradient(135deg, rgba(22,132,91,.12), rgba(109,61,46,.08)); border: 1px solid rgba(22,132,91,.18); border-radius: var(--radius-lg); padding: 15px; }
+.campaign-final-call h3 { margin: 4px 0 8px; font-size: 1.25rem; }
+.risk-meter { min-height: 112px; border-radius: 22px; background: var(--surface); border: 1px solid var(--line); display: grid; place-items: center; position: relative; overflow: hidden; text-align: center; }
+.risk-meter::before { content: ''; position: absolute; inset: 12px; border-radius: 999px; background: conic-gradient(currentColor var(--risk), rgba(0,0,0,.08) 0); color: #bd6a16; opacity: .26; }
+.risk-meter span { position: absolute; inset: 23px; border-radius: 999px; background: var(--surface); z-index: 1; }
+.risk-meter b, .risk-meter small { position: relative; z-index: 2; }
+.risk-meter b { font-size: 1.5rem; }
+.risk-meter small { color: var(--muted); font-weight: 900; }
+.campaign-panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 14px; display: grid; gap: 12px; }
+.campaign-panel h3 { margin: 0; }
+.campaign-panel ol { margin: 0; padding-inline-start: 22px; line-height: 1.95; font-weight: 750; }
+.mini-card { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 12px; line-height: 1.75; }
+.mini-card small { color: var(--muted); display: block; margin-bottom: 6px; font-weight: 800; }
+.mini-card strong { display: block; font-size: 1rem; line-height: 1.8; }
+.badge.success { background: rgba(22,132,91,.12); color: #146b4d; }
+.badge.warning { background: rgba(189,123,22,.12); color: #805008; }
+.badge.danger { background: rgba(190,56,56,.12); color: #9b2525; }
+.campaign-form textarea { min-height: 84px; }
+
+@media (max-width: 900px) {
+  .campaign-intel-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .campaign-final-call { grid-template-columns: 1fr; }
+  .scenario-table { display: block; overflow-x: auto; white-space: nowrap; }
+}

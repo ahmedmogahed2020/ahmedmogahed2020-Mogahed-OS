@@ -10,7 +10,7 @@ import { openEmergencyModal, pickEmergency, emergencyToTask } from './modules/em
 import { openDecisionModal, editDecision, deleteDecision, reviewDecision } from './modules/decisions.js';
 import { openReviewModal, editReview, deleteReview } from './modules/reviews.js';
 import { openWinModal, editWin, deleteWin } from './modules/wins.js';
-import { openCampaignModal, editCampaign, deleteCampaign, viewCampaign } from './modules/campaigns.js';
+import { openCampaignModal, editCampaign, deleteCampaign, viewCampaign, campaignToTasks, openCampaignCompare, setCampaignFilter, setCampaignSearch } from './modules/campaigns.js';
 import { openSearchModal, jumpTo } from './modules/search.js';
 import { doBackup, doClear, doExport, doImport, showBackup, showSettings, updateUserName, updateYouTubeApiKey } from './modules/backup.js';
 
@@ -23,7 +23,7 @@ const actionMap = {
   'open-decision-modal': () => openDecisionModal(), 'edit-decision': id => editDecision(id), 'delete-decision': id => deleteDecision(id), 'review-decision': id => reviewDecision(id),
   'open-review-modal': (_, el) => openReviewModal('', el.dataset.type), 'edit-review': id => editReview(id), 'delete-review': id => deleteReview(id),
   'open-win-modal': () => openWinModal(), 'edit-win': id => editWin(id), 'delete-win': id => deleteWin(id),
-  'open-campaign-modal': () => openCampaignModal(), 'edit-campaign': id => editCampaign(id), 'delete-campaign': id => deleteCampaign(id), 'view-campaign': id => viewCampaign(id),
+  'open-campaign-modal': () => openCampaignModal(), 'edit-campaign': id => editCampaign(id), 'delete-campaign': id => deleteCampaign(id), 'view-campaign': id => viewCampaign(id), 'campaign-to-tasks': id => campaignToTasks(id), 'open-campaign-compare': () => openCampaignCompare(), 'set-campaign-filter': (_, el) => { setCampaignFilter(el.dataset.filter); },
   'open-search': () => openSearchModal(), 'search-jump': (_, el) => { closeModal(); jumpTo(el.dataset.routeTarget); },
   'show-backup': () => showBackup(), 'show-settings': () => showSettings(), 'export-json': () => doExport(), 'backup-date': () => doBackup(), 'clear-data': () => doClear(),
   'close-modal': () => closeModal(), 'toggle-quick-actions': () => toggleQuickActions(), 'set-task-filter': (_, el) => { setTaskFilter(el.dataset.filter); renderPage(); }
@@ -61,6 +61,7 @@ function handleInput(event) {
   if (el.matches('[data-action="filter-list"]')) filterCards(el.value, el.dataset.list);
   if (el.matches('[data-action="knowledge-search"]')) setKnowledgeSearch(el.value);
   if (el.matches('[data-action="task-search"]')) setTaskSearch(el.value);
+  if (el.matches('[data-action="campaign-search"]')) setCampaignSearch(el.value);
 }
 
 function filterCards(query, listId) {
