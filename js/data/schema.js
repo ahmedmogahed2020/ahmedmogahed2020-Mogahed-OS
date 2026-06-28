@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.10.0';
+export const APP_VERSION = '1.11.0';
 
 export const defaultSettings = {
   userName: 'مجاهد',
@@ -16,7 +16,8 @@ export const defaultSettings = {
   enableSeedData: true,
   lastSystemTestAt: null,
   lastSystemTestSummary: null,
-  recentItems: []
+  recentItems: [],
+  notifications: { enabled: true, soundEnabled: true, browserNotifications: false, leadMinutes: 10, volume: 0.35, soundType: 'soft', focusSound: true }
 };
 
 export function createEmptyData() {
@@ -31,8 +32,9 @@ export function createEmptyData() {
     wins: [],
     campaigns: [],
     emergencyLogs: [],
+    notificationLogs: [],
     settings: { ...defaultSettings }
   };
 }
 
-export const collectionNames = ['goals','projects','tasks','knowledge','decisions','reviews','wins','campaigns','emergencyLogs'];
+export const collectionNames = ['goals','projects','tasks','knowledge','decisions','reviews','wins','campaigns','emergencyLogs','notificationLogs'];

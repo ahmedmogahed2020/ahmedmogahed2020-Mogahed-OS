@@ -32,13 +32,13 @@ export const knownActions = [
   'open-task-modal','edit-task','delete-task','complete-task','toggle-task-complete','toggle-task-step','set-task-filter',
   'open-knowledge-modal','edit-knowledge','delete-knowledge','knowledge-to-task','review-knowledge','knowledge-to-goal','knowledge-to-project','fetch-knowledge-metadata','add-video-note','seek-video-note','knowledge-select-video','save-video-content','mark-video-complete','schedule-video-review','video-content-to-tasks','knowledge-search-tag','knowledge-filter','knowledge-search',
   'open-emergency','emergency-pick','emergency-to-task',
-  'open-decision-modal','edit-decision','delete-decision','review-decision',
+  'open-decision-modal','edit-decision','delete-decision','review-decision','decision-to-tasks','set-decision-filter','decision-search',
   'open-review-modal','edit-review','delete-review',
   'open-win-modal','edit-win','delete-win','duplicate-win','record-suggested-win','set-win-filter','win-search',
   'open-campaign-modal','edit-campaign','delete-campaign','view-campaign','campaign-to-tasks','open-campaign-compare','set-campaign-filter','campaign-search',
   'open-search','search-jump',
-  'show-backup','show-settings','show-qa','run-system-test','export-json','backup-date','clear-data','import-json',
-  'settings-name','settings-store-name','settings-currency','settings-daily-task-target','settings-learning-minutes-target','settings-youtube-key','settings-quiet-mode','settings-compact-mode','settings-seed-data','settings-reset-section',
+  'show-backup','show-settings','show-qa','show-notifications','show-guide','run-system-test','export-json','backup-date','force-save-data','clear-data','import-json','test-notification-sound','request-notification-permission','mark-notification-read','clear-notification-log',
+  'settings-name','settings-store-name','settings-currency','settings-daily-task-target','settings-learning-minutes-target','settings-youtube-key','settings-quiet-mode','settings-compact-mode','settings-seed-data','settings-reset-section','notification-enabled','notification-sound-enabled','notification-browser-enabled','notification-sound-type','notification-lead-minutes','notification-volume',
   'close-modal','toggle-quick-actions','filter-list','modal-save','confirm-yes'
 ];
 
@@ -84,7 +84,7 @@ function checkDataShape() {
   for (const name of collectionNames) {
     results.push(Array.isArray(normalized[name]) ? pass(`بيانات ${name}`, 'Array سليم.') : fail(`بيانات ${name}`, 'ليست Array.'));
   }
-  const requiredSettings = ['userName','lastSavedAt','lastPage','autoSave','youtubeApiKey','storeName','currency','dailyTaskTarget','learningMinutesTarget','quietMode','compactMode'];
+  const requiredSettings = ['userName','lastSavedAt','lastPage','autoSave','youtubeApiKey','storeName','currency','dailyTaskTarget','learningMinutesTarget','quietMode','compactMode','notifications'];
   const missingSettings = requiredSettings.filter(key => !(key in normalized.settings));
   results.push(missingSettings.length ? warn('الإعدادات', `ناقص: ${missingSettings.join(', ')}`) : pass('الإعدادات', 'كل مفاتيح الإعدادات الأساسية موجودة.'));
   return results;

@@ -8,7 +8,7 @@ import { renderPage } from '../router.js';
 const taskStatuses = ['مفتوحة','قيد التنفيذ','مكتملة','مؤجلة'];
 const taskTypes = ['مهمة','إجراء سريع','عادة','متابعة'];
 const priorities = ['عالية','متوسطة','منخفضة'];
-const sources = ['يدوي','معرفة','طوارئ','حملة','مراجعة'];
+const sources = ['يدوي','معرفة','طوارئ','حملة','مراجعة','قرار'];
 const views = [
   ['today','اليوم'], ['week','الأسبوع'], ['open','المفتوح'], ['done','المكتمل'], ['kanban','Kanban'], ['matrix','Matrix'], ['all','الكل']
 ];

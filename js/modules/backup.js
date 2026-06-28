@@ -1,10 +1,44 @@
 import { appState } from '../state.js';
-import { autoSave, checkStorageHealth, clearData, exportJSON, importJSON, backupWithDate } from '../storage.js';
+import { autoSave, checkStorageHealth, clearData, exportJSON, importJSON, backupWithDate, saveData } from '../storage.js';
 import { confirmDialog, pageHeader, toast } from '../ui.js';
 import { formatDate, safeNumber, safeText } from '../utils.js';
 import { renderTestReport, runSystemTests } from './qa.js';
+import { notificationsPanel } from './notifications.js';
+import { guidePanel } from './guide.js';
 
 let lastQaReport = null;
+
+function collectionCount(name) { return Array.isArray(appState.data[name]) ? appState.data[name].length : 0; }
+function getDataSize() { return new Blob([JSON.stringify(appState.data)]).size; }
+function getSizeMb() { return (getDataSize() / 1024 / 1024).toFixed(2); }
+function getStoragePercent() {
+  const assumedLimit = 5 * 1024 * 1024;
+  return Math.min(100, Math.round((getDataSize() / assumedLimit) * 100));
+}
+function findDuplicateIds() {
+  const collections = ['goals','projects','tasks','knowledge','decisions','reviews','wins','campaigns'];
+  const duplicates = [];
+  collections.forEach(name => {
+    const seen = new Set();
+    (appState.data[name] || []).forEach(item => {
+      if (!item?.id) duplicates.push(`${name}: عنصر بدون ID`);
+      else if (seen.has(item.id)) duplicates.push(`${name}: ${item.id}`);
+      seen.add(item.id);
+    });
+  });
+  return duplicates;
+}
+function backupHealthReport() {
+  const health = checkStorageHealth();
+  const duplicates = findDuplicateIds();
+  const sizePercent = getStoragePercent();
+  const issues = [];
+  if (!health.ok) issues.push(health.message);
+  if (duplicates.length) issues.push(`يوجد ${duplicates.length} ID مكرر/ناقص.`);
+  if (sizePercent > 80) issues.push('حجم البيانات قريب من حد LocalStorage المتوقع. صدّر نسخة الآن.');
+  if (!issues.length) issues.push('البيانات تبدو سليمة، والتخزين يعمل.');
+  return { health, duplicates, sizePercent, issues };
+}
 
 export function renderMore() {
   return `<section class="page">${pageHeader('المزيد', 'أدوات متقدمة منظمة في Grid مناسب للموبايل.', '')}
@@ -15,6 +49,8 @@ export function renderMore() {
       <button class="more-tile" data-route="wins"><span>🏆</span><b>لوحة الفوز</b><small>سجل الانتصارات</small></button>
       <button class="more-tile" data-route="campaigns"><span>📣</span><b>تحليل الحملات</b><small>تسعير وربحية</small></button>
       <button class="more-tile" data-action="show-backup"><span>🛡️</span><b>النسخ الاحتياطي</b><small>تصدير واستيراد</small></button>
+      <button class="more-tile" data-action="show-notifications"><span>🔔</span><b>التنبيهات</b><small>تذكيرات وأصوات</small></button>
+      <button class="more-tile" data-action="show-guide"><span>📘</span><b>تعليمات</b><small>دليل المستخدم</small></button>
       <button class="more-tile" data-action="show-settings"><span>⚙️</span><b>الإعدادات</b><small>بيانات النظام</small></button>
       <button class="more-tile" data-action="show-qa"><span>🧪</span><b>System Health</b><small>اختبار النظام</small></button>
     </div>
@@ -22,27 +58,49 @@ export function renderMore() {
   </section>`;
 }
 
-export function backupPanel() {
-  const health = checkStorageHealth();
-  const dataSize = new Blob([JSON.stringify(appState.data)]).size;
-  const sizeMb = (dataSize / 1024 / 1024).toFixed(2);
-  return `<article class="card"><h3>النسخ الاحتياطي</h3>
-    <p class="meta">آخر حفظ: ${safeText(formatDate(appState.data.settings.lastSavedAt))}</p>
-    <p class="meta">حجم البيانات الحالي: ${safeText(sizeMb)} MB</p>
-    <div class="btn-row" style="margin-top:12px">
-      <button class="btn primary" data-action="export-json">تصدير JSON</button>
-      <label class="btn ghost">استيراد JSON<input class="sr-only" type="file" accept="application/json" data-action="import-json"></label>
-      <button class="btn ghost" data-action="backup-date">نسخة بتاريخ اليوم</button>
-      <button class="btn danger" data-action="clear-data">مسح كل البيانات</button>
-    </div>
-    <div class="${health.ok?'recommendation':'warning-box'}" style="margin-top:12px">${safeText(health.message)}</div>
-    <div class="warning-box" style="margin-top:12px">قبل أي تعديل كبير على GitHub، صدّر نسخة JSON واحتفظ بها خارج المتصفح.</div>
-  </article>`;
+function renderBackupStats() {
+  const report = backupHealthReport();
+  return `<div class="decision-intel-grid backup-stats">
+    <article class="kpi-card"><small>حجم البيانات</small><strong>${safeText(getSizeMb())} MB</strong></article>
+    <article class="kpi-card"><small>استخدام تقريبي</small><strong>${safeText(report.sizePercent)}%</strong></article>
+    <article class="kpi-card"><small>آخر حفظ</small><strong>${safeText(formatDate(appState.data.settings.lastSavedAt))}</strong></article>
+    <article class="kpi-card"><small>مشاكل IDs</small><strong>${safeText(report.duplicates.length)}</strong></article>
+  </div>`;
 }
 
-function settingsValue(key, fallback = '') {
-  return safeText(appState.data.settings[key] ?? fallback);
+function renderCollectionBreakdown() {
+  const collections = [
+    ['goals','الأهداف'], ['projects','المشاريع'], ['tasks','المهام'], ['knowledge','المعرفة'], ['decisions','القرارات'], ['reviews','المراجعات'], ['wins','الفوز'], ['campaigns','الحملات'], ['emergencyLogs','الطوارئ'], ['notificationLogs','التنبيهات']
+  ];
+  return `<article class="card"><h3>محتويات النسخة</h3><div class="backup-breakdown">${collections.map(([key, label]) => `<span><b>${safeText(label)}</b><em>${safeText(collectionCount(key))}</em></span>`).join('')}</div></article>`;
 }
+
+export function backupPanel() {
+  const report = backupHealthReport();
+  return `<section class="backup-pro">
+    ${pageHeader('النسخ الاحتياطي', 'مركز حماية البيانات: تصدير، استيراد، فحص سلامة، ومسح آمن.', '<button class="btn primary" data-action="export-json">تصدير الآن</button>')}
+    ${renderBackupStats()}
+    <div class="grid grid-2">
+      <article class="card"><h3>إجراءات النسخ</h3>
+        <p class="meta">احتفظ بملف JSON خارج المتصفح قبل أي تعديل كبير أو رفع نسخة جديدة.</p>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn primary" data-action="export-json">تصدير JSON</button>
+          <label class="btn ghost">استيراد JSON<input class="sr-only" type="file" accept="application/json" data-action="import-json"></label>
+          <button class="btn ghost" data-action="backup-date">نسخة بتاريخ اليوم</button>
+          <button class="btn ghost" data-action="force-save-data">حفظ الآن</button>
+        </div>
+      </article>
+      <article class="card"><h3>منطقة الخطر</h3>
+        <p class="meta">المسح يمسح بيانات LocalStorage من هذا المتصفح فقط. لا تستخدمه قبل التصدير.</p>
+        <div class="btn-row" style="margin-top:12px"><button class="btn danger" data-action="clear-data">مسح كل البيانات</button><button class="btn ghost" data-action="show-qa">تشغيل اختبار النظام</button></div>
+      </article>
+    </div>
+    <article class="card"><h3>فحص سلامة النسخة</h3>${report.issues.map(issue => `<div class="${report.health.ok && !report.duplicates.length ? 'recommendation' : 'warning-box'}" style="margin-top:10px">${safeText(issue)}</div>`).join('')}</article>
+    ${renderCollectionBreakdown()}
+  </section>`;
+}
+
+function settingsValue(key, fallback = '') { return safeText(appState.data.settings[key] ?? fallback); }
 
 export function settingsPanel() {
   const s = appState.data.settings;
@@ -60,7 +118,7 @@ export function settingsPanel() {
       <label><input type="checkbox" data-action="settings-compact-mode" ${s.compactMode?'checked':''}> وضع مكثف للموبايل</label>
       <label><input type="checkbox" data-action="settings-seed-data" ${s.enableSeedData?'checked':''}> السماح بالبيانات التجريبية عند البداية الجديدة</label>
     </div>
-    <div class="btn-row" style="margin-top:14px"><button class="btn ghost" data-action="show-qa">فتح اختبار النظام</button></div>
+    <div class="btn-row" style="margin-top:14px"><button class="btn ghost" data-action="show-notifications">إعدادات التنبيهات</button><button class="btn ghost" data-action="show-qa">فتح اختبار النظام</button></div>
     <p class="meta" style="margin-top:10px">يتم الحفظ تلقائيًا بعد أي تغيير.</p>
   </article>`;
 }
@@ -75,14 +133,13 @@ export function qaPanel() {
   </article>`;
 }
 
-function renderMorePanel(html) {
-  const panel = document.getElementById('morePanel');
-  if (panel) panel.innerHTML = html;
-}
-
+function renderMorePanel(html) { const panel = document.getElementById('morePanel'); if (panel) panel.innerHTML = html; }
 export function showBackup() { renderMorePanel(backupPanel()); }
 export function showSettings() { renderMorePanel(settingsPanel()); }
 export function showQA() { renderMorePanel(qaPanel()); }
+export function showNotifications() { renderMorePanel(notificationsPanel()); }
+export function showGuide() { renderMorePanel(guidePanel()); }
+
 export function runQA() {
   lastQaReport = runSystemTests();
   const reportNode = document.getElementById('qaReport');
@@ -94,14 +151,20 @@ export function runQA() {
 
 export function doExport() { exportJSON(); toast('تم تصدير النسخة'); }
 export function doBackup() { backupWithDate(); toast('تم حفظ نسخة بتاريخ اليوم'); }
+export function forceSaveData() { const result = saveData(); toast(result.ok ? 'تم الحفظ الآن' : 'فشل الحفظ', result.ok ? 'info' : 'error'); }
 export function doClear() { confirmDialog('سيتم مسح كل البيانات المحلية. صدّر نسخة قبل المسح لو البيانات مهمة.', () => { clearData(); toast('تم مسح البيانات'); location.reload(); }); }
-export async function doImport(file) { if(!file) return; try { await importJSON(file); toast('تم الاستيراد بنجاح'); location.reload(); } catch { toast('ملف غير صالح للاستيراد', 'error'); } }
-
-function updateSetting(key, value) {
-  appState.data.settings[key] = value;
-  autoSave();
+export async function doImport(file) {
+  if(!file) return;
+  try {
+    await importJSON(file);
+    toast('تم الاستيراد بنجاح');
+    location.reload();
+  } catch {
+    toast('ملف غير صالح للاستيراد', 'error');
+  }
 }
 
+function updateSetting(key, value) { appState.data.settings[key] = value; autoSave(); }
 export function updateUserName(value) { updateSetting('userName', value.trim() || 'مجاهد'); }
 export function updateYouTubeApiKey(value) { updateSetting('youtubeApiKey', value.trim()); }
 export function updateStoreName(value) { updateSetting('storeName', value.trim() || 'Mogahed OS'); }
