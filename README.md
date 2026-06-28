@@ -399,3 +399,13 @@ README.md
 - فكرة / ملاحظة: نص مخصص بدون إجبار المستخدم على حقول فيديو.
 
 التعديل محصور في صفحة المعرفة، مع الحفاظ على تشغيل YouTube والـ Playlist والتقدم والملاحظات الزمنية.
+
+## Knowledge Local Uploads
+
+The Knowledge module supports local uploads in addition to links:
+
+- PDF books can be saved from device upload or by external PDF link.
+- Images can be saved as multiple local image uploads or by external image/folder link.
+- Videos can be saved as local video uploads or by YouTube/external links.
+
+Because this phase is still backend-free and stores data locally in the browser, very large media files should be stored as external links to avoid LocalStorage quota limits.

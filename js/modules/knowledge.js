@@ -109,11 +109,12 @@ function knowledgeCard(item) {
   const parsed = parseYouTubeUrl(item.url || '');
   const activeVideoId = youtube.currentVideoId || youtube.videoId || parsed.videoId || youtube.playlistItems?.[0]?.videoId || '';
   const isYouTube = Boolean(activeVideoId || youtube.playlistId || parsed.playlistId);
-  const preview = isYouTube && activeVideoId
+  const localPreview = renderLocalMediaPreview(item);
+  const preview = localPreview || (isYouTube && activeVideoId
     ? `<div class="video-shell">
         <div id="yt-player-${safeText(item.id)}" class="youtube-player" data-knowledge-id="${safeText(item.id)}" data-video-id="${safeText(activeVideoId)}"></div>
       </div>`
-    : item.url ? `<a class="btn dark" target="_blank" rel="noopener" href="${safeText(item.url)}">فتح الرابط خارجيًا</a>` : '';
+    : item.url ? `<a class="btn dark" target="_blank" rel="noopener" href="${safeText(item.url)}">فتح الرابط خارجيًا</a>` : '');
 
   const progress = renderVideoProgress(item);
   const playlist = renderPlaylist(item, activeVideoId);
@@ -261,6 +262,52 @@ function renderTimedNotes(item, activeVideoId = '') {
   </button>`).join('')}</div>`;
 }
 
+function getLocalFiles(item = {}) {
+  return Array.isArray(item.localFiles) ? item.localFiles : [];
+}
+
+function formatFileSize(bytes = 0) {
+  const size = safeNumber(bytes);
+  if (!size) return '0 KB';
+  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function renderLocalFileSummary(item = {}) {
+  const files = getLocalFiles(item);
+  if (!files.length) return '<p class="meta">لا توجد ملفات مرفوعة محفوظة لهذا العنصر.</p>';
+  return `<div class="uploaded-file-list">${files.map(file => `<div class="uploaded-file-chip"><span>${file.kind === 'image' ? '🖼️' : file.kind === 'video' ? '🎬' : file.kind === 'pdf' ? '📄' : '📎'}</span><b>${safeText(file.name)}</b><small>${safeText(formatFileSize(file.size))}</small></div>`).join('')}</div>`;
+}
+
+function renderLocalMediaPreview(item = {}) {
+  const files = getLocalFiles(item).filter(file => file?.dataUrl);
+  if (!files.length) return '';
+  const pdf = files.find(file => file.kind === 'pdf' || file.type === 'application/pdf');
+  const videos = files.filter(file => file.kind === 'video' || String(file.type || '').startsWith('video/'));
+  const images = files.filter(file => file.kind === 'image' || String(file.type || '').startsWith('image/'));
+  if (pdf) {
+    return `<div class="local-media-box local-pdf-box">
+      <div class="local-media-head"><b>ملف PDF مرفوع</b><span>${safeText(pdf.name)} · ${safeText(formatFileSize(pdf.size))}</span></div>
+      <iframe class="local-pdf-frame" src="${safeText(pdf.dataUrl)}" title="${safeText(pdf.name)}"></iframe>
+      <a class="btn dark" href="${safeText(pdf.dataUrl)}" target="_blank" rel="noopener">فتح PDF</a>
+    </div>`;
+  }
+  if (videos.length) {
+    return `<div class="local-media-box local-video-box">
+      <div class="local-media-head"><b>فيديو مرفوع من الجهاز</b><span>${safeText(videos[0].name)} · ${safeText(formatFileSize(videos[0].size))}</span></div>
+      <video class="local-video-player" controls playsinline preload="metadata" src="${safeText(videos[0].dataUrl)}"></video>
+      ${videos.length > 1 ? `<div class="uploaded-file-list">${videos.slice(1).map(file => `<a class="uploaded-file-chip" href="${safeText(file.dataUrl)}" target="_blank" rel="noopener">🎬 <b>${safeText(file.name)}</b><small>${safeText(formatFileSize(file.size))}</small></a>`).join('')}</div>` : ''}
+    </div>`;
+  }
+  if (images.length) {
+    return `<div class="local-media-box local-images-box">
+      <div class="local-media-head"><b>صور مرفوعة</b><span>${safeText(images.length)} صورة</span></div>
+      <div class="local-image-grid">${images.map(file => `<a href="${safeText(file.dataUrl)}" target="_blank" rel="noopener"><img src="${safeText(file.dataUrl)}" alt="${safeText(file.name)}"><small>${safeText(file.name)}</small></a>`).join('')}</div>
+    </div>`;
+  }
+  return '';
+}
+
 
 export function openKnowledgeModal(id = '') {
   const item = appState.data.knowledge.find(x => x.id === id) || {};
@@ -298,8 +345,10 @@ function renderKnowledgeTypeFields(type = 'فيديو', item = {}) {
   if (type === 'فيديو' || type === 'Playlist') {
     return `${baseHint}
       <div class="type-fieldset"><h4>${type === 'Playlist' ? 'بيانات Playlist' : 'بيانات فيديو'}</h4><p>بعد الجلب أو الحفظ، الملخص والملاحظات والأفكار والأفعال تكون داخل كل فيديو نفسه.</p></div>
-      <label class="full">رابط YouTube<div class="input-action"><input name="url" value="${urlValue}" placeholder="ضع رابط فيديو YouTube أو Playlist"><button type="button" class="btn dark" data-action="fetch-knowledge-metadata">جلب البيانات</button></div><small class="field-hint">${safeText(apiKeyHint)}</small></label>
-      <label>${type === 'Playlist' ? 'القناة / مالك القائمة' : 'اسم القناة'}<input name="fileName" value="${fileValue}" placeholder="يُملأ تلقائيًا عند الجلب"></label>
+      <label class="full">رابط YouTube أو رابط فيديو خارجي<div class="input-action"><input name="url" value="${urlValue}" placeholder="ضع رابط فيديو YouTube أو Playlist أو رابط فيديو خارجي"><button type="button" class="btn dark" data-action="fetch-knowledge-metadata">جلب بيانات YouTube</button></div><small class="field-hint">${safeText(apiKeyHint)} — ويمكنك ترك الرابط فارغًا ورفع فيديو من الجهاز.</small></label>
+      <label class="full">رفع فيديو من الجهاز ${type === 'Playlist' ? 'أو أكثر من فيديو' : ''}<input name="localFiles" type="file" accept="video/*" ${type === 'Playlist' ? 'multiple' : ''}><small class="field-hint">يعمل من الموبايل أو الكمبيوتر. الملفات الكبيرة جدًا قد لا تُحفظ في LocalStorage، لذلك استخدم رابط خارجي للفيديوهات الضخمة.</small></label>
+      <div class="full" data-local-file-summary>${renderLocalFileSummary(item)}</div>
+      <label>${type === 'Playlist' ? 'القناة / مالك القائمة' : 'اسم القناة أو اسم الملف'}<input name="fileName" value="${fileValue}" placeholder="يُملأ تلقائيًا عند الجلب أو من اسم الملف"></label>
       <label>المدة المتوقعة بالدقائق<input name="durationMinutes" type="number" min="0" value="${safeText(metaValue(item, 'durationMinutes'))}" placeholder="اختياري لو بدون API"></label>
       <label class="full">هدف المشاهدة<input name="purpose" value="${safeText(metaValue(item, 'purpose'))}" placeholder="لماذا ستشاهد هذا المحتوى؟"></label>`;
   }
@@ -316,7 +365,9 @@ function renderKnowledgeTypeFields(type = 'فيديو', item = {}) {
   if (type === 'كتاب PDF') {
     return `${baseHint}
       <div class="type-fieldset"><h4>بيانات كتاب / PDF</h4><p>مناسب للكتب والملفات وملخصات القراءة.</p></div>
-      <label class="full">رابط PDF أو مكان الملف<input name="url" value="${urlValue}" placeholder="رابط Google Drive / PDF / أو اتركه فارغًا لو ملف محلي"></label>
+      <label class="full">رابط PDF<input name="url" value="${urlValue}" placeholder="رابط Google Drive / PDF أو اتركه فارغًا لو سترفع ملفًا محليًا"></label>
+      <label class="full">رفع PDF من الجهاز<input name="localFiles" type="file" accept="application/pdf,.pdf"><small class="field-hint">يدعم الموبايل والكمبيوتر. لو الملف كبير جدًا، الأفضل استخدام رابط خارجي حفاظًا على مساحة التخزين.</small></label>
+      <div class="full" data-local-file-summary>${renderLocalFileSummary(item)}</div>
       <label>اسم الملف / الكتاب<input name="fileName" value="${fileValue}" placeholder="اسم الكتاب أو الملف"></label>
       <label>المؤلف<input name="author" value="${safeText(metaValue(item, 'author'))}" placeholder="اسم المؤلف"></label>
       <label>عدد الصفحات<input name="pages" type="number" min="0" value="${safeText(metaValue(item, 'pages'))}" placeholder="مثال: 240"></label>
@@ -345,7 +396,9 @@ function renderKnowledgeTypeFields(type = 'فيديو', item = {}) {
   if (type === 'صور') {
     return `${baseHint}
       <div class="type-fieldset"><h4>بيانات صور / لقطات شاشة</h4><p>مناسب للصور المرجعية، التصميمات، لقطات شاشة، أو أفكار بصرية.</p></div>
-      <label class="full">رابط الصورة أو المجلد<input name="url" value="${urlValue}" placeholder="رابط صورة / Drive / مصدر خارجي"></label>
+      <label class="full">رابط الصورة أو المجلد<input name="url" value="${urlValue}" placeholder="رابط صورة / Drive / مصدر خارجي أو اتركه فارغًا لو سترفع صورًا"></label>
+      <label class="full">رفع صور من الجهاز<input name="localFiles" type="file" accept="image/*" multiple><small class="field-hint">يمكن اختيار أكثر من صورة من الموبايل أو الكمبيوتر.</small></label>
+      <div class="full" data-local-file-summary>${renderLocalFileSummary(item)}</div>
       <label>اسم المجموعة<input name="fileName" value="${fileValue}" placeholder="مثال: أفكار تصميم إعلان"></label>
       <label>عدد الصور<input name="imageCount" type="number" min="0" value="${safeText(metaValue(item, 'imageCount'))}" placeholder="اختياري"></label>
       <label>مصدر الصور<input name="source" value="${safeText(metaValue(item, 'source'))}" placeholder="Pinterest / عميل / Screenshot"></label>
@@ -413,15 +466,69 @@ function buildKnowledgePayload(existing = {}, data) {
     youtube: keepMedia ? existing.youtube : undefined,
     videoProgress: keepMedia ? existing.videoProgress : undefined,
     timedNotes: keepMedia ? existing.timedNotes : [],
-    videoContent: keepMedia ? existing.videoContent : {}
+    videoContent: keepMedia ? existing.videoContent : {},
+    localFiles: existing.localFiles || []
   };
 }
 
-function saveKnowledge(existing = {}) {
+function getFileKind(file = {}) {
+  const type = String(file.type || '');
+  if (type === 'application/pdf' || String(file.name || '').toLowerCase().endsWith('.pdf')) return 'pdf';
+  if (type.startsWith('image/')) return 'image';
+  if (type.startsWith('video/')) return 'video';
+  return 'file';
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve({ id: generateId('file'), name: file.name, type: file.type, size: file.size, kind: getFileKind(file), dataUrl: reader.result, createdAt: new Date().toISOString() });
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function collectLocalUploads(form, knowledgeType = '') {
+  const input = form.querySelector('input[name="localFiles"]');
+  const files = Array.from(input?.files || []);
+  if (!files.length) return [];
+  const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+  const maxSingle = 8 * 1024 * 1024;
+  const maxBatch = 14 * 1024 * 1024;
+  const tooLarge = files.find(file => file.size > maxSingle);
+  if (tooLarge) throw new Error(`الملف ${tooLarge.name} كبير جدًا للحفظ المحلي. استخدم رابط خارجي أو ملف أصغر من 8MB.`);
+  if (totalSize > maxBatch) throw new Error('إجمالي الملفات كبير جدًا للتخزين المحلي. ارفع عددًا أقل أو استخدم روابط خارجية.');
+  const uploaded = await Promise.all(files.map(readFileAsDataURL));
+  if (knowledgeType === 'كتاب PDF' && uploaded.some(file => file.kind !== 'pdf')) throw new Error('نوع الكتاب يقبل ملفات PDF فقط.');
+  if (knowledgeType === 'صور' && uploaded.some(file => file.kind !== 'image')) throw new Error('نوع الصور يقبل ملفات صور فقط.');
+  if ((knowledgeType === 'فيديو' || knowledgeType === 'Playlist') && uploaded.some(file => file.kind !== 'video')) throw new Error('نوع الفيديو يقبل ملفات فيديو فقط.');
+  return uploaded;
+}
+
+function mergeKnowledgeFiles(existingFiles = [], newFiles = [], knowledgeType = '') {
+  if (!newFiles.length) return existingFiles;
+  if (knowledgeType === 'صور') return [...existingFiles.filter(file => file.kind === 'image'), ...newFiles];
+  if (knowledgeType === 'كتاب PDF') return [...existingFiles.filter(file => file.kind !== 'pdf'), ...newFiles.filter(file => file.kind === 'pdf')].slice(-1);
+  if (knowledgeType === 'فيديو') return [...existingFiles.filter(file => file.kind !== 'video'), ...newFiles.filter(file => file.kind === 'video')].slice(-1);
+  if (knowledgeType === 'Playlist') return [...existingFiles.filter(file => file.kind !== 'video'), ...newFiles.filter(file => file.kind === 'video')];
+  return [...existingFiles, ...newFiles];
+}
+
+async function saveKnowledge(existing = {}) {
   const form = document.getElementById('entityForm'); if (!form.reportValidity()) return;
   const data = objectFromForm(form);
-  upsert('knowledge', buildKnowledgePayload(existing, data));
-  closeModal(); toast('تم حفظ المعرفة');
+  try {
+    const uploads = await collectLocalUploads(form, data.type);
+    const payload = buildKnowledgePayload(existing, data);
+    payload.localFiles = mergeKnowledgeFiles(existing.localFiles || [], uploads, data.type);
+    if (!payload.fileName && payload.localFiles.length) payload.fileName = payload.localFiles[0].name;
+    if (!payload.title && payload.fileName) payload.title = payload.fileName.replace(/\.[^.]+$/, '');
+    if (uploads.length && !payload.url) payload.url = '';
+    upsert('knowledge', payload);
+    closeModal(); toast(uploads.length ? 'تم حفظ المعرفة والملفات المرفوعة' : 'تم حفظ المعرفة');
+  } catch (error) {
+    toast(error.message || 'فشل رفع الملف داخل المعرفة', 'error');
+  }
 }
 
 export async function fetchKnowledgeMetadataFromForm() {
