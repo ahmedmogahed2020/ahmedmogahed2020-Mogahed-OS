@@ -12,3 +12,23 @@
 .bar-track span { display: block; height: 100%; border-radius: inherit; background: var(--primary); }
 .mini-chart { display: flex; align-items: end; gap: 6px; height: 84px; padding: 10px; background: var(--surface-2); border-radius: var(--radius-md); border: 1px solid var(--line); }
 .mini-chart span { flex: 1; min-height: 8px; border-radius: 999px 999px 4px 4px; background: var(--primary-soft); border: 1px solid rgba(109,61,46,.12); }
+
+/* V2 Dashboard Intelligence */
+.knowledge-intel-section { display: grid; gap: 12px; margin-top: 14px; }
+.knowledge-hero { background: linear-gradient(135deg, #111827, #2f241f); }
+.knowledge-ring { background: conic-gradient(var(--accent) calc(var(--value) * 1%), rgba(255,255,255,.16) 0); }
+.knowledge-kpi-grid .warning strong { color: var(--danger); }
+.dashboard-chip-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.dashboard-chip-row.compact { margin-top: 10px; }
+.dashboard-chip-row.compact span,
+.dashboard-chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface-2); color: var(--text); border-radius: 999px; padding: 7px 10px; font-size: .82rem; font-weight: 900; }
+.knowledge-hero .dashboard-chip-row.compact span { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.18); color: #fff; }
+.dashboard-chip b { color: var(--primary); }
+.dashboard-list { display: grid; gap: 8px; margin-top: 10px; }
+.dashboard-list-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--line); background: var(--surface-2); border-radius: var(--radius-md); padding: 10px; }
+.dashboard-list-item b { font-size: .92rem; line-height: 1.6; }
+.dashboard-list-item span { color: var(--muted); font-weight: 900; font-size: .8rem; white-space: nowrap; }
+.dashboard-warning-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #fff7ed; color: #7c2d12; border: 1px solid #fed7aa; border-radius: var(--radius-lg); padding: 14px; box-shadow: var(--shadow-sm); }
+.dashboard-warning-card b { font-size: .95rem; }
+.dashboard-warning-card span { line-height: 1.8; font-weight: 800; }
+.home-knowledge-intel { display: grid; gap: 12px; }
