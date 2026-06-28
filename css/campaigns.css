@@ -1,0 +1,8 @@
+.campaign-summary { display: grid; gap: 12px; }
+.scenario-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+.scenario-table th { text-align: right; color: var(--muted); font-size: .83rem; padding: 0 8px; }
+.scenario-table td { background: var(--surface-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 12px 8px; font-weight: 800; }
+.scenario-table td:first-child { border-radius: 0 14px 14px 0; border-right: 1px solid var(--line); }
+.scenario-table td:last-child { border-radius: 14px 0 0 14px; border-left: 1px solid var(--line); }
+.recommendation { background: linear-gradient(135deg, rgba(22,132,91,.12), rgba(109,61,46,.10)); border: 1px solid rgba(22,132,91,.18); border-radius: var(--radius-lg); padding: 15px; line-height: 1.85; }
+.warning-box { background: rgba(189,123,22,.12); color: #7a4a05; border-radius: var(--radius-md); padding: 12px; font-weight: 800; line-height: 1.75; }

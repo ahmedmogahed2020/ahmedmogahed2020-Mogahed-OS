@@ -1,6 +1,0 @@
-
-/* V83.33 Campaign Analysis integration */
-.campaign-analysis-shell{padding:12px;overflow:hidden}
-.campaign-analysis-head{align-items:flex-start;margin-bottom:10px}
-.campaign-analysis-frame{width:100%;min-height:calc(100vh - 190px);height:78vh;border:1px solid var(--line);border-radius:22px;background:#fff;box-shadow:var(--shadow)}
-@media(max-width:720px){.campaign-analysis-shell{padding:8px}.campaign-analysis-frame{min-height:calc(100vh - 150px);height:82vh;border-radius:18px}}

@@ -1,0 +1,14 @@
+.dashboard-grid { display: grid; gap: 12px; }
+.dashboard-hero { display: grid; gap: 12px; background: #111827; color: #fff; border-radius: var(--radius-xl); padding: 18px; box-shadow: var(--shadow-md); }
+.dashboard-hero p { color: rgba(255,255,255,.72); line-height: 1.8; }
+.ring-wrap { display: flex; align-items: center; gap: 16px; }
+.progress-ring { --value: 0; width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--primary-2) calc(var(--value) * 1%), rgba(255,255,255,.16) 0); position: relative; flex: 0 0 auto; }
+.progress-ring::after { content: ""; position: absolute; width: 78px; height: 78px; border-radius: 50%; background: #111827; }
+.progress-ring strong { position: relative; z-index: 1; font-size: 1.25rem; }
+.bar-chart { display: grid; gap: 10px; }
+.bar-row { display: grid; gap: 5px; }
+.bar-label { display: flex; justify-content: space-between; color: var(--muted); font-weight: 900; font-size: .86rem; }
+.bar-track { height: 12px; border-radius: 999px; background: rgba(31,41,55,.08); overflow: hidden; }
+.bar-track span { display: block; height: 100%; border-radius: inherit; background: var(--primary); }
+.mini-chart { display: flex; align-items: end; gap: 6px; height: 84px; padding: 10px; background: var(--surface-2); border-radius: var(--radius-md); border: 1px solid var(--line); }
+.mini-chart span { flex: 1; min-height: 8px; border-radius: 999px 999px 4px 4px; background: var(--primary-soft); border: 1px solid rgba(109,61,46,.12); }

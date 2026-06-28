@@ -1,0 +1,8 @@
+.knowledge-card { display: grid; gap: 12px; }
+.knowledge-type { width: fit-content; }
+.embed-box { aspect-ratio: 16 / 9; width: 100%; border-radius: var(--radius-lg); overflow: hidden; background: #111827; display: grid; place-items: center; color: #fff; }
+.embed-box iframe { width: 100%; height: 100%; border: 0; }
+.knowledge-section { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--line); background: var(--surface-2); border-radius: var(--radius-md); }
+.knowledge-section h4 { font-size: .95rem; font-weight: 900; }
+.chip-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border-radius: 999px; padding: 7px 10px; background: var(--surface-soft); color: var(--muted); font-weight: 900; font-size: .8rem; }

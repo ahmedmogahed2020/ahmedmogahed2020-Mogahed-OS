@@ -1,141 +1,60 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mogahed OS — Professional Stable</title>
-
-        <meta name="description" content="Mogahed OS — نظامك الشخصي للتحويل من معرفة إلى تنفيذ ونتائج." />
-    <meta name="theme-color" content="#1a1a2e" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>م</text></svg>" />
-    <meta property="og:title" content="Mogahed OS" />
-    <meta property="og:description" content="نظامك الشخصي للتحويل من معرفة إلى تنفيذ ونتائج." />
-    <meta property="og:type" content="website" />
-    <meta name="build" content="Professional Stable" />
-
-    <link rel="stylesheet" href="./assets/bundle/app.min.css">
-    <link rel="stylesheet" href="./assets/v84/v84-fixes.css">
-    <link rel="stylesheet" href="./assets/v85/v85-restore.css">
-    <link rel="stylesheet" href="./assets/v86/v86-uiux.css">
-    <link rel="stylesheet" href="./assets/v87/v87-knowledge.css">
-    <link rel="stylesheet" href="./assets/v88/v88-dashboard.css">
-    <link rel="stylesheet" href="./assets/v89/v89-tasks-goals.css">
-    <link rel="stylesheet" href="./assets/v90/v90-emergency-qa.css">
-    <link rel="stylesheet" href="./assets/v91/v91-full-repair.css">
-    <link rel="stylesheet" href="./assets/v92/v92-professional-cleanup.css">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#111827" />
+  <title>Mogahed OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/pages.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/campaigns.css" />
+  <link rel="stylesheet" href="css/knowledge.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
 </head>
-  <body>
-    <div id="app-loading" style="position:fixed;inset:0;background:#0f0f1a;display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:16px">
-      <div style="font-size:48px">م</div>
-      <div style="color:#a78bfa;font-family:sans-serif;direction:rtl">جاري التحميل...</div>
-      <div style="width:120px;height:3px;background:#1e1e3f;border-radius:4px;overflow:hidden">
-        <div style="height:100%;background:#a78bfa;animation:ld 1.5s ease-in-out infinite" id="ldbar"></div>
+<body>
+  <div class="app-shell" id="appShell">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">م</div>
+        <div>
+          <p class="eyebrow">Personal Operating System</p>
+          <h1>Mogahed OS</h1>
+        </div>
       </div>
-    </div>
-    <style>#app-loading{transition:opacity .4s} @keyframes ld{0%{width:0%}100%{width:100%}}</style>
-    <script>window.addEventListener('load',function(){var l=document.getElementById('app-loading');if(l){l.style.opacity='0';setTimeout(function(){l.remove()},400)}})</script>
-    <noscript><div style="text-align:center;padding:40px;font-family:sans-serif;direction:rtl"><h2>⚠️ يحتاج JavaScript</h2><p>يرجى تفعيل JavaScript في المتصفح لتشغيل Mogahed OS</p></div></noscript>
-    <div class="app">
-      <aside class="sidebar">
-        <div class="brand">
-          <div class="avatar" id="sideAvatar">م</div>
-          <div>
-            <h1 id="sideName">Mogahed OS X</h1>
-            <p>Personal Transformation System</p>
-          </div>
-        </div>
-        <div class="nav" id="nav"></div>
-      </aside>
-      <main class="content">
-        <div class="topbar">
-          <div class="hero" style="flex: 1">
-            <h2 id="pageTitle">الرئيسية</h2>
-            <p id="pageSub">نظامك الشخصي للتحويل من معرفة إلى تنفيذ ونتائج.</p>
-          </div>
-          <div class="searchbox" style="min-width: min(360px, 100%)">
-            <input id="globalSearch" placeholder="اكتب أي كلمة للبحث..." />
-            <div class="search-results" id="searchResults"></div>
-          </div>
-        </div>
-        <div class="quick-dock">
-          <div class="dock-right">
-            <button class="btn mini" data-action="openQuickAdd">
-              + إضافة سريعة</button
-            ><button class="btn secondary mini" data-route="actionHub">
-              التنفيذ</button
-            ><button class="btn secondary mini" data-route="knowledge">
-              المعرفة
-            </button>
-          </div>
-          <div class="dock-left">
-            <button class="btn rescue mini" data-action="emergencyPlan">
-              🚨 طوارئ</button
-            ><button class="btn secondary mini" data-action="openFocus">
-              تركيز
-            </button>
-          </div>
-        </div>
-        <section id="view"></section>
-      </main>
-    </div>
-    <button
-      class="emergency-floating"
-      data-action="emergencyPlan"
-      aria-label="زر الطوارئ"
-    >
-      🚨
-    </button>
-    <div class="modal" id="modal">
-      <div class="modal-box">
-        <div class="space">
-          <h3 id="modalTitle">إضافة</h3>
-          <div class="row" id="modalHeaderActions">
-            <button
-              class="btn mini"
-              id="modalHeaderSaveBtn"
-              data-action="saveKnowledgeHeader"
-              style="display: none"
-            >
-              حفظ
-            </button>
-            <button class="btn secondary mini" data-action="closeModal">
-              إغلاق
-            </button>
-          </div>
-        </div>
-        <div id="modalBody"></div>
-      </div>
-    </div>
-    <div class="focus-overlay" id="focusOverlay">
-      <div class="focus-card card">
-        <h2>وضع التركيز</h2>
-        <p class="muted" id="focusTaskName">مهمة واحدة فقط الآن</p>
-        <div class="timer" id="timer">25:00</div>
-        <div class="row" style="justify-content: center">
-          <button class="btn" data-action="toggleTimer">ابدأ / إيقاف</button
-          ><button class="btn secondary" data-action="resetTimer">إعادة</button
-          ><button class="btn danger" data-action="closeFocus">خروج</button>
-        </div>
-        <label>ملاحظات سريعة</label
-        ><textarea
-          id="focusNotes"
-          placeholder="اكتب أي ملاحظة أثناء التركيز..."
-        ></textarea>
-      </div>
-    </div>
-    <div class="toast" id="toast"></div>
+      <button class="icon-button" type="button" data-action="open-search" aria-label="بحث عام">⌕</button>
+    </header>
 
-<!-- Mogahed final requested fix: rescue title scrolls with modal content only -->
-<!-- Mogahed real final fix: make Rescue title part of scrolling modal body -->
-    <script src="./assets/bundle/app.min.js" defer></script>
-    <script src="./assets/v84/v84-fixes.js" defer></script>
-    <script src="./assets/v85/v85-restore.js" defer></script>
-    <script src="./assets/v86/v86-uiux.js" defer></script>
-    <script src="./assets/v87/v87-knowledge.js" defer></script>
-    <script src="./assets/v88/v88-dashboard.js" defer></script>
-    <script src="./assets/v89/v89-tasks-goals.js" defer></script>
-    <script src="./assets/v90/v90-emergency-qa.js" defer></script>
-    <script src="./assets/v91/v91-full-repair.js" defer></script>
-    <script src="./assets/v92/v92-professional-cleanup.js" defer></script>
+    <main id="mainView" class="main-view" tabindex="-1"></main>
+
+    <nav class="bottom-nav" aria-label="التنقل الرئيسي">
+      <button type="button" data-route="home" class="nav-item active"><span>⌂</span><b>الرئيسية</b></button>
+      <button type="button" data-route="goals" class="nav-item"><span>◎</span><b>الأهداف</b></button>
+      <button type="button" data-route="projects" class="nav-item"><span>▦</span><b>المشاريع</b></button>
+      <button type="button" data-route="tasks" class="nav-item"><span>☑</span><b>المهام</b></button>
+      <button type="button" data-route="knowledge" class="nav-item"><span>◈</span><b>المعرفة</b></button>
+      <button type="button" data-route="more" class="nav-item"><span>⋯</span><b>المزيد</b></button>
+    </nav>
+
+    <div class="quick-actions" id="quickActions" aria-hidden="true">
+      <button type="button" data-action="open-task-modal">مهمة</button>
+      <button type="button" data-action="open-knowledge-modal">معرفة</button>
+      <button type="button" data-action="open-emergency">طوارئ</button>
+      <button type="button" data-action="open-search">بحث</button>
+      <button type="button" data-action="open-campaign-modal">حملة</button>
+    </div>
+    <button class="fab" id="mainFab" type="button" data-action="toggle-quick-actions" aria-label="الإجراءات السريعة">＋</button>
+  </div>
+
+  <div id="modalRoot" class="modal-root" aria-live="polite"></div>
+  <div id="toastRoot" class="toast-root" aria-live="polite" aria-atomic="true"></div>
+
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>
