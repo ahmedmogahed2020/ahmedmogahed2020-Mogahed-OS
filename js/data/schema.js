@@ -15,7 +15,8 @@ export const defaultSettings = {
   compactMode: false,
   enableSeedData: true,
   lastSystemTestAt: null,
-  lastSystemTestSummary: null
+  lastSystemTestSummary: null,
+  recentItems: []
 };
 
 export function createEmptyData() {

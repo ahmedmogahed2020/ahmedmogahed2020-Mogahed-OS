@@ -11,7 +11,7 @@ import { openDecisionModal, editDecision, deleteDecision, reviewDecision } from 
 import { openReviewModal, editReview, deleteReview, createDailyReview, createWeeklyReview, reviewToTasks, setReviewFilter, setReviewSearch } from './modules/reviews.js';
 import { openWinModal, editWin, deleteWin } from './modules/wins.js';
 import { openCampaignModal, editCampaign, deleteCampaign, viewCampaign, campaignToTasks, openCampaignCompare, setCampaignFilter, setCampaignSearch } from './modules/campaigns.js';
-import { openSearchModal, jumpTo } from './modules/search.js';
+import { openSearchModal, jumpTo, openSearchResult, openRecentItem, runSearchCommand, clearRecentItems } from './modules/search.js';
 import { startFocusSession } from './modules/dashboard.js';
 import { doBackup, doClear, doExport, doImport, showBackup, showSettings, showQA, runQA, updateUserName, updateYouTubeApiKey, updateStoreName, updateCurrency, updateDailyTaskTarget, updateLearningMinutesTarget, updateQuietMode, updateCompactMode, updateSeedData } from './modules/backup.js';
 
@@ -26,7 +26,7 @@ const actionMap = {
   'open-win-modal': () => openWinModal(), 'edit-win': id => editWin(id), 'delete-win': id => deleteWin(id),
   'open-campaign-modal': () => openCampaignModal(), 'edit-campaign': id => editCampaign(id), 'delete-campaign': id => deleteCampaign(id), 'view-campaign': id => viewCampaign(id), 'campaign-to-tasks': id => campaignToTasks(id), 'open-campaign-compare': () => openCampaignCompare(), 'set-campaign-filter': (_, el) => { setCampaignFilter(el.dataset.filter); },
   'start-focus-session': () => startFocusSession(),
-  'open-search': () => openSearchModal(), 'search-jump': (_, el) => { closeModal(); jumpTo(el.dataset.routeTarget); },
+  'open-search': () => openSearchModal(), 'search-jump': (_, el) => { closeModal(); jumpTo(el.dataset.routeTarget); }, 'search-open-result': (_, el) => openSearchResult(el.dataset.uid), 'search-open-recent': (_, el) => openRecentItem(el.dataset.uid), 'search-command': (_, el) => runSearchCommand(el.dataset.commandId), 'search-clear-recent': () => clearRecentItems(),
   'show-backup': () => showBackup(), 'show-settings': () => showSettings(), 'show-qa': () => showQA(), 'run-system-test': () => runQA(), 'export-json': () => doExport(), 'backup-date': () => doBackup(), 'clear-data': () => doClear(),
   'close-modal': () => closeModal(), 'toggle-quick-actions': () => toggleQuickActions(), 'set-task-filter': (_, el) => { setTaskFilter(el.dataset.filter); renderPage(); }
 };
@@ -83,12 +83,20 @@ function filterCards(query, listId) {
   root.querySelectorAll('.item-card').forEach(card => card.style.display = card.textContent.toLowerCase().includes(q) ? '' : 'none');
 }
 
+function handleKeydown(event) {
+  const target = event.target;
+  const isTyping = target && ['INPUT','TEXTAREA','SELECT'].includes(target.tagName);
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); openSearchModal(); return; }
+  if (!isTyping && event.key === '/') { event.preventDefault(); openSearchModal(); }
+}
+
 function init() {
   loadData();
   document.body.classList.toggle('compact-mode', Boolean(appState.data.settings.compactMode));
   document.addEventListener('click', handleClick);
   document.addEventListener('change', handleChange);
   document.addEventListener('input', handleInput);
+  document.addEventListener('keydown', handleKeydown);
   window.addEventListener('beforeunload', saveData);
   navigate(appState.data.settings.lastPage || 'home');
   toast('Mogahed OS جاهز للعمل');
