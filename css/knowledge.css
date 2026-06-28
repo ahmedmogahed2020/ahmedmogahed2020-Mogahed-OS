@@ -32,3 +32,9 @@
   .playlist-item small, .playlist-item em { grid-column: 2; }
   .progress-line { align-items: flex-start; flex-direction: column; }
 }
+.video-workspace label { display: grid; gap: 7px; font-weight: 900; color: var(--text); }
+.video-workspace textarea { min-height: 92px; resize: vertical; }
+.video-workspace .workspace-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.video-workspace .workspace-head p { color: var(--muted); font-weight: 800; line-height: 1.7; margin-top: 4px; }
+.form-note { padding: 12px; border-radius: var(--radius-md); background: var(--surface-soft); color: var(--muted); font-weight: 900; line-height: 1.8; }
+@media (max-width: 560px) { .video-workspace .workspace-head { flex-direction: column; } .video-workspace .workspace-head .btn { width: 100%; } }
