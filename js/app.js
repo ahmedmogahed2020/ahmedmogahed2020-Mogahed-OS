@@ -5,7 +5,7 @@ import { closeModal, qs, toast } from './ui.js';
 import { openGoalModal, editGoal, deleteGoal, viewGoal, goalToProjects, goalToTasks, setGoalFilter, setGoalSearch } from './modules/goals.js';
 import { openProjectModal, editProject, deleteProject, viewProject, projectToTasks, rescueProject, setProjectFilter, setProjectSearch } from './modules/projects.js';
 import { openTaskModal, editTask, deleteTask, completeTask, setTaskFilter, toggleTaskComplete, toggleTaskStep, setTaskSearch } from './modules/tasks.js';
-import { openKnowledgeModal, editKnowledge, deleteKnowledge, knowledgeToTask, reviewKnowledge, knowledgeToGoal, knowledgeToProject, fetchKnowledgeMetadataFromForm, addTimedNote, seekVideoNote, selectKnowledgeVideo, saveVideoContent, setKnowledgeFilter, setKnowledgeSearch, searchKnowledgeTag, markVideoComplete, scheduleVideoReview, videoContentToTasks } from './modules/knowledge.js';
+import { openKnowledgeModal, editKnowledge, deleteKnowledge, knowledgeToTask, reviewKnowledge, knowledgeToGoal, knowledgeToProject, fetchKnowledgeMetadataFromForm, addTimedNote, seekVideoNote, selectKnowledgeVideo, saveVideoContent, setKnowledgeFilter, setKnowledgeSearch, searchKnowledgeTag, markVideoComplete, scheduleVideoReview, videoContentToTasks, refreshKnowledgeTypeFields } from './modules/knowledge.js';
 import { openEmergencyModal, pickEmergency, emergencyToTask } from './modules/emergency.js';
 import { openDecisionModal, editDecision, deleteDecision, reviewDecision, decisionToTasks, setDecisionFilter, setDecisionSearch } from './modules/decisions.js';
 import { openReviewModal, editReview, deleteReview, createDailyReview, createWeeklyReview, reviewToTasks, setReviewFilter, setReviewSearch } from './modules/reviews.js';
@@ -56,6 +56,7 @@ function handleChange(event) {
   const el = event.target;
   if (el.matches('[data-action="import-json"]')) doImport(el.files?.[0]);
   if (el.matches('[data-action="knowledge-filter"]')) setKnowledgeFilter(el.value);
+  if (el.matches('[data-action="knowledge-type-change"]')) refreshKnowledgeTypeFields(el.value);
   if (el.matches('[data-action="settings-currency"]')) updateCurrency(el.value);
   if (el.matches('[data-action="settings-quiet-mode"]')) updateQuietMode(el.checked);
   if (el.matches('[data-action="settings-compact-mode"]')) updateCompactMode(el.checked);

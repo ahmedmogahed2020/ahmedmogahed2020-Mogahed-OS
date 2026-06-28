@@ -6,7 +6,7 @@ import { linkedFields, removeItem, simpleCard, upsert } from './shared.js';
 import { openTaskModal } from './tasks.js';
 import { buildEmbedUrl, fetchYouTubeMetadata, parseYouTubeUrl, secondsToTime } from './youtube.js';
 
-const types = ['فيديو','Playlist','بودكاست','كتاب PDF','مقال','رابط','ملاحظة','فكرة'];
+const types = ['فيديو','Playlist','بودكاست','كتاب PDF','مقال','رابط','ملاحظة','فكرة','صور'];
 const statuses = ['جديد','قيد المراجعة','تم تلخيصه','تحول لأفعال','مؤرشف'];
 const learningStatuses = ['لم أبدأ','جاري المشاهدة','انتهيت','أحتاج مراجعة','تم تحويله لتنفيذ'];
 const knowledgeFilters = [
@@ -261,19 +261,18 @@ function renderTimedNotes(item, activeVideoId = '') {
   </button>`).join('')}</div>`;
 }
 
+
 export function openKnowledgeModal(id = '') {
   const item = appState.data.knowledge.find(x => x.id === id) || {};
-  const apiKeyHint = appState.data.settings.youtubeApiKey ? 'مفتاح YouTube API محفوظ' : 'ضع المفتاح من المزيد ← الإعدادات لتفعيل جلب البيانات';
-  openModal({ title: item.id ? 'تعديل معرفة' : 'إضافة معرفة', saveText: 'حفظ', body: `<form id="entityForm" class="form-grid">
+  const currentType = item.type || 'فيديو';
+  openModal({ title: item.id ? 'تعديل معرفة' : 'إضافة معرفة', saveText: 'حفظ', size: 'wide', body: `<form id="entityForm" class="form-grid knowledge-dynamic-form">
     <input type="hidden" name="id" value="${safeText(item.id || '')}">
-    <label>العنوان<input name="title" required value="${safeText(item.title || '')}" placeholder="سيتم ملؤه تلقائيًا من YouTube عند الجلب"></label>
-    <label>النوع<select name="type">${types.map(v=>`<option ${v===item.type?'selected':''}>${v}</option>`).join('')}</select></label>
-    <label class="full">الرابط<div class="input-action"><input name="url" value="${safeText(item.url || '')}" placeholder="YouTube Video / Playlist / مقال / رابط خارجي"><button type="button" class="btn dark" data-action="fetch-knowledge-metadata">جلب البيانات</button></div><small class="field-hint">${safeText(apiKeyHint)}</small></label>
-    <label>اسم الملف / القناة<input name="fileName" value="${safeText(item.fileName || '')}" placeholder="اختياري"></label>
+    <label>نوع المعرفة<select name="type" data-action="knowledge-type-change">${types.map(v=>`<option ${v===currentType?'selected':''}>${safeText(v)}</option>`).join('')}</select><small class="field-hint">غيّر النوع وستظهر الحقول المناسبة فقط.</small></label>
+    <label>العنوان<input name="title" required value="${safeText(item.title || '')}" placeholder="عنوان المعرفة"></label>
     <label>التصنيف<input name="category" value="${safeText(item.category || '')}" placeholder="إنتاجية / تجارة / دين / تعلم"></label>
-    <label>الحالة<select name="status">${statuses.map(v=>`<option ${v===item.status?'selected':''}>${v}</option>`).join('')}</select></label>
+    <label>الحالة<select name="status">${statuses.map(v=>`<option ${v===item.status?'selected':''}>${safeText(v)}</option>`).join('')}</select></label>
     ${linkedFields({ goalId: item.linkedGoalId, projectId: item.linkedProjectId })}
-    <div class="full form-note">بعد حفظ الرابط، ستكتب الملخص والملاحظات والأفكار والأفعال داخل كل فيديو نفسه من كارت المشاهدة.</div>
+    <div id="knowledgeTypeFields" class="full knowledge-type-fields">${renderKnowledgeTypeFields(currentType, item)}</div>
   </form>
   <div class="btn-row">
     <button class="btn ghost" data-action="knowledge-to-goal" data-id="${safeText(item.id || '')}">تحويل لهدف</button>
@@ -282,18 +281,130 @@ export function openKnowledgeModal(id = '') {
   </div>`, onSave: () => saveKnowledge(item) });
 }
 
+function getKnowledgeMeta(item = {}) {
+  return item.meta || item.knowledgeMeta || {};
+}
+
+function metaValue(item = {}, key = '') {
+  const meta = getKnowledgeMeta(item);
+  return meta[key] ?? item[key] ?? '';
+}
+
+function renderKnowledgeTypeFields(type = 'فيديو', item = {}) {
+  const apiKeyHint = appState.data.settings.youtubeApiKey ? 'مفتاح YouTube API محفوظ' : 'ضع المفتاح من المزيد ← الإعدادات لتفعيل جلب بيانات YouTube';
+  const urlValue = safeText(item.url || '');
+  const fileValue = safeText(item.fileName || '');
+  const baseHint = '<div class="full form-note">هذه الحقول تتغير حسب نوع المعرفة. لا توجد بيانات ثابتة لكل الأنواع.</div>';
+  if (type === 'فيديو' || type === 'Playlist') {
+    return `${baseHint}
+      <div class="type-fieldset"><h4>${type === 'Playlist' ? 'بيانات Playlist' : 'بيانات فيديو'}</h4><p>بعد الجلب أو الحفظ، الملخص والملاحظات والأفكار والأفعال تكون داخل كل فيديو نفسه.</p></div>
+      <label class="full">رابط YouTube<div class="input-action"><input name="url" value="${urlValue}" placeholder="ضع رابط فيديو YouTube أو Playlist"><button type="button" class="btn dark" data-action="fetch-knowledge-metadata">جلب البيانات</button></div><small class="field-hint">${safeText(apiKeyHint)}</small></label>
+      <label>${type === 'Playlist' ? 'القناة / مالك القائمة' : 'اسم القناة'}<input name="fileName" value="${fileValue}" placeholder="يُملأ تلقائيًا عند الجلب"></label>
+      <label>المدة المتوقعة بالدقائق<input name="durationMinutes" type="number" min="0" value="${safeText(metaValue(item, 'durationMinutes'))}" placeholder="اختياري لو بدون API"></label>
+      <label class="full">هدف المشاهدة<input name="purpose" value="${safeText(metaValue(item, 'purpose'))}" placeholder="لماذا ستشاهد هذا المحتوى؟"></label>`;
+  }
+  if (type === 'بودكاست') {
+    return `${baseHint}
+      <div class="type-fieldset"><h4>بيانات بودكاست</h4><p>مصمم للحلقات الصوتية أو روابط Spotify/Apple/YouTube Audio.</p></div>
+      <label class="full">رابط الحلقة<input name="url" value="${urlValue}" placeholder="رابط البودكاست أو الحلقة"></label>
+      <label>اسم البودكاست<input name="fileName" value="${fileValue}" placeholder="مثال: فنجان / بدون ورق"></label>
+      <label>المضيف / الضيف<input name="author" value="${safeText(metaValue(item, 'author'))}" placeholder="اسم المتحدث أو الضيف"></label>
+      <label>رقم الحلقة<input name="episode" value="${safeText(metaValue(item, 'episode'))}" placeholder="اختياري"></label>
+      <label>مدة الحلقة بالدقائق<input name="durationMinutes" type="number" min="0" value="${safeText(metaValue(item, 'durationMinutes'))}" placeholder="مثال: 60"></label>
+      <label class="full">ماذا تريد أن تخرج منه؟<textarea name="contentText" placeholder="أسئلة أو نقاط تريد ملاحظتها أثناء الاستماع">${safeText(metaValue(item, 'contentText'))}</textarea></label>`;
+  }
+  if (type === 'كتاب PDF') {
+    return `${baseHint}
+      <div class="type-fieldset"><h4>بيانات كتاب / PDF</h4><p>مناسب للكتب والملفات وملخصات القراءة.</p></div>
+      <label class="full">رابط PDF أو مكان الملف<input name="url" value="${urlValue}" placeholder="رابط Google Drive / PDF / أو اتركه فارغًا لو ملف محلي"></label>
+      <label>اسم الملف / الكتاب<input name="fileName" value="${fileValue}" placeholder="اسم الكتاب أو الملف"></label>
+      <label>المؤلف<input name="author" value="${safeText(metaValue(item, 'author'))}" placeholder="اسم المؤلف"></label>
+      <label>عدد الصفحات<input name="pages" type="number" min="0" value="${safeText(metaValue(item, 'pages'))}" placeholder="مثال: 240"></label>
+      <label>وصلت لصفحة<input name="currentPage" type="number" min="0" value="${safeText(metaValue(item, 'currentPage'))}" placeholder="لتتبع تقدم القراءة"></label>
+      <label class="full">خطة القراءة / أسئلة القراءة<textarea name="contentText" placeholder="اكتب هدفك من الكتاب أو خطة القراءة">${safeText(metaValue(item, 'contentText'))}</textarea></label>`;
+  }
+  if (type === 'مقال') {
+    return `${baseHint}
+      <div class="type-fieldset"><h4>بيانات مقال</h4><p>مناسب للمقالات والصفحات الطويلة والتقارير.</p></div>
+      <label class="full">رابط المقال<input name="url" value="${urlValue}" placeholder="رابط المقال"></label>
+      <label>المصدر<input name="fileName" value="${fileValue}" placeholder="اسم الموقع / المجلة"></label>
+      <label>الكاتب<input name="author" value="${safeText(metaValue(item, 'author'))}" placeholder="اختياري"></label>
+      <label>وقت القراءة بالدقائق<input name="readingTime" type="number" min="0" value="${safeText(metaValue(item, 'readingTime'))}" placeholder="مثال: 8"></label>
+      <label class="full">السؤال الأساسي من المقال<input name="keyQuestion" value="${safeText(metaValue(item, 'keyQuestion'))}" placeholder="ما السؤال الذي تريد أن يجاوب عنه المقال؟"></label>
+      <label class="full">مقتطفات أو نقاط أولية<textarea name="contentText" placeholder="انسخ أهم فقرة أو اكتب نقاطك الأولية">${safeText(metaValue(item, 'contentText'))}</textarea></label>`;
+  }
+  if (type === 'رابط') {
+    return `${baseHint}
+      <div class="type-fieldset"><h4>بيانات رابط عام</h4><p>مناسب للأدوات والمصادر والمواقع التي ستعود لها لاحقًا.</p></div>
+      <label class="full">الرابط<input name="url" value="${urlValue}" placeholder="رابط المصدر"></label>
+      <label>اسم المصدر<input name="fileName" value="${fileValue}" placeholder="اسم الموقع أو الأداة"></label>
+      <label>نوع المصدر<input name="sourceType" value="${safeText(metaValue(item, 'sourceType'))}" placeholder="أداة / مرجع / كورس / صفحة"></label>
+      <label class="full">سبب الحفظ<input name="purpose" value="${safeText(metaValue(item, 'purpose'))}" placeholder="لماذا حفظت هذا الرابط؟"></label>
+      <label class="full">ملاحظات سريعة<textarea name="contentText" placeholder="أي ملاحظة عن الرابط">${safeText(metaValue(item, 'contentText'))}</textarea></label>`;
+  }
+  if (type === 'صور') {
+    return `${baseHint}
+      <div class="type-fieldset"><h4>بيانات صور / لقطات شاشة</h4><p>مناسب للصور المرجعية، التصميمات، لقطات شاشة، أو أفكار بصرية.</p></div>
+      <label class="full">رابط الصورة أو المجلد<input name="url" value="${urlValue}" placeholder="رابط صورة / Drive / مصدر خارجي"></label>
+      <label>اسم المجموعة<input name="fileName" value="${fileValue}" placeholder="مثال: أفكار تصميم إعلان"></label>
+      <label>عدد الصور<input name="imageCount" type="number" min="0" value="${safeText(metaValue(item, 'imageCount'))}" placeholder="اختياري"></label>
+      <label>مصدر الصور<input name="source" value="${safeText(metaValue(item, 'source'))}" placeholder="Pinterest / عميل / Screenshot"></label>
+      <label class="full">ماذا تريد أن تتذكر من هذه الصور؟<textarea name="contentText" placeholder="اكتب الأفكار أو الملاحظات البصرية">${safeText(metaValue(item, 'contentText'))}</textarea></label>`;
+  }
+  if (type === 'فكرة') {
+    return `${baseHint}
+      <div class="type-fieldset"><h4>بيانات فكرة</h4><p>مناسب للأفكار السريعة التي قد تتحول لمهمة أو مشروع.</p></div>
+      <label>مصدر الفكرة<input name="fileName" value="${fileValue}" placeholder="من أين جاءت الفكرة؟"></label>
+      <label>مجال الفكرة<input name="sourceType" value="${safeText(metaValue(item, 'sourceType'))}" placeholder="تسويق / مشروع / تعلم"></label>
+      <label class="full">نص الفكرة<textarea name="contentText" required placeholder="اكتب الفكرة بوضوح">${safeText(metaValue(item, 'contentText') || item.summary || '')}</textarea></label>
+      <label class="full">أول فعل ممكن<input name="purpose" value="${safeText(metaValue(item, 'purpose'))}" placeholder="ما أول خطوة صغيرة لتجربة الفكرة؟"></label>`;
+  }
+  return `${baseHint}
+    <div class="type-fieldset"><h4>بيانات ملاحظة</h4><p>مناسب للملاحظات الحرة بدون رابط.</p></div>
+    <label>مصدر الملاحظة<input name="fileName" value="${fileValue}" placeholder="اختياري"></label>
+    <label class="full">نص الملاحظة<textarea name="contentText" required placeholder="اكتب الملاحظة هنا">${safeText(metaValue(item, 'contentText') || item.notes || item.summary || '')}</textarea></label>
+    <label class="full">ماذا ستفعل بها؟<input name="purpose" value="${safeText(metaValue(item, 'purpose'))}" placeholder="تحويل لمهمة / مراجعة لاحقة / حفظ فقط"></label>`;
+}
+
+export function refreshKnowledgeTypeFields(type = '') {
+  const form = document.getElementById('entityForm');
+  const container = document.getElementById('knowledgeTypeFields');
+  if (!form || !container) return;
+  const snapshot = objectFromForm(form);
+  const item = {
+    ...snapshot,
+    linkedGoalId: snapshot.goalId || '',
+    linkedProjectId: snapshot.projectId || '',
+    meta: collectKnowledgeMeta(snapshot)
+  };
+  container.innerHTML = renderKnowledgeTypeFields(type || snapshot.type || 'فيديو', item);
+}
+
+
+function collectKnowledgeMeta(data = {}) {
+  const metaKeys = ['author','source','sourceType','durationMinutes','episode','pages','currentPage','readingTime','imageCount','contentText','keyQuestion','purpose'];
+  return Object.fromEntries(metaKeys.map(key => [key, data[key] || '']).filter(([, value]) => String(value || '').trim() !== ''));
+}
+
+function isYouTubeKnowledgeType(type = '') {
+  return type === 'فيديو' || type === 'Playlist';
+}
+
 function buildKnowledgePayload(existing = {}, data) {
-  const keepMedia = data.url === existing.url;
+  const keepMedia = data.url === existing.url && isYouTubeKnowledgeType(data.type);
+  const meta = collectKnowledgeMeta(data);
+  const contentText = meta.contentText || '';
   return {
     id: data.id || generateId('know'),
     title: data.title,
     type: data.type,
-    url: data.url,
-    fileName: data.fileName,
-    category: data.category,
-    status: data.status,
-    summary: existing.summary || '',
-    notes: existing.notes || '',
+    url: data.url || '',
+    fileName: data.fileName || '',
+    category: data.category || '',
+    status: data.status || 'جديد',
+    meta,
+    summary: isYouTubeKnowledgeType(data.type) ? (existing.summary || '') : contentText,
+    notes: isYouTubeKnowledgeType(data.type) ? (existing.notes || '') : contentText,
     extractedIdeas: existing.extractedIdeas || [],
     extractedActions: existing.extractedActions || [],
     linkedGoalId: data.goalId,
