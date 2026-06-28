@@ -8,7 +8,7 @@ import { openTaskModal, editTask, deleteTask, completeTask, setTaskFilter, toggl
 import { openKnowledgeModal, editKnowledge, deleteKnowledge, knowledgeToTask, reviewKnowledge, knowledgeToGoal, knowledgeToProject, fetchKnowledgeMetadataFromForm, addTimedNote, seekVideoNote, selectKnowledgeVideo, saveVideoContent, setKnowledgeFilter, setKnowledgeSearch, searchKnowledgeTag, markVideoComplete, scheduleVideoReview, videoContentToTasks } from './modules/knowledge.js';
 import { openEmergencyModal, pickEmergency, emergencyToTask } from './modules/emergency.js';
 import { openDecisionModal, editDecision, deleteDecision, reviewDecision } from './modules/decisions.js';
-import { openReviewModal, editReview, deleteReview } from './modules/reviews.js';
+import { openReviewModal, editReview, deleteReview, createDailyReview, createWeeklyReview, reviewToTasks, setReviewFilter, setReviewSearch } from './modules/reviews.js';
 import { openWinModal, editWin, deleteWin } from './modules/wins.js';
 import { openCampaignModal, editCampaign, deleteCampaign, viewCampaign, campaignToTasks, openCampaignCompare, setCampaignFilter, setCampaignSearch } from './modules/campaigns.js';
 import { openSearchModal, jumpTo } from './modules/search.js';
@@ -22,7 +22,7 @@ const actionMap = {
   'open-knowledge-modal': () => openKnowledgeModal(), 'edit-knowledge': id => editKnowledge(id), 'delete-knowledge': id => deleteKnowledge(id), 'knowledge-to-task': id => knowledgeToTask(id), 'review-knowledge': id => reviewKnowledge(id), 'knowledge-to-goal': id => knowledgeToGoal(id), 'knowledge-to-project': id => knowledgeToProject(id), 'fetch-knowledge-metadata': () => fetchKnowledgeMetadataFromForm(), 'add-video-note': id => addTimedNote(id), 'seek-video-note': (id, el) => seekVideoNote(id, el.dataset.noteId), 'knowledge-select-video': (id, el) => selectKnowledgeVideo(id, el.dataset.videoId), 'save-video-content': id => saveVideoContent(id), 'mark-video-complete': id => markVideoComplete(id), 'schedule-video-review': id => scheduleVideoReview(id), 'video-content-to-tasks': id => videoContentToTasks(id), 'knowledge-search-tag': (_, el) => searchKnowledgeTag(el.dataset.tag),
   'open-emergency': () => openEmergencyModal(), 'emergency-pick': (_, el) => pickEmergency(el.dataset.state), 'emergency-to-task': () => emergencyToTask(),
   'open-decision-modal': () => openDecisionModal(), 'edit-decision': id => editDecision(id), 'delete-decision': id => deleteDecision(id), 'review-decision': id => reviewDecision(id),
-  'open-review-modal': (_, el) => openReviewModal('', el.dataset.type), 'edit-review': id => editReview(id), 'delete-review': id => deleteReview(id),
+  'open-review-modal': (_, el) => openReviewModal('', el.dataset.type), 'create-daily-review': () => createDailyReview(), 'create-weekly-review': () => createWeeklyReview(), 'review-to-tasks': id => reviewToTasks(id), 'set-review-filter': (_, el) => setReviewFilter(el.dataset.filter), 'edit-review': id => editReview(id), 'delete-review': id => deleteReview(id),
   'open-win-modal': () => openWinModal(), 'edit-win': id => editWin(id), 'delete-win': id => deleteWin(id),
   'open-campaign-modal': () => openCampaignModal(), 'edit-campaign': id => editCampaign(id), 'delete-campaign': id => deleteCampaign(id), 'view-campaign': id => viewCampaign(id), 'campaign-to-tasks': id => campaignToTasks(id), 'open-campaign-compare': () => openCampaignCompare(), 'set-campaign-filter': (_, el) => { setCampaignFilter(el.dataset.filter); },
   'start-focus-session': () => startFocusSession(),
@@ -71,6 +71,7 @@ function handleInput(event) {
   if (el.matches('[data-action="knowledge-search"]')) setKnowledgeSearch(el.value);
   if (el.matches('[data-action="task-search"]')) setTaskSearch(el.value);
   if (el.matches('[data-action="campaign-search"]')) setCampaignSearch(el.value);
+  if (el.matches('[data-action="review-search"]')) setReviewSearch(el.value);
 }
 
 function filterCards(query, listId) {

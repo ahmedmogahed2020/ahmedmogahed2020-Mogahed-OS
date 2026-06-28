@@ -43,3 +43,30 @@
 @media (min-width: 980px) {
   .task-intel-grid { grid-template-columns: repeat(6, 1fr); }
 }
+
+/* V7 Review & Reflection Pro */
+.review-system { display: grid; gap: 14px; }
+.review-intel-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.review-digest-grid { display: grid; gap: 12px; }
+.review-digest-card { display: grid; gap: 10px; align-content: start; }
+.review-digest-card p { line-height: 1.8; color: var(--muted); }
+.review-alert-list { display: grid; gap: 8px; }
+.review-alert-list span,
+.review-snapshot span,
+.review-actions-list span { display: inline-flex; align-items: center; width: fit-content; max-width: 100%; padding: 7px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); color: var(--muted); font-size: .83rem; line-height: 1.5; }
+.review-toolbar { display: grid; gap: 12px; }
+.review-search { width: 100%; min-height: 44px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius-sm); padding: 10px 12px; font-weight: 800; }
+.review-actions-list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.review-actions-list b { width: 100%; font-size: .88rem; }
+.review-snapshot { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.review-form textarea { min-height: 110px; }
+
+@media (min-width: 680px) {
+  .review-intel-grid { grid-template-columns: repeat(3, 1fr); }
+  .review-digest-grid { grid-template-columns: repeat(3, 1fr); }
+  .review-toolbar { grid-template-columns: 1.3fr .9fr; align-items: center; }
+}
+
+@media (min-width: 980px) {
+  .review-intel-grid { grid-template-columns: repeat(6, 1fr); }
+}
