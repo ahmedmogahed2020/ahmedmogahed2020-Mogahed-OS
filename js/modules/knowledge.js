@@ -33,13 +33,38 @@ export function renderKnowledge() {
   </section>`;
  }
 
+function isVideoKnowledge(item = {}) {
+  return ['فيديو', 'Playlist'].includes(item.type) || Boolean(item.youtube?.videoId || item.youtube?.playlistId || item.youtube?.playlistItems?.length) || getLocalFiles(item).some(file => file.kind === 'video');
+}
+
+function isPdfKnowledge(item = {}) {
+  return item.type === 'كتاب PDF' || getLocalFiles(item).some(file => file.kind === 'pdf') || /\.pdf($|[?#])/i.test(item.url || '');
+}
+
+function getEstimatedKnowledgeSeconds(item = {}) {
+  if (isPdfKnowledge(item)) {
+    const progress = getPdfProgress(item);
+    return safeNumber(progress.totalPages || item.meta?.pages) * 90;
+  }
+  return safeNumber(item.meta?.durationMinutes) * 60;
+}
+
 function getVideoEntries(item) {
   const youtube = item.youtube || {};
-  const videos = youtube.playlistItems?.length ? youtube.playlistItems : [{ videoId: youtube.videoId || 'general', title: item.title, durationSeconds: youtube.durationSeconds || 0 }];
-  return videos.map(video => {
-    const id = video.videoId || 'general';
-    return { ...video, content: getVideoContent(item, id), id };
-  });
+  if (isVideoKnowledge(item)) {
+    const localVideos = getLocalFiles(item).filter(file => file.kind === 'video');
+    const videos = youtube.playlistItems?.length
+      ? youtube.playlistItems
+      : localVideos.length
+        ? localVideos.map(file => ({ videoId: file.id, title: file.name, durationSeconds: safeNumber(file.durationSeconds || item.meta?.durationMinutes * 60) }))
+        : [{ videoId: youtube.videoId || 'general', title: item.title, durationSeconds: youtube.durationSeconds || safeNumber(item.meta?.durationMinutes) * 60 }];
+    return videos.map(video => {
+      const id = video.videoId || 'general';
+      return { ...video, content: getVideoContent(item, id), id };
+    });
+  }
+  const id = isPdfKnowledge(item) ? 'pdf' : 'general';
+  return [{ id, videoId: id, title: item.title, durationSeconds: getEstimatedKnowledgeSeconds(item), content: getVideoContent(item, id), kind: item.type || 'معرفة' }];
 }
 
 function isReviewDue(content = {}) {
@@ -109,29 +134,49 @@ function knowledgeCard(item) {
   const parsed = parseYouTubeUrl(item.url || '');
   const activeVideoId = youtube.currentVideoId || youtube.videoId || parsed.videoId || youtube.playlistItems?.[0]?.videoId || '';
   const isYouTube = Boolean(activeVideoId || youtube.playlistId || parsed.playlistId);
+  const isVideo = isVideoKnowledge(item);
   const localPreview = renderLocalMediaPreview(item);
-  const preview = localPreview || (isYouTube && activeVideoId
+  const preview = localPreview || (isVideo && isYouTube && activeVideoId
     ? `<div class="video-shell">
         <div id="yt-player-${safeText(item.id)}" class="youtube-player" data-knowledge-id="${safeText(item.id)}" data-video-id="${safeText(activeVideoId)}"></div>
       </div>`
-    : item.url ? `<a class="btn dark" target="_blank" rel="noopener" href="${safeText(item.url)}">فتح الرابط خارجيًا</a>` : '');
+    : renderExternalPreview(item));
 
-  const progress = renderVideoProgress(item);
-  const playlist = renderPlaylist(item, activeVideoId);
-  const videoWorkspace = renderCurrentVideoWorkspace(item, activeVideoId);
-  const timedNotes = renderTimedNotes(item, activeVideoId);
   const extra = `<button class="btn primary" data-action="knowledge-to-task" data-id="${safeText(item.id)}">تحويل لمهمة</button><button class="btn ghost" data-action="review-knowledge" data-id="${safeText(item.id)}">مراجعة</button>`;
 
+  if (isVideo) {
+    const progress = renderVideoProgress(item);
+    const playlist = renderPlaylist(item, activeVideoId);
+    const videoWorkspace = renderCurrentVideoWorkspace(item, activeVideoId);
+    const timedNotes = renderTimedNotes(item, activeVideoId);
+    return simpleCard('knowledge', item, `${preview}
+      <div class="meta"><span>${safeText(item.type)}</span><span>${safeText(item.category || 'عام')}</span>${youtube.channelTitle ? `<span>${safeText(youtube.channelTitle)}</span>` : ''}</div>
+      ${renderItemLearningBadges(item, activeVideoId)}
+      ${progress}
+      ${playlist}
+      ${videoWorkspace}
+      <div class="knowledge-section"><h4>ملاحظات مرتبطة بالوقت لهذا الفيديو</h4>
+        <div class="timed-note-form"><input data-note-input="${safeText(item.id)}" placeholder="اكتب ملاحظة على اللحظة الحالية في الفيديو"><button class="btn primary" data-action="add-video-note" data-id="${safeText(item.id)}">حفظ الملاحظة</button></div>
+        ${timedNotes}
+      </div>`, extra);
+  }
+
   return simpleCard('knowledge', item, `${preview}
-    <div class="meta"><span>${safeText(item.type)}</span><span>${safeText(item.category || 'عام')}</span>${youtube.channelTitle ? `<span>${safeText(youtube.channelTitle)}</span>` : ''}</div>
-    ${renderItemLearningBadges(item, activeVideoId)}
-    ${progress}
-    ${playlist}
-    ${videoWorkspace}
-    <div class="knowledge-section"><h4>ملاحظات مرتبطة بالوقت لهذا الفيديو</h4>
-      <div class="timed-note-form"><input data-note-input="${safeText(item.id)}" placeholder="اكتب ملاحظة على اللحظة الحالية في الفيديو"><button class="btn primary" data-action="add-video-note" data-id="${safeText(item.id)}">حفظ الملاحظة</button></div>
-      ${timedNotes}
-    </div>`, extra);
+    <div class="meta"><span>${safeText(item.type)}</span><span>${safeText(item.category || 'عام')}</span>${item.fileName ? `<span>${safeText(item.fileName)}</span>` : ''}</div>
+    ${renderItemLearningBadges(item, isPdfKnowledge(item) ? 'pdf' : 'general')}
+    ${renderTypeSpecificWorkspace(item)}`, extra);
+}
+
+function renderExternalPreview(item = {}) {
+  if (isPdfKnowledge(item) && item.url) return renderPdfViewer(item, item.url, 'رابط PDF');
+  if (item.type === 'صور' && item.url) return `<div class="local-media-box local-images-box"><div class="local-media-head"><b>رابط صور</b><span>${safeText(item.fileName || item.url)}</span></div><a class="btn dark" target="_blank" rel="noopener" href="${safeText(item.url)}">فتح رابط الصور</a></div>`;
+  return item.url ? `<a class="btn dark" target="_blank" rel="noopener" href="${safeText(item.url)}">فتح الرابط خارجيًا</a>` : '';
+}
+
+function renderTypeSpecificWorkspace(item = {}) {
+  if (isPdfKnowledge(item)) return renderPdfWorkspace(item);
+  if (item.type === 'صور') return renderImagesWorkspace(item);
+  return renderTextKnowledgeWorkspace(item);
 }
 
 function getActiveVideoId(item) {
@@ -147,6 +192,22 @@ function getActiveVideo(item, videoId = '') {
 
 function getVideoContent(item, videoId = '') {
   const id = videoId || getActiveVideoId(item);
+  if (id === 'pdf' && isPdfKnowledge(item)) {
+    const progress = getPdfProgress(item);
+    const done = Boolean(progress.completedAt || (progress.totalPages && progress.currentPage >= progress.totalPages));
+    return {
+      summary: item.summary || item.meta?.contentText || '',
+      notes: item.notes || '',
+      extractedIdeas: item.extractedIdeas || [],
+      extractedActions: item.extractedActions || [],
+      learningStatus: done ? 'انتهيت' : progress.currentPage ? 'جاري القراءة' : 'لم أبدأ',
+      tags: [],
+      reviewAt: item.lastReviewAt || '',
+      linkedGoalId: item.linkedGoalId || '',
+      linkedProjectId: item.linkedProjectId || '',
+      convertedAt: ''
+    };
+  }
   const current = item.videoContent?.[id] || {};
   const video = getActiveVideo(item, id);
   return {
@@ -286,11 +347,7 @@ function renderLocalMediaPreview(item = {}) {
   const videos = files.filter(file => file.kind === 'video' || String(file.type || '').startsWith('video/'));
   const images = files.filter(file => file.kind === 'image' || String(file.type || '').startsWith('image/'));
   if (pdf) {
-    return `<div class="local-media-box local-pdf-box">
-      <div class="local-media-head"><b>ملف PDF مرفوع</b><span>${safeText(pdf.name)} · ${safeText(formatFileSize(pdf.size))}</span></div>
-      <iframe class="local-pdf-frame" src="${safeText(pdf.dataUrl)}" title="${safeText(pdf.name)}"></iframe>
-      <a class="btn dark" href="${safeText(pdf.dataUrl)}" target="_blank" rel="noopener">فتح PDF</a>
-    </div>`;
+    return renderPdfViewer(item, pdf.dataUrl, `ملف PDF مرفوع · ${pdf.name} · ${formatFileSize(pdf.size)}`);
   }
   if (videos.length) {
     return `<div class="local-media-box local-video-box">
@@ -307,6 +364,99 @@ function renderLocalMediaPreview(item = {}) {
   }
   return '';
 }
+function renderPdfViewer(item = {}, src = '', label = 'PDF') {
+  const progress = getPdfProgress(item);
+  const pageHash = progress.currentPage ? `#page=${Math.max(1, safeNumber(progress.currentPage))}` : '';
+  const viewerSrc = `${src}${String(src).includes('#') ? '' : pageHash}`;
+  return `<div class="local-media-box local-pdf-box" data-knowledge-id="${safeText(item.id)}">
+    <div class="local-media-head"><b>قارئ PDF داخل المشروع</b><span>${safeText(label)}</span></div>
+    <iframe class="local-pdf-frame" src="${safeText(viewerSrc)}" title="${safeText(item.title || 'PDF')}"></iframe>
+    <div class="pdf-viewer-actions"><a class="btn dark" href="${safeText(src)}" target="_blank" rel="noopener">فتح PDF خارجيًا</a><button class="btn ghost" data-action="start-pdf-reading" data-id="${safeText(item.id)}">ابدأ جلسة قراءة</button><button class="btn ghost" data-action="stop-pdf-reading" data-id="${safeText(item.id)}">إنهاء جلسة القراءة</button></div>
+  </div>`;
+}
+
+function getPdfProgress(item = {}) {
+  const meta = getKnowledgeMeta(item);
+  const pdfFile = getLocalFiles(item).find(file => file.kind === 'pdf');
+  const progress = item.readingProgress || {};
+  const totalPages = safeNumber(progress.totalPages || meta.pages || pdfFile?.pageCount || 0);
+  const currentPage = Math.min(Math.max(0, safeNumber(progress.currentPage || meta.currentPage || 0)), Math.max(1, totalPages || safeNumber(progress.currentPage || meta.currentPage || 0) || 1));
+  return {
+    totalPages,
+    currentPage,
+    startedAt: progress.startedAt || '',
+    activeStartedAt: progress.activeStartedAt || '',
+    lastReadAt: progress.lastReadAt || '',
+    totalSeconds: safeNumber(progress.totalSeconds),
+    completedAt: progress.completedAt || ''
+  };
+}
+
+function getPdfCompletion(progress = {}) {
+  return progress.totalPages ? Math.min(100, Math.round((safeNumber(progress.currentPage) / progress.totalPages) * 100)) : 0;
+}
+
+function renderPdfWorkspace(item = {}) {
+  const progress = getPdfProgress(item);
+  const completion = getPdfCompletion(progress);
+  const meta = getKnowledgeMeta(item);
+  return `<div class="knowledge-section pdf-workspace" data-pdf-workspace="${safeText(item.id)}">
+    <div class="workspace-head"><div><h4>تتبع قراءة الكتاب</h4><p>${safeText(item.title || item.fileName || 'كتاب PDF')}</p></div><b class="pdf-percent">${safeText(completion)}%</b></div>
+    <div class="knowledge-progress"><div class="progress-line"><b>تقدم القراءة</b><span>${safeText(progress.currentPage)} / ${safeText(progress.totalPages || '؟')} صفحة</span></div><div class="progress"><span style="width:${safeText(completion)}%"></span></div><div class="meta"><span>وقت القراءة المسجل: ${safeText(secondsToTime(progress.totalSeconds))}</span><span>${progress.completedAt ? 'مكتمل' : progress.activeStartedAt ? 'جلسة قراءة نشطة' : 'غير مكتمل'}</span></div></div>
+    <div class="pdf-page-control">
+      <button class="btn ghost" data-action="pdf-page-prev" data-id="${safeText(item.id)}">− صفحة</button>
+      <label>وصلت لصفحة<input data-pdf-field="currentPage" type="number" min="0" value="${safeText(progress.currentPage)}"></label>
+      <label>عدد الصفحات<input data-pdf-field="totalPages" type="number" min="0" value="${safeText(progress.totalPages)}" placeholder="لو لم يتم جلبه تلقائيًا"></label>
+      <button class="btn ghost" data-action="pdf-page-next" data-id="${safeText(item.id)}">+ صفحة</button>
+      <button class="btn primary" data-action="save-pdf-progress" data-id="${safeText(item.id)}">حفظ تقدم القراءة</button>
+      <button class="btn dark" data-action="mark-pdf-complete" data-id="${safeText(item.id)}">تم إنهاء الكتاب</button>
+    </div>
+    <div class="learning-control-grid">
+      <label>ربط بهدف<select data-pdf-field="linkedGoalId">${goalOptions(item.linkedGoalId || '')}</select></label>
+      <label>ربط بمشروع<select data-pdf-field="linkedProjectId">${projectOptions(item.linkedProjectId || '')}</select></label>
+      <label>المؤلف<input data-pdf-field="author" value="${safeText(meta.author || '')}" placeholder="اسم المؤلف"></label>
+      <label>خطة القراءة<input data-pdf-field="purpose" value="${safeText(meta.purpose || '')}" placeholder="ماذا تريد من الكتاب؟"></label>
+    </div>
+    <label>ملخص الكتاب<textarea data-pdf-field="summary" placeholder="اكتب ملخص الكتاب هنا">${safeText(item.summary || meta.contentText || '')}</textarea></label>
+    <label>ملاحظات القراءة<textarea data-pdf-field="notes" placeholder="ملاحظات عامة أثناء القراءة">${safeText(item.notes || '')}</textarea></label>
+    <label>أفكار مستخرجة — كل فكرة في سطر<textarea data-pdf-field="extractedIdeas" placeholder="فكرة 1\nفكرة 2">${safeText(linesToText(item.extractedIdeas || []))}</textarea></label>
+    <label>أفعال مستخرجة — كل فعل في سطر<textarea data-pdf-field="extractedActions" placeholder="فعل 1\nفعل 2">${safeText(linesToText(item.extractedActions || []))}</textarea></label>
+    <div class="btn-row"><button class="btn primary" data-action="pdf-content-to-tasks" data-id="${safeText(item.id)}">حوّل أفعال الكتاب لمهام</button><button class="btn ghost" data-action="schedule-pdf-review" data-id="${safeText(item.id)}">مراجعة بعد 7 أيام</button></div>
+  </div>`;
+}
+
+function renderImagesWorkspace(item = {}) {
+  const meta = getKnowledgeMeta(item);
+  return `<div class="knowledge-section image-workspace"><h4>محتوى الصور</h4><label>ماذا تريد أن تتذكر؟<textarea readonly>${safeText(meta.contentText || item.summary || '')}</textarea></label><p class="meta">استخدم الصور كمرجع بصري، ويمكن تحويل الملاحظة أو الفكرة إلى مهمة.</p></div>`;
+}
+
+function renderTextKnowledgeWorkspace(item = {}) {
+  const meta = getKnowledgeMeta(item);
+  return `<div class="knowledge-section text-knowledge-workspace"><h4>محتوى ${safeText(item.type || 'المعرفة')}</h4><label>المحتوى / الملاحظات<textarea readonly>${safeText(meta.contentText || item.summary || item.notes || '')}</textarea></label><p class="meta">هذا النوع لا يعرض أدوات فيديو أو PDF حتى لا تختلط البيانات.</p></div>`;
+}
+
+function countPdfPagesFromText(text = '') {
+  const matches = String(text).match(/\/Type\s*\/Page(?!s)\b/g);
+  return matches ? matches.length : 0;
+}
+
+async function countPdfPagesFromArrayBuffer(buffer) {
+  try {
+    const bytes = new Uint8Array(buffer);
+    let text = '';
+    const chunk = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunk) text += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    return countPdfPagesFromText(text);
+  } catch { return 0; }
+}
+
+function inferTitleFromUrl(url = '') {
+  try {
+    const clean = decodeURIComponent(new URL(url).pathname.split('/').pop() || '').replace(/\.pdf$/i, '').replace(/[-_]+/g, ' ').trim();
+    return clean || 'كتاب PDF';
+  } catch { return String(url).split('/').pop()?.replace(/\.pdf$/i, '') || 'كتاب PDF'; }
+}
+
 
 
 export function openKnowledgeModal(id = '') {
@@ -365,7 +515,7 @@ function renderKnowledgeTypeFields(type = 'فيديو', item = {}) {
   if (type === 'كتاب PDF') {
     return `${baseHint}
       <div class="type-fieldset"><h4>بيانات كتاب / PDF</h4><p>مناسب للكتب والملفات وملخصات القراءة.</p></div>
-      <label class="full">رابط PDF<input name="url" value="${urlValue}" placeholder="رابط Google Drive / PDF أو اتركه فارغًا لو سترفع ملفًا محليًا"></label>
+      <label class="full">رابط PDF<div class="input-action"><input name="url" value="${urlValue}" placeholder="رابط PDF مباشر أو رابط خارجي أو اتركه فارغًا لو سترفع ملفًا محليًا"><button type="button" class="btn dark" data-action="fetch-pdf-metadata">جلب بيانات PDF</button></div><small class="field-hint">لو الرابط يسمح بالقراءة، سنحاول جلب اسم الملف وعدد الصفحات تلقائيًا. لو لم يسمح بسبب CORS يمكنك إدخال الصفحات يدويًا.</small></label>
       <label class="full">رفع PDF من الجهاز<input name="localFiles" type="file" accept="application/pdf,.pdf"><small class="field-hint">يدعم الموبايل والكمبيوتر. لو الملف كبير جدًا، الأفضل استخدام رابط خارجي حفاظًا على مساحة التخزين.</small></label>
       <div class="full" data-local-file-summary>${renderLocalFileSummary(item)}</div>
       <label>اسم الملف / الكتاب<input name="fileName" value="${fileValue}" placeholder="اسم الكتاب أو الملف"></label>
@@ -467,7 +617,8 @@ function buildKnowledgePayload(existing = {}, data) {
     videoProgress: keepMedia ? existing.videoProgress : undefined,
     timedNotes: keepMedia ? existing.timedNotes : [],
     videoContent: keepMedia ? existing.videoContent : {},
-    localFiles: existing.localFiles || []
+    localFiles: existing.localFiles || [],
+    readingProgress: existing.readingProgress || {}
   };
 }
 
@@ -479,13 +630,18 @@ function getFileKind(file = {}) {
   return 'file';
 }
 
-function readFileAsDataURL(file) {
-  return new Promise((resolve, reject) => {
+async function readFileAsDataURL(file) {
+  const dataUrl = await new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve({ id: generateId('file'), name: file.name, type: file.type, size: file.size, kind: getFileKind(file), dataUrl: reader.result, createdAt: new Date().toISOString() });
+    reader.onload = () => resolve(reader.result);
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+  const payload = { id: generateId('file'), name: file.name, type: file.type, size: file.size, kind: getFileKind(file), dataUrl, createdAt: new Date().toISOString() };
+  if (payload.kind === 'pdf') {
+    try { payload.pageCount = await countPdfPagesFromArrayBuffer(await file.arrayBuffer()); } catch { payload.pageCount = 0; }
+  }
+  return payload;
 }
 
 async function collectLocalUploads(form, knowledgeType = '') {
@@ -523,6 +679,13 @@ async function saveKnowledge(existing = {}) {
     payload.localFiles = mergeKnowledgeFiles(existing.localFiles || [], uploads, data.type);
     if (!payload.fileName && payload.localFiles.length) payload.fileName = payload.localFiles[0].name;
     if (!payload.title && payload.fileName) payload.title = payload.fileName.replace(/\.[^.]+$/, '');
+    if (data.type === 'كتاب PDF') {
+      const pdfFile = payload.localFiles.find(file => file.kind === 'pdf');
+      payload.meta = { ...(payload.meta || {}) };
+      if (!payload.meta.pages && pdfFile?.pageCount) payload.meta.pages = String(pdfFile.pageCount);
+      payload.readingProgress = { ...(existing.readingProgress || {}), totalPages: safeNumber(payload.meta.pages || pdfFile?.pageCount || existing.readingProgress?.totalPages), currentPage: safeNumber(payload.meta.currentPage || existing.readingProgress?.currentPage), totalSeconds: safeNumber(existing.readingProgress?.totalSeconds), startedAt: existing.readingProgress?.startedAt || '', lastReadAt: existing.readingProgress?.lastReadAt || '', completedAt: existing.readingProgress?.completedAt || '' };
+      if (pdfFile?.pageCount && (!payload.title || payload.title === 'كتاب PDF')) payload.title = pdfFile.name.replace(/\.pdf$/i, '');
+    }
     if (uploads.length && !payload.url) payload.url = '';
     upsert('knowledge', payload);
     closeModal(); toast(uploads.length ? 'تم حفظ المعرفة والملفات المرفوعة' : 'تم حفظ المعرفة');
@@ -564,6 +727,28 @@ export async function fetchKnowledgeMetadataFromForm() {
     console.error(error);
     const message = error.message === 'NOT_YOUTUBE_URL' ? 'الرابط ليس رابط YouTube صالح' : 'فشل جلب بيانات YouTube. راجع المفتاح أو صلاحيات YouTube Data API';
     toast(message, 'error');
+  }
+}
+
+export async function fetchPdfMetadataFromForm() {
+  const form = document.getElementById('entityForm');
+  if (!form) return;
+  const url = form.elements.url?.value?.trim();
+  if (!url) return toast('ضع رابط PDF أولًا أو ارفع ملف من الجهاز', 'error');
+  try {
+    const title = inferTitleFromUrl(url);
+    if (!form.elements.title.value) form.elements.title.value = title;
+    if (!form.elements.fileName.value) form.elements.fileName.value = title.endsWith('.pdf') ? title : `${title}.pdf`;
+    let pages = 0;
+    try {
+      toast('جاري محاولة جلب عدد صفحات PDF...');
+      const response = await fetch(url);
+      if (response.ok) pages = await countPdfPagesFromArrayBuffer(await response.arrayBuffer());
+    } catch {}
+    if (pages && form.elements.pages) form.elements.pages.value = pages;
+    toast(pages ? `تم جلب بيانات PDF: ${pages} صفحة` : 'تم جلب اسم PDF. عدد الصفحات غير متاح لهذا الرابط، اكتبه يدويًا.');
+  } catch {
+    toast('تعذر جلب بيانات PDF. اكتب البيانات يدويًا أو استخدم ملفًا مرفوعًا.', 'error');
   }
 }
 
@@ -759,15 +944,132 @@ export function videoContentToTasks(id) {
   toast(`تم إنشاء ${actions.length} مهمة من هذا الفيديو`);
 }
 
+function savePdfWorkspaceContent(id, quiet = false) {
+  const item = appState.data.knowledge.find(k => k.id === id);
+  const root = document.querySelector(`[data-pdf-workspace="${CSS.escape(id)}"]`);
+  if (!item || !root) return null;
+  const currentPage = safeNumber(root.querySelector('[data-pdf-field="currentPage"]')?.value);
+  const totalPages = safeNumber(root.querySelector('[data-pdf-field="totalPages"]')?.value);
+  const previous = getPdfProgress(item);
+  item.readingProgress = {
+    ...previous,
+    currentPage,
+    totalPages,
+    lastReadAt: new Date().toISOString(),
+    completedAt: totalPages && currentPage >= totalPages ? (previous.completedAt || new Date().toISOString()) : previous.completedAt
+  };
+  item.meta = { ...(item.meta || {}), pages: totalPages ? String(totalPages) : item.meta?.pages || '', currentPage: currentPage ? String(currentPage) : item.meta?.currentPage || '', author: root.querySelector('[data-pdf-field="author"]')?.value || item.meta?.author || '', purpose: root.querySelector('[data-pdf-field="purpose"]')?.value || item.meta?.purpose || '' };
+  item.linkedGoalId = root.querySelector('[data-pdf-field="linkedGoalId"]')?.value || item.linkedGoalId || '';
+  item.linkedProjectId = root.querySelector('[data-pdf-field="linkedProjectId"]')?.value || item.linkedProjectId || '';
+  item.summary = root.querySelector('[data-pdf-field="summary"]')?.value?.trim() || item.summary || '';
+  item.notes = root.querySelector('[data-pdf-field="notes"]')?.value?.trim() || item.notes || '';
+  item.extractedIdeas = parseLines(root.querySelector('[data-pdf-field="extractedIdeas"]')?.value || '');
+  item.extractedActions = parseLines(root.querySelector('[data-pdf-field="extractedActions"]')?.value || '');
+  item.updatedAt = new Date().toISOString();
+  if (item.readingProgress.completedAt) addKnowledgeWin(item, 'إنهاء كتاب PDF', 'تعلم');
+  autoSave();
+  if (!quiet) toast('تم حفظ تقدم قراءة PDF');
+  return item;
+}
+
+function refreshPdfWorkspace(id) {
+  const item = appState.data.knowledge.find(k => k.id === id);
+  const root = document.querySelector(`[data-pdf-workspace="${CSS.escape(id)}"]`);
+  if (item && root) root.outerHTML = renderPdfWorkspace(item);
+}
+
+export function changePdfPage(id, delta = 0) {
+  const root = document.querySelector(`[data-pdf-workspace="${CSS.escape(id)}"]`);
+  const input = root?.querySelector('[data-pdf-field="currentPage"]');
+  const total = safeNumber(root?.querySelector('[data-pdf-field="totalPages"]')?.value);
+  if (!input) return;
+  input.value = Math.max(0, Math.min(total || 99999, safeNumber(input.value) + safeNumber(delta)));
+  savePdfWorkspaceContent(id, true);
+  refreshPdfWorkspace(id);
+}
+
+export function savePdfReadingProgress(id) {
+  savePdfWorkspaceContent(id, false);
+  refreshPdfWorkspace(id);
+}
+
+export function startPdfReading(id) {
+  const item = appState.data.knowledge.find(k => k.id === id);
+  if (!item) return;
+  item.readingProgress = { ...getPdfProgress(item), activeStartedAt: new Date().toISOString(), startedAt: item.readingProgress?.startedAt || new Date().toISOString() };
+  autoSave();
+  refreshPdfWorkspace(id);
+  toast('بدأت جلسة قراءة PDF');
+}
+
+export function stopPdfReading(id) {
+  const item = appState.data.knowledge.find(k => k.id === id);
+  if (!item) return;
+  const progress = getPdfProgress(item);
+  const started = progress.activeStartedAt ? new Date(progress.activeStartedAt).getTime() : 0;
+  const elapsed = started ? Math.max(0, Math.floor((Date.now() - started) / 1000)) : 0;
+  item.readingProgress = { ...progress, activeStartedAt: '', totalSeconds: safeNumber(progress.totalSeconds) + elapsed, lastReadAt: new Date().toISOString() };
+  autoSave();
+  refreshPdfWorkspace(id);
+  toast(`تم إنهاء جلسة القراءة: ${secondsToTime(elapsed)}`);
+}
+
+export function markPdfComplete(id) {
+  const item = appState.data.knowledge.find(k => k.id === id);
+  if (!item) return;
+  savePdfWorkspaceContent(id, true);
+  const progress = getPdfProgress(item);
+  item.readingProgress = { ...progress, currentPage: progress.totalPages || progress.currentPage, completedAt: new Date().toISOString(), lastReadAt: new Date().toISOString() };
+  item.status = 'تم تلخيصه';
+  addKnowledgeWin(item, 'إنهاء كتاب PDF', 'تعلم');
+  autoSave();
+  refreshPdfWorkspace(id);
+  toast('تم تعليم الكتاب كمكتمل وإضافته للإنجازات');
+}
+
+export function schedulePdfReview(id, days = 7) {
+  const item = appState.data.knowledge.find(k => k.id === id);
+  if (!item) return;
+  item.lastReviewAt = addDaysISO(days);
+  autoSave();
+  toast('تم جدولة مراجعة الكتاب بعد 7 أيام');
+}
+
+export function pdfContentToTasks(id) {
+  const item = savePdfWorkspaceContent(id, true);
+  if (!item) return;
+  const actions = item.extractedActions?.length ? item.extractedActions : item.extractedIdeas || [];
+  if (!actions.length) return toast('اكتب أفعال أو أفكار من الكتاب أولًا', 'error');
+  const now = new Date().toISOString();
+  actions.forEach((action, index) => appState.data.tasks.unshift({ id: generateId('task'), title: action, description: `من كتاب: ${item.title}\n${item.summary || item.notes || ''}`.trim(), goalId: item.linkedGoalId || '', projectId: item.linkedProjectId || '', type: 'إجراء سريع', source: 'معرفة', priority: index === 0 ? 'عالية' : 'متوسطة', status: 'مفتوحة', dueDate: '', dueTime: '', reminder: '', repeat: '', notes: item.url || item.fileName || '', createdAt: now, updatedAt: now, completedAt: '' }));
+  addKnowledgeWin(item, 'تحويل كتاب إلى أفعال', 'تعلم');
+  autoSave();
+  import('../router.js').then(({ renderPage }) => renderPage());
+  toast(`تم إنشاء ${actions.length} مهمة من الكتاب`);
+}
+
+function addKnowledgeWin(item = {}, title = 'إنجاز معرفة', type = 'تعلم') {
+  appState.data.wins = appState.data.wins || [];
+  const key = `${item.id}-${title}`;
+  if (appState.data.wins.some(win => win.sourceKey === key)) return;
+  const now = new Date().toISOString();
+  appState.data.wins.unshift({ id: generateId('win'), title: `${title}: ${item.title || item.fileName || 'معرفة'}`, description: item.summary || item.notes || 'تقدم في المعرفة', type, size: 'متوسط', date: todayISO(), linkedGoalId: item.linkedGoalId || '', linkedProjectId: item.linkedProjectId || '', linkedKnowledgeId: item.id, sourceKey: key, createdAt: now });
+}
+
+function getPrimaryKnowledgeContent(item = {}) {
+  if (isVideoKnowledge(item)) return getVideoContent(item);
+  return { summary: item.summary || item.meta?.contentText || '', notes: item.notes || '', linkedGoalId: item.linkedGoalId || '', linkedProjectId: item.linkedProjectId || '' };
+}
+
 export function knowledgeToTask(id) {
   const item = appState.data.knowledge.find(k => k.id === id);
   if (!item && document.getElementById('entityForm')) { saveKnowledge({}); return; }
   if (!item) return toast('احفظ المعرفة أولًا');
-  const content = getVideoContent(item);
+  const content = getPrimaryKnowledgeContent(item);
   openTaskModal('', { title: `إجراء من: ${item.title}`, description: content.summary || content.notes || item.summary || item.notes, type: 'إجراء سريع', source: 'معرفة', priority: 'متوسطة', status: 'مفتوحة', goalId: content.linkedGoalId || item.linkedGoalId, projectId: content.linkedProjectId || item.linkedProjectId });
 }
-export function knowledgeToGoal(id) { const item = appState.data.knowledge.find(k=>k.id===id); if (!item) return toast('احفظ المعرفة أولًا'); const content = getVideoContent(item); upsert('goals', { id: generateId('goal'), title: item.title, description: content.summary || content.notes || item.summary || item.notes, reason: 'تم تحويله من المعرفة', status: 'نشط', priority: 'متوسطة', startDate: todayISO(), targetDate: '', progress: 0, linkedProjects: [], notes: item.url }); toast('تم تحويل المعرفة إلى هدف'); }
-export function knowledgeToProject(id) { const item = appState.data.knowledge.find(k=>k.id===id); if (!item) return toast('احفظ المعرفة أولًا'); const content = getVideoContent(item); upsert('projects', { id: generateId('project'), title: item.title, description: content.summary || content.notes || item.summary || item.notes, goalId: item.linkedGoalId || '', status: 'قيد التنفيذ', priority: 'متوسطة', startDate: todayISO(), targetDate: '', progress: 0, notes: item.url }); toast('تم تحويل المعرفة إلى مشروع'); }
+export function knowledgeToGoal(id) { const item = appState.data.knowledge.find(k=>k.id===id); if (!item) return toast('احفظ المعرفة أولًا'); const content = getPrimaryKnowledgeContent(item); upsert('goals', { id: generateId('goal'), title: item.title, description: content.summary || content.notes || item.summary || item.notes, reason: 'تم تحويله من المعرفة', status: 'نشط', priority: 'متوسطة', startDate: todayISO(), targetDate: '', progress: 0, linkedProjects: [], notes: item.url }); toast('تم تحويل المعرفة إلى هدف'); }
+export function knowledgeToProject(id) { const item = appState.data.knowledge.find(k=>k.id===id); if (!item) return toast('احفظ المعرفة أولًا'); const content = getPrimaryKnowledgeContent(item); upsert('projects', { id: generateId('project'), title: item.title, description: content.summary || content.notes || item.summary || item.notes, goalId: item.linkedGoalId || '', status: 'قيد التنفيذ', priority: 'متوسطة', startDate: todayISO(), targetDate: '', progress: 0, notes: item.url }); toast('تم تحويل المعرفة إلى مشروع'); }
 export function reviewKnowledge(id) { const item = appState.data.knowledge.find(k=>k.id===id); if (item) { item.lastReviewAt = new Date().toISOString(); upsert('knowledge', item); toast('تم تسجيل مراجعة المعرفة'); } }
 export function editKnowledge(id) { openKnowledgeModal(id); }
 export function deleteKnowledge(id) { removeItem('knowledge', id); }

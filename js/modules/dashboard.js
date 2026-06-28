@@ -7,7 +7,45 @@ import { getWinIntelligence } from './wins.js';
 
 const DONE_LEARNING_STATUSES = ['انتهيت', 'تم تحويله لتنفيذ'];
 
+function isPdfKnowledge(item = {}) {
+  return item.type === 'كتاب PDF' || (Array.isArray(item.localFiles) && item.localFiles.some(file => file.kind === 'pdf')) || /\.pdf($|[?#])/i.test(item.url || '');
+}
+
+function getPdfProgress(item = {}) {
+  const meta = item.meta || {};
+  const pdfFile = Array.isArray(item.localFiles) ? item.localFiles.find(file => file.kind === 'pdf') : null;
+  const progress = item.readingProgress || {};
+  const totalPages = safeNumber(progress.totalPages || meta.pages || pdfFile?.pageCount);
+  const currentPage = safeNumber(progress.currentPage || meta.currentPage);
+  return { totalPages, currentPage, totalSeconds: safeNumber(progress.totalSeconds), completedAt: progress.completedAt || '', lastReadAt: progress.lastReadAt || '' };
+}
+
 function getKnowledgeVideoEntries(item) {
+  if (isPdfKnowledge(item)) {
+    const progress = getPdfProgress(item);
+    const pagesCompletion = calculatePercentage(progress.currentPage, progress.totalPages);
+    const completed = Boolean(progress.completedAt || (progress.totalPages && progress.currentPage >= progress.totalPages));
+    return [{
+      id: 'pdf',
+      index: 0,
+      itemId: item.id,
+      itemTitle: item.title,
+      title: item.title || item.fileName || 'كتاب PDF',
+      kind: 'كتاب PDF',
+      durationSeconds: Math.max(progress.totalSeconds, progress.totalPages * 90),
+      channelTitle: item.meta?.author || '',
+      content: {},
+      learningStatus: completed ? 'انتهيت' : progress.currentPage ? 'جاري القراءة' : 'لم أبدأ',
+      tags: [],
+      reviewAt: item.lastReviewAt || '',
+      convertedAt: '',
+      linkedProjectId: item.linkedProjectId || '',
+      linkedGoalId: item.linkedGoalId || '',
+      actions: Array.isArray(item.extractedActions) ? item.extractedActions.filter(Boolean) : [],
+      ideas: Array.isArray(item.extractedIdeas) ? item.extractedIdeas.filter(Boolean) : [],
+      pdfPagesCompletion: pagesCompletion
+    }];
+  }
   const youtube = item.youtube || {};
   const videos = Array.isArray(youtube.playlistItems) && youtube.playlistItems.length
     ? youtube.playlistItems
@@ -39,6 +77,7 @@ function getKnowledgeVideoEntries(item) {
 }
 
 function getWatchedSecondsForEntry(item, entry) {
+  if (entry.kind === 'كتاب PDF') return safeNumber(item.readingProgress?.totalSeconds);
   const progress = item.videoProgress || {};
   const completed = Array.isArray(progress.completedVideoIds) ? progress.completedVideoIds : [];
   if (completed.includes(entry.id)) return entry.durationSeconds;
@@ -82,6 +121,10 @@ function getKnowledgeIntelligence() {
       }, 0) / playlistItems.length)
     : 0;
 
+  const pdfEntries = entries.filter(entry => entry.kind === 'كتاب PDF');
+  const pdfCompleted = pdfEntries.filter(entry => DONE_LEARNING_STATUSES.includes(entry.learningStatus)).length;
+  const pdfPagesCompletion = pdfEntries.length ? Math.round(pdfEntries.reduce((sum, entry) => sum + safeNumber(entry.pdfPagesCompletion), 0) / pdfEntries.length) : 0;
+
   const tags = topCounts(entries.flatMap(entry => entry.tags), 6);
   const projectCounts = topCounts(entries.map(entry => {
     const project = appState.data.projects.find(p => p.id === entry.linkedProjectId);
@@ -120,6 +163,9 @@ function getKnowledgeIntelligence() {
     watchCompletion: calculatePercentage(watchedSeconds, totalDurationSeconds),
     playlistCount: playlistItems.length,
     playlistCompletion,
+    pdfCount: pdfEntries.length,
+    pdfCompleted,
+    pdfPagesCompletion,
     tags,
     projectCounts,
     goalCounts,
@@ -332,7 +378,7 @@ export function renderHome() {
       <aside class="command-side">
         <article class="card command-panel">
           <h3>نبض المعرفة</h3>
-          <p class="meta">اكتمال التعلم ${safeText(k.learningCompletion)}% — متبقي ${safeText(secondsToTime(k.remainingSeconds))}</p>
+          <p class="meta">اكتمال التعلم ${safeText(k.learningCompletion)}% — متبقي ${safeText(secondsToTime(k.remainingSeconds))}${k.pdfCount ? ` — PDF ${safeText(k.pdfPagesCompletion)}%` : ''}</p>
           <div class="progress"><span style="width:${safeText(k.learningCompletion)}%"></span></div>
           <div class="bar-chart mini-command-bars">
             <div class="bar-row"><div class="bar-label"><span>هدف التعلم اليومي</span><b>${safeText(command.learningProgress)}%</b></div><div class="bar-track"><span style="width:${safeText(command.learningProgress)}%"></span></div></div>
