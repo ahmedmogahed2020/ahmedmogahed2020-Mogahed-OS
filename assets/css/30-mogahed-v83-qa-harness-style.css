@@ -1,0 +1,26 @@
+/* Extracted from V83 inline style block 30. Original id: mogahed-v83-qa-harness-style */
+
+.v83-qa-panel { border-color: rgba(250, 204, 21, .28) !important; background: linear-gradient(180deg, rgba(33, 26, 8, .90), rgba(13, 16, 30, .92)) !important; }
+  .v83-qa-panel .eyebrow, .v83-gold { color: #fde68a !important; }
+  .v83-test-grid { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:10px; margin-top:12px; }
+  .v83-test-card { padding:12px; border-radius:16px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.045); min-width:0; }
+  .v83-test-card small { display:block; color:var(--muted); font-size:11px; margin-bottom:5px; }
+  .v83-test-card b { display:block; overflow-wrap:anywhere; }
+  .v83-pass { color:#86efac !important; }
+  .v83-warn { color:#fde68a !important; }
+  .v83-fail { color:#fecaca !important; }
+  .v83-info { color:#bfdbfe !important; }
+  .v83-results { display:grid; gap:8px; margin-top:12px; }
+  .v83-result { padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.04); }
+  .v83-result-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .v83-result-head b { line-height:1.5; }
+  .v83-result p { margin:6px 0 0; color:var(--muted); line-height:1.65; font-size:12px; }
+  .v83-tag { display:inline-flex; align-items:center; gap:5px; padding:5px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.05); font-size:11px; white-space:nowrap; }
+  .v83-tag.pass { color:#86efac; border-color:rgba(34,197,94,.22); background:rgba(34,197,94,.08); }
+  .v83-tag.warn { color:#fde68a; border-color:rgba(245,158,11,.25); background:rgba(245,158,11,.08); }
+  .v83-tag.fail { color:#fecaca; border-color:rgba(239,68,68,.25); background:rgba(239,68,68,.08); }
+  .v83-tag.info { color:#bfdbfe; border-color:rgba(59,130,246,.25); background:rgba(59,130,246,.08); }
+  .v83-qa-inline { margin-top:14px; padding:12px; border-radius:18px; border:1px solid rgba(250,204,21,.22); background:rgba(250,204,21,.06); }
+  .v83-log { white-space:pre-wrap; direction:ltr; text-align:left; max-height:300px; overflow:auto; padding:12px; border-radius:16px; background:rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.08); color:var(--soft); }
+  @media (max-width:1020px){ .v83-test-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  @media (max-width:420px){ .v83-test-grid { grid-template-columns: 1fr; } .v83-result-head{flex-direction:column;} }

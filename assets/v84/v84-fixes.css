@@ -1,0 +1,24 @@
+/* V84 Fixes Only — safe overlay */
+:root{--v84-bottom-safe:92px;--v84-modal-gap:14px}
+body{padding-bottom:calc(var(--v84-bottom-safe) + env(safe-area-inset-bottom,0px))!important;}
+.content,#view,.app main{padding-bottom:calc(var(--v84-bottom-safe) + env(safe-area-inset-bottom,0px))!important;}
+.bottom-bar,.bottom-nav,.mobile-bottom-nav,.mogahed-bottom-bar,.v75-bottom-bar{z-index:9000!important;}
+#modal.modal.open{display:flex!important;align-items:center!important;justify-content:center!important;padding:12px!important;box-sizing:border-box!important;}
+#modal .modal-box{width:min(960px,calc(100vw - 24px))!important;max-height:calc(100dvh - 24px)!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;border-radius:24px!important;box-sizing:border-box!important;}
+#modal .modal-box>.space:first-child{position:relative!important;top:auto!important;z-index:5!important;flex:0 0 auto!important;margin:0!important;padding:14px 16px!important;background:rgba(18,18,31,.96)!important;backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.08)!important;align-items:center!important;gap:10px!important;}
+#modalTitle{margin:0!important;font-size:18px!important;line-height:1.35!important;}
+#modalHeaderActions{display:flex!important;align-items:center!important;gap:8px!important;flex-wrap:nowrap!important;}
+#modalHeaderSaveBtn{min-height:36px!important;padding:8px 14px!important;}
+#modalBody{flex:1 1 auto!important;overflow:auto!important;padding:var(--v84-modal-gap)!important;box-sizing:border-box!important;scroll-padding-top:16px!important;}
+#modalBody .space:first-child,#modalBody .player-head{position:relative!important;top:auto!important;z-index:auto!important;}
+.theme-toggle,[data-action="toggleTheme"],.dark-toggle,.theme-switch{position:static!important;inset:auto!important;transform:none!important;margin-inline-start:auto;}
+.focus-overlay.open,.focus-overlay[style*="display: flex"]{align-items:center!important;justify-content:center!important;padding:14px!important;box-sizing:border-box!important;}
+.focus-card{width:min(620px,calc(100vw - 28px))!important;max-height:calc(100dvh - 28px)!important;overflow:auto!important;border-radius:28px!important;}
+.v46-badge{display:none!important;}
+.command-question:before{content:"صباح الخير يا مجاهد";display:block;font-size:14px;font-weight:800;color:#a78bfa;margin-bottom:8px;}
+@media (prefers-color-scheme: dark){#app-loading{background:radial-gradient(circle at top,#2c1d52 0,#11111f 48%,#090913 100%)!important}}
+.v84-splash-logo{width:82px;height:82px;border-radius:26px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(167,139,250,.28),rgba(56,189,248,.12));box-shadow:0 18px 60px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.12);overflow:hidden;font-size:34px;font-weight:900;color:#fff}
+.v84-splash-logo img{width:100%;height:100%;object-fit:cover;display:block}.v84-splash-title{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#fff;font-weight:900;font-size:20px;text-align:center}.v84-splash-sub{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#c4b5fd;font-size:13px;text-align:center}.v84-loader{width:168px;height:7px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}.v84-loader i{display:block;height:100%;width:42%;border-radius:inherit;background:linear-gradient(90deg,#a78bfa,#38bdf8,#f0abfc);animation:v84ld 1.15s ease-in-out infinite}@keyframes v84ld{0%{transform:translateX(140%)}100%{transform:translateX(-260%)}}
+.v84-dashboard-btn{font-weight:800!important}.v84-toast-success{box-shadow:0 14px 44px rgba(0,0,0,.32)!important}
+.reader-shell iframe{min-height:60vh!important}.reader-side .row{position:sticky;bottom:0;background:rgba(15,15,26,.92);padding-top:10px;z-index:3}
+@media(max-width:720px){#modal.modal.open{padding:8px!important;align-items:stretch!important}#modal .modal-box{width:100%!important;max-height:calc(100dvh - 16px)!important;border-radius:22px!important}#modal .modal-box>.space:first-child{padding:12px!important}#modalTitle{font-size:16px!important}#modalBody{padding:12px!important}.player-shell,.reader-shell{display:flex!important;flex-direction:column!important}.reader-frame,.player-shell>div:first-child{min-height:260px}.quick-dock{padding-bottom:6px}.command-question:before{font-size:13px}.focus-card{border-radius:22px!important}.toast{bottom:calc(var(--v84-bottom-safe) + 12px)!important;}}

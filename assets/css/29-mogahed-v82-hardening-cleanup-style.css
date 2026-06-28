@@ -1,0 +1,16 @@
+/* Extracted from V83 inline style block 29. Original id: mogahed-v82-hardening-cleanup-style */
+
+.v82-hardening-panel { border-color: rgba(34, 211, 238, .22) !important; background: linear-gradient(180deg, rgba(9, 19, 35, .92), rgba(13, 16, 30, .9)) !important; }
+  .v82-hardening-panel .eyebrow, .v82-cyan { color: #67e8f9 !important; }
+  .v82-health-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+  .v82-health-card { padding: 12px; border-radius: 16px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.045); min-width:0; }
+  .v82-health-card small { display:block; color: var(--muted); font-size:11px; margin-bottom: 5px; }
+  .v82-health-card b { display:block; overflow-wrap:anywhere; }
+  .v82-ok { color:#86efac !important; }
+  .v82-warn { color:#fde68a !important; }
+  .v82-bad { color:#fecaca !important; }
+  .v82-log { white-space: pre-wrap; direction:ltr; text-align:left; max-height: 260px; overflow:auto; padding:12px; border-radius:16px; background:rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.08); color:var(--soft); }
+  .v82-hidden-old-panel.v81-stability-panel { display:none !important; }
+  @media (max-width: 1020px){ .v82-health-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 420px){ .v82-health-grid { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce){ *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; } }

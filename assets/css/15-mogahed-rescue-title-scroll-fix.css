@@ -1,0 +1,7 @@
+/* Extracted from V83 inline style block 15. Original id: mogahed-rescue-title-scroll-fix */
+
+#modal.mogahed-rescue-flow .modal-box > .space:first-child {
+        position: static !important;
+        top: auto !important;
+        z-index: auto !important;
+      }

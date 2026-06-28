@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Campaign Profit OS V6.5.2 Claude Direct Analysis</title>
+<style>
+:root{
+  --bg:#f7f1ea;--surface:#fffaf5;--card:#fff;--ink:#241812;--muted:#7a6a60;--line:#eadfd5;
+  --brand:#6d28d9;--brand2:#be185d;--dark:#2b123f;--good:#13803d;--warn:#b26a00;--bad:#b42318;
+  --goodBg:#dcfce7;--warnBg:#fff3c4;--badBg:#fee2e2;--soft:#f4ebff;--shadow:0 16px 40px rgba(43,18,63,.10);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(180deg,#fff8f0 0,#f7f1ea 48%,#f3eadf 100%);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;padding-bottom:92px}button,input,select,textarea{font:inherit}button{border:0;cursor:pointer}input,select,textarea{width:100%;min-height:50px;border:1px solid var(--line);border-bottom-width:2px;border-radius:16px;background:white;padding:12px 13px;color:var(--ink);outline:none;font-size:16px}textarea{min-height:96px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:#c084fc;box-shadow:0 0 0 4px rgba(109,40,217,.10)}label{display:block;font-size:12px;font-weight:900;color:#4b4039;margin-bottom:7px}.app{width:min(920px,100%);margin:auto;padding:12px 10px 28px}.hero{position:relative;overflow:hidden;border-radius:28px;background:linear-gradient(135deg,#2b123f,#6d28d9 52%,#be185d);color:white;padding:18px 16px;box-shadow:var(--shadow)}.hero:after{content:"";position:absolute;width:210px;height:210px;left:-80px;bottom:-130px;border-radius:50%;background:rgba(255,255,255,.14)}.hero-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:7px 10px;font-size:12px;font-weight:950;white-space:nowrap}.hero h1{margin:12px 0 6px;font-size:27px;line-height:1.08;letter-spacing:-.7px}.hero p{margin:0;max-width:620px;font-size:13px;line-height:1.7;color:rgba(255,255,255,.84)}.mode-pill{background:rgba(255,255,255,.92);color:#3b155c;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:1000}.tabs{position:sticky;top:8px;z-index:5;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:12px 0;padding:7px;border:1px solid rgba(234,223,213,.86);border-radius:20px;background:rgba(255,250,245,.82);backdrop-filter:blur(14px)}.tabs button{min-height:42px;border-radius:15px;background:#fff;color:#6b5c53;border:1px solid var(--line);font-size:11px;font-weight:950}.tabs button.active{background:var(--dark);border-color:var(--dark);color:white}.view{display:none;animation:fade .16s ease}.view.active{display:block}@keyframes fade{from{opacity:.4;transform:translateY(5px)}to{opacity:1;transform:none}}.card{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:24px;padding:14px;margin-top:12px;box-shadow:var(--shadow)}.card.flat{box-shadow:none;background:var(--surface)}.section-title{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:11px}.section-title h2{font-size:18px;margin:0;letter-spacing:-.3px}.section-title p{font-size:12px;color:var(--muted);line-height:1.6;margin:4px 0 0}.chip{display:inline-flex;align-items:center;white-space:nowrap;border-radius:999px;border:1px solid var(--line);background:#fbf4ee;color:#6a5a51;padding:7px 9px;font-size:11px;font-weight:950}.decision-card{background:linear-gradient(135deg,#fff7ed,#faf5ff);border:1px solid #eadcfb;border-radius:28px;padding:16px;margin-top:12px}.decision-card small{font-size:12px;color:var(--muted);font-weight:950}.decision-card h2{font-size:30px;line-height:1.08;margin:8px 0 6px;letter-spacing:-.8px}.decision-card p{font-size:13px;line-height:1.75;color:#66584e;margin:0}.decision-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.pill{border-radius:999px;background:white;border:1px solid var(--line);padding:8px 10px;font-size:12px;font-weight:950}.pill.good{color:var(--good);border-color:#b7efc5;background:#f0fdf4}.pill.warn{color:var(--warn);border-color:#fde68a;background:#fffbea}.pill.bad{color:var(--bad);border-color:#fecaca;background:#fff1f2}.kpis{display:grid;grid-template-columns:1fr 1fr;gap:9px}.kpi{background:white;border:1px solid var(--line);border-radius:20px;padding:12px;min-height:84px}.kpi small{display:block;font-size:11px;font-weight:900;color:var(--muted);margin-bottom:6px}.kpi b{display:block;font-size:20px;letter-spacing:-.3px}.kpi span{display:block;font-size:10.5px;color:var(--muted);line-height:1.35;margin-top:5px}.grid{display:grid;gap:10px}.grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:1fr}.field{margin-bottom:11px}.hint{font-size:10.5px;color:var(--muted);line-height:1.45;margin-top:5px}.accordion{border:1px solid var(--line);border-radius:20px;background:#fff;overflow:hidden;margin-top:10px}summary{list-style:none;display:flex;align-items:center;justify-content:space-between;padding:14px;font-weight:1000;cursor:pointer}summary::-webkit-details-marker{display:none}summary:after{content:"⌄";font-size:17px;color:var(--muted)}details[open] summary:after{content:"⌃"}.acc-body{padding:0 14px 14px}.btn{min-height:47px;border-radius:16px;padding:10px 13px;font-size:13px;font-weight:1000}.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:white;box-shadow:0 10px 22px rgba(109,40,217,.20)}.soft{background:#f0e7ff;color:#581c87;border:1px solid #e9d5ff}.mutedBtn{background:#f7eee8;color:#5d5048;border:1px solid var(--line)}.danger{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.price-card,.mini-card,.source-card,.offer-card,.saved-card{background:white;border:1px solid var(--line);border-radius:22px;padding:13px}.price-card.best{border-color:#bbf7d0;outline:3px solid rgba(19,128,61,.12)}.price-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.price{font-size:27px;font-weight:1000;color:#581c87;letter-spacing:-.6px}.tag{border-radius:999px;padding:6px 8px;font-size:11px;font-weight:1000}.tag.good{background:var(--goodBg);color:#166534}.tag.warn{background:var(--warnBg);color:#92400e}.tag.bad{background:var(--badBg);color:#991b1b}.mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}.cell{border:1px solid #f0e5db;background:#fbf7f4;border-radius:15px;padding:9px;min-height:62px}.cell small{display:block;font-size:10.5px;font-weight:850;color:var(--muted);margin-bottom:5px}.cell b{font-size:14px}.cell.wide{grid-column:1/-1}.good{color:var(--good)!important}.warn{color:var(--warn)!important}.bad{color:var(--bad)!important}.progress{height:10px;border-radius:999px;background:#f1e7dd;overflow:hidden;margin-top:7px}.bar{height:100%;width:20%;background:linear-gradient(90deg,#22c55e,#eab308,#ef4444);border-radius:999px}.list{display:grid;gap:10px}.copybox{background:#fbf7f4;border:1px solid #efe4db;border-radius:18px;padding:12px;white-space:pre-wrap;font-size:13px;line-height:1.7;color:#4e413a}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:white}table{width:100%;border-collapse:separate;border-spacing:0;min-width:760px}th,td{padding:11px;border-bottom:1px solid #f0e7df;text-align:right;font-size:13px;white-space:nowrap}th{font-size:11px;background:#fbf7f4;color:#665850}.bottom-nav{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));max-width:680px;margin:auto;background:rgba(255,255,255,.95);border:1px solid var(--line);box-shadow:0 18px 42px rgba(43,18,63,.18);backdrop-filter:blur(16px);border-radius:24px;padding:8px;display:grid;grid-template-columns:repeat(5,1fr);gap:5px;z-index:20}.bottom-nav button{min-height:43px;border-radius:16px;background:#f7eee8;color:#5c5049;font-size:10.5px;font-weight:950}.bottom-nav button.active{background:var(--dark);color:white}.split{display:grid;gap:10px}.hide{display:none!important}.no-data{color:var(--muted);font-size:13px;line-height:1.7;text-align:center;padding:14px}.smallbtn{border-radius:12px;padding:8px 9px;font-size:11px;font-weight:950}.header-row{display:flex;align-items:center;justify-content:space-between;gap:8px}.saved-card h3,.source-card h3,.offer-card h3,.mini-card h3{margin:0 0 7px;font-size:15px}.saved-card p,.source-card p,.offer-card p,.mini-card p{margin:0;color:#62554d;font-size:12.5px;line-height:1.65}.desktop-only{display:none}
+.pro-dashboard{display:grid;gap:12px;margin-top:12px}.command-card{background:linear-gradient(135deg,#21102f,#5b21b6 55%,#be185d);color:white;border-radius:30px;padding:16px;overflow:hidden;position:relative;box-shadow:0 22px 52px rgba(43,18,63,.20)}.command-card:after{content:"";position:absolute;inset:auto -60px -90px auto;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.12)}.command-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.command-title{font-size:12px;font-weight:1000;color:rgba(255,255,255,.78)}.command-price{font-size:36px;line-height:1.05;font-weight:1000;letter-spacing:-1px;margin:6px 0}.command-sub{font-size:12.5px;line-height:1.7;color:rgba(255,255,255,.82);margin:0}.score-ring{width:78px;height:78px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#22c55e calc(var(--score)*1%), rgba(255,255,255,.20) 0);position:relative;flex:0 0 auto}.score-ring:before{content:"";position:absolute;inset:8px;border-radius:50%;background:#2b123f}.score-ring b{position:relative;font-size:18px}.dashboard-strip{display:grid;grid-template-columns:1fr 1fr;gap:9px}.dash-tile{background:white;border:1px solid var(--line);border-radius:22px;padding:13px;min-height:92px}.dash-tile small{display:block;font-size:10.5px;font-weight:950;color:var(--muted);margin-bottom:6px}.dash-tile b{display:block;font-size:21px;letter-spacing:-.4px}.dash-tile span{display:block;font-size:11px;color:var(--muted);line-height:1.45;margin-top:5px}.dash-tile.goodline{border-color:#bbf7d0;background:#f8fff9}.dash-tile.warnline{border-color:#fde68a;background:#fffdf2}.dash-tile.badline{border-color:#fecaca;background:#fff7f7}.dash-section{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:26px;padding:14px;box-shadow:var(--shadow)}.dash-section h3{margin:0 0 4px;font-size:16px}.dash-section p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}.funnel-pro{display:grid;gap:8px;margin-top:12px}.funnel-row{display:grid;grid-template-columns:78px 1fr 70px;gap:8px;align-items:center}.funnel-row label{margin:0;font-size:11px;color:#5b5049}.funnel-track{height:12px;border-radius:999px;background:#f1e7dd;overflow:hidden}.funnel-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#6d28d9,#be185d)}.funnel-value{text-align:left;font-size:12px;font-weight:1000}.health-list{display:grid;gap:8px;margin-top:12px}.health-item{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#fbf7f4;border:1px solid #f0e5db;border-radius:16px;padding:10px}.health-item span{font-size:12px;color:#5d5048}.health-item b{font-size:12px}.source-bars{display:grid;gap:8px;margin-top:12px}.source-line{display:grid;grid-template-columns:96px 1fr 58px;gap:8px;align-items:center}.source-line span{font-size:11px;font-weight:950;color:#5d5048}.source-line .source-track{height:10px;background:#f1e7dd;border-radius:999px;overflow:hidden}.source-line .source-fill{height:100%;background:linear-gradient(90deg,#22c55e,#6d28d9);border-radius:999px}.source-line b{text-align:left;font-size:11px}.insight-card{background:#fbf7f4;border:1px solid #efe4db;border-radius:18px;padding:11px}.insight-card h4{margin:0 0 5px;font-size:13px}.insight-card p{font-size:12px;margin:0;color:#66584e;line-height:1.65}.desktop-mosaic{display:grid;gap:12px}.mini-chart{height:64px;display:flex;align-items:end;gap:5px;padding:8px;background:#fbf7f4;border:1px solid #f0e5db;border-radius:18px}.mini-chart i{flex:1;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#be185d,#6d28d9);min-height:10px}.sticky-action{position:sticky;bottom:82px;z-index:3;background:rgba(255,250,245,.92);border:1px solid var(--line);backdrop-filter:blur(14px);border-radius:22px;padding:8px;margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.drawer-group-label{padding:10px 10px 4px;color:var(--muted);font-size:11px;font-weight:1000}.drawer-menu button.compact span span{font-size:10.5px}
+@media(min-width:760px){.pro-dashboard{grid-template-columns:1.15fr .85fr}.command-card{grid-column:1/-1}.dashboard-strip{grid-template-columns:repeat(4,1fr)}.desktop-mosaic{grid-template-columns:1fr 1fr}.sticky-action{position:static}}
+@media(max-width:430px){.command-price{font-size:31px}.score-ring{width:66px;height:66px}.score-ring b{font-size:15px}.funnel-row{grid-template-columns:64px 1fr 56px}.source-line{grid-template-columns:78px 1fr 48px}.dashboard-strip{grid-template-columns:1fr 1fr}.dash-tile b{font-size:18px}}
+.drawer-group-label{padding:10px 10px 4px;color:var(--muted);font-size:11px;font-weight:1000}.drawer-menu button.compact span span{font-size:10.5px}
+@media(min-width:760px){body{padding-bottom:24px}.app{padding:18px}.hero h1{font-size:38px}.desktop-only{display:block}.bottom-nav{display:none}.tabs{grid-template-columns:repeat(5,1fr);top:12px}.split{grid-template-columns:1.05fr .95fr}.grid.three{grid-template-columns:repeat(3,1fr)}.scenario-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.form-layout{display:grid;grid-template-columns:1fr 1fr;gap:10px}.accordion{margin-top:0}.dashboard-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:12px}}@media(max-width:430px){.app{padding-inline:9px}.hero{border-radius:24px}.hero h1{font-size:24px}.hero p{font-size:12.5px}.kpi{padding:10px}.kpi b{font-size:17px}.grid.two{grid-template-columns:1fr}.tabs{grid-template-columns:repeat(5,1fr);gap:4px}.tabs button{font-size:10px;padding:0 2px}.quick-actions{grid-template-columns:1fr 1fr}.decision-card h2{font-size:26px}.mini-grid{grid-template-columns:1fr 1fr}}@media(max-width:345px){.kpis,.mini-grid,.quick-actions{grid-template-columns:1fr}.tabs{display:none}.hero p{display:none}}@media print{body{padding:0;background:white}.tabs,.bottom-nav,.no-print,.quick-actions{display:none!important}.app{width:100%;padding:0}.card,.hero,.decision-card{box-shadow:none}.view{display:block!important}.view:not(#overview){display:none!important}}
+
+
+/* V6 Command Layout: dashboard-first + side menu */
+body{padding-top:76px;padding-bottom:24px}.app{padding-top:8px}.hero,.tabs,.bottom-nav{display:none!important}.app-header{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(255,250,245,.88);backdrop-filter:blur(18px);border-bottom:1px solid rgba(234,223,213,.9);box-shadow:0 10px 32px rgba(43,18,63,.08)}.app-header-inner{width:min(920px,100%);margin:auto;min-height:64px;padding:8px 11px;display:flex;align-items:center;gap:10px}.hamburger{width:46px;height:46px;border-radius:16px;background:linear-gradient(135deg,var(--dark),var(--brand));color:white;display:grid;place-items:center;box-shadow:0 10px 22px rgba(43,18,63,.18);flex:0 0 auto}.hamburger span{display:block;width:20px;height:2px;border-radius:99px;background:white;position:relative}.hamburger span:before,.hamburger span:after{content:"";position:absolute;right:0;width:20px;height:2px;border-radius:99px;background:white}.hamburger span:before{top:-7px}.hamburger span:after{top:7px}.top-title{min-width:0;flex:1}.top-title small{display:block;font-size:10.5px;font-weight:1000;color:var(--brand);line-height:1.2}.top-title b{display:block;font-size:15px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.top-chip{border:1px solid var(--line);background:white;color:#5d5048;border-radius:999px;padding:7px 9px;font-size:10.5px;font-weight:1000;white-space:nowrap}.drawer-backdrop{position:fixed;inset:0;background:rgba(23,12,34,.35);z-index:80;opacity:0;pointer-events:none;transition:.18s}.drawer{position:fixed;top:0;right:0;width:min(86vw,360px);height:100dvh;background:#fffaf5;z-index:90;transform:translateX(105%);transition:.22s cubic-bezier(.2,.8,.2,1);box-shadow:-24px 0 60px rgba(43,18,63,.22);border-left:1px solid var(--line);display:flex;flex-direction:column}.drawer.open{transform:translateX(0)}.drawer-backdrop.open{opacity:1;pointer-events:auto}.drawer-head{padding:16px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,#fff7ed,#faf5ff)}.drawer-head-row{display:flex;align-items:center;justify-content:space-between;gap:10px}.drawer-head h3{margin:0;font-size:18px}.drawer-head p{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.6}.close-drawer{width:38px;height:38px;border-radius:14px;background:white;border:1px solid var(--line);font-weight:1000;color:#5d5048}.drawer-menu{padding:12px;display:grid;gap:8px;overflow:auto}.drawer-menu button{min-height:56px;border-radius:18px;border:1px solid var(--line);background:white;color:#3b302b;text-align:right;padding:10px 12px;display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:center}.drawer-menu button.active{background:linear-gradient(135deg,#2b123f,#6d28d9);color:white;border-color:#2b123f}.drawer-menu i{font-style:normal;width:32px;height:32px;border-radius:13px;display:grid;place-items:center;background:#fbf4ee}.drawer-menu button.active i{background:rgba(255,255,255,.18)}.drawer-menu strong{display:block;font-size:13px;font-weight:1000}.drawer-menu span{display:block;font-size:10.5px;opacity:.74;margin-top:2px;line-height:1.35}.drawer-actions{margin-top:auto;padding:12px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:8px;background:rgba(255,250,245,.92)}.dashboard-only-note{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 8px}.dashboard-only-note h1{margin:0;font-size:20px;letter-spacing:-.4px}.dashboard-only-note p{margin:3px 0 0;font-size:12px;color:var(--muted);line-height:1.5}.dashboard-only-note .chip{background:white}.view:not(#overview){padding-top:2px}.view:not(#overview)::before{content:attr(data-title);display:block;margin:4px 2px 10px;font-size:22px;font-weight:1000;letter-spacing:-.5px}.sticky-action{bottom:12px}.drawer-group-label{padding:10px 10px 4px;color:var(--muted);font-size:11px;font-weight:1000}.drawer-menu button.compact span span{font-size:10.5px}
+@media(min-width:760px){body{padding-top:84px}.app-header-inner{min-height:70px}.app{padding-top:10px}.dashboard-only-note h1{font-size:25px}.drawer{width:390px}.sticky-action{position:sticky;bottom:18px}}@media(max-width:430px){body{padding-top:70px}.app{padding-inline:10px}.dashboard-only-note h1{font-size:18px}.top-chip{display:none}.command-card{border-radius:26px}.decision-card{display:none}.card.dashboard-grid{display:none}.card:has(#warnings){display:none}}@media print{body{padding-top:0}.app-header,.drawer,.drawer-backdrop{display:none!important}.hero{display:none!important}}
+
+
+
+/* V6.1 UX Polish: app-like dashboard first */
+:root{--radius-xl:30px;--radius-lg:24px;--radius-md:18px}.app-header{background:rgba(255,252,248,.92)}.app-header-inner{padding-inline:12px}.top-title small{color:#7c3aed}.top-title b{font-size:16px}.hamburger{border-radius:18px}.dashboard-only-note{background:rgba(255,255,255,.78);border:1px solid rgba(234,223,213,.9);border-radius:24px;padding:12px;box-shadow:0 12px 30px rgba(43,18,63,.06)}.dashboard-only-note h1{font-size:22px}.dashboard-only-note p{max-width:540px}.ux-command-nav{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0 12px}.ux-command-nav button{min-height:72px;border-radius:22px;background:rgba(255,255,255,.94);border:1px solid var(--line);box-shadow:0 10px 28px rgba(43,18,63,.06);padding:10px;display:flex;align-items:center;gap:9px;text-align:right;color:var(--ink)}.ux-command-nav i{font-style:normal;width:38px;height:38px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#fff7ed,#f4e9ff);font-size:18px;flex:0 0 auto}.ux-command-nav b{display:block;font-size:12.5px;font-weight:1000}.ux-command-nav small{display:block;font-size:10.5px;color:var(--muted);line-height:1.35;margin-top:3px}.decision-card{display:none!important}.pro-dashboard{gap:10px}.command-card{border-radius:32px;padding:18px;background:radial-gradient(circle at top left,rgba(255,255,255,.18),transparent 34%),linear-gradient(135deg,#241033,#5b21b6 58%,#be185d);box-shadow:0 22px 54px rgba(43,18,63,.22)}.command-price{font-size:38px}.score-ring{box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}.dashboard-strip{grid-template-columns:1fr 1fr;gap:9px}.dash-tile{border-radius:24px;min-height:86px;box-shadow:0 10px 24px rgba(43,18,63,.045)}.dash-section{border-radius:26px;box-shadow:0 10px 26px rgba(43,18,63,.055);padding:13px}.dash-section .section-title{margin-bottom:9px}.dash-section .section-title h2{font-size:16px}.dash-section .section-title p{font-size:11.5px}.drawer{background:linear-gradient(180deg,#fffaf5,#fff 56%,#fbf7f4)}.drawer-head{padding:18px;background:radial-gradient(circle at top left,rgba(109,40,217,.12),transparent 40%),linear-gradient(135deg,#fff7ed,#faf5ff)}.drawer-menu{gap:9px}.drawer-menu button{border-radius:20px;min-height:62px;box-shadow:0 8px 22px rgba(43,18,63,.045)}.drawer-actions{padding-bottom:calc(12px + env(safe-area-inset-bottom))}#overview > .card.dashboard-grid,#overview > .card:not(.ux-keep){display:none!important}.sticky-action{grid-template-columns:1fr 1fr;border-radius:24px}.view:not(#overview)::before{background:white;border:1px solid var(--line);border-radius:22px;padding:12px;margin-bottom:12px;box-shadow:0 10px 28px rgba(43,18,63,.055)}.drawer-group-label{padding:10px 10px 4px;color:var(--muted);font-size:11px;font-weight:1000}.drawer-menu button.compact span span{font-size:10.5px}
+@media(min-width:760px){.ux-command-nav{grid-template-columns:repeat(4,1fr)}.pro-dashboard{grid-template-columns:1.05fr .95fr}.command-card,.dashboard-strip{grid-column:auto}.pro-dashboard .dash-section:last-child{grid-column:1/-1}.dashboard-only-note{padding:14px 16px}.dashboard-only-note h1{font-size:26px}}@media(max-width:430px){body{background:#f8f1ea}.app{padding-inline:10px}.dashboard-only-note{margin-top:0}.dashboard-only-note .chip{display:none}.ux-command-nav{grid-template-columns:1fr 1fr}.ux-command-nav button{min-height:66px;border-radius:20px;padding:9px}.ux-command-nav i{width:34px;height:34px;border-radius:14px}.ux-command-nav small{display:none}.command-card{border-radius:28px;padding:16px}.command-price{font-size:34px}.command-sub{font-size:12px}.score-ring{width:70px;height:70px}.dashboard-strip{grid-template-columns:1fr 1fr}.dash-tile{min-height:78px;padding:11px}.dash-tile b{font-size:18px}.dash-section{padding:12px;border-radius:24px}.dash-section .section-title h2{font-size:15px}.dash-section .section-title p{display:none}.drawer{width:min(88vw,350px)}.drawer-menu button{min-height:58px}.sticky-action{bottom:10px}}
+
+
+
+/* V6.2 Pro Feature Suite */
+body.dark{--bg:#0f1117;--surface:#161922;--card:#1b1f2a;--ink:#f6f0ea;--muted:#b7a99d;--line:#303544;--soft:#251b36;background:linear-gradient(180deg,#0b0d13,#151823 55%,#11131a);color:var(--ink)}
+body.dark .card,body.dark .dash-section,body.dark .price-card,body.dark .mini-card,body.dark .source-card,body.dark .offer-card,body.dark .saved-card,body.dark .drawer,body.dark .daily-entry,body.dark .feature-panel{background:#1b1f2a;border-color:#303544;color:var(--ink)}
+body.dark input,body.dark select,body.dark textarea{background:#111827;border-color:#303544;color:#fff}body.dark .cell,body.dark .copybox,body.dark .health-item,body.dark .mini-chart,body.dark .top-chip,body.dark .calendar-day{background:#151923;border-color:#303544;color:var(--ink)}
+.feature-grid{display:grid;gap:12px}.feature-panel{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:24px;padding:14px;box-shadow:var(--shadow)}
+.feature-panel h3{margin:0 0 6px;font-size:16px}.feature-panel p{margin:0 0 10px;color:var(--muted);font-size:12.5px;line-height:1.65}
+.feature-checklist{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}.feature-check{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line);background:#fbf7f4;border-radius:16px;padding:10px}.feature-check b{font-size:12.5px}.feature-check span{font-size:11px;font-weight:1000;border-radius:999px;padding:5px 8px;background:#dcfce7;color:#166534}.feature-check em{font-style:normal;color:var(--muted);font-size:11px;line-height:1.4}.mini-note{border:1px dashed #d8c5b5;background:#fffaf5;border-radius:18px;padding:10px;font-size:12px;line-height:1.7;color:var(--muted);margin-top:10px}body.dark .feature-check,body.dark .mini-note{background:#151923;border-color:#303544}.drawer-group-label{padding:10px 10px 4px;color:var(--muted);font-size:11px;font-weight:1000}.drawer-menu button.compact span span{font-size:10.5px}
+@media(min-width:760px){.feature-checklist{grid-template-columns:1fr 1fr}}
+.feature-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.feature-actions.one{grid-template-columns:1fr}
+.compare-box{display:grid;gap:8px}.compare-result{display:grid;gap:8px;margin-top:10px}.compare-row{display:flex;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:16px;padding:10px;background:#fbf7f4}.compare-row span{font-size:12px;color:var(--muted)}.compare-row b{font-size:13px}
+.daily-entry{display:grid;grid-template-columns:1fr 1fr;gap:8px;border:1px solid var(--line);border-radius:18px;padding:10px;background:#fff;margin-top:8px}.daily-entry .wide{grid-column:1/-1}.sparkline{height:90px;display:flex;align-items:end;gap:6px;border:1px solid var(--line);border-radius:18px;background:#fbf7f4;padding:10px;margin-top:10px}.sparkline i{flex:1;min-height:8px;border-radius:10px 10px 4px 4px;background:linear-gradient(180deg,#22c55e,#6d28d9)}
+.alert-stack{position:fixed;top:76px;left:10px;right:10px;z-index:80;display:grid;gap:8px;pointer-events:none}.smart-alert{max-width:680px;margin:auto;border-radius:18px;padding:12px 14px;border:1px solid var(--line);background:#fff7ed;color:#7c2d12;box-shadow:var(--shadow);font-size:13px;font-weight:900;line-height:1.5}.smart-alert.bad{background:#fff1f2;color:#991b1b;border-color:#fecaca}.smart-alert.good{background:#f0fdf4;color:#166534;border-color:#bbf7d0}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}.calendar-head{font-size:10px;text-align:center;color:var(--muted);font-weight:900}.calendar-day{min-height:58px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:6px;font-size:10px;display:flex;flex-direction:column;gap:3px}.calendar-day b{font-size:12px}.calendar-day.has{background:#f5f3ff;border-color:#ddd6fe}.calendar-day small{color:var(--good);font-weight:900}
+.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}.heat-cell{min-height:64px;border-radius:16px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#fbf7f4}.heat-cell b{font-size:12px}.heat-cell span{font-size:11px;color:var(--muted)}
+.onboarding{position:fixed;inset:0;z-index:120;background:rgba(15,12,20,.55);display:none;align-items:center;justify-content:center;padding:18px}.onboarding.open{display:flex}.onboard-card{width:min(460px,100%);background:white;border-radius:28px;padding:18px;box-shadow:0 24px 70px rgba(0,0,0,.24);border:1px solid var(--line)}body.dark .onboard-card{background:#1b1f2a}.onboard-card h2{margin:0 0 8px}.onboard-card p{font-size:13px;line-height:1.7;color:var(--muted)}.steps{display:grid;gap:8px;margin:12px 0}.step{border:1px solid var(--line);border-radius:16px;padding:10px;background:#fbf7f4;font-size:13px}body.dark .step{background:#151923}.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:10px}.switch{width:54px;height:31px;border-radius:999px;background:#e5d8ce;border:1px solid var(--line);padding:3px}.switch i{display:block;width:23px;height:23px;background:white;border-radius:50%;transition:.2s}.switch.active{background:#6d28d9}.switch.active i{transform:translateX(-23px)}
+.desktop-hint{font-size:11px;color:var(--muted);line-height:1.55;margin-top:8px}.share-url{direction:ltr;text-align:left;font-size:11px;overflow:auto;white-space:nowrap}.benchmark-meter{height:12px;border-radius:999px;background:#f1e7dd;position:relative;margin:16px 0}.benchmark-meter i{position:absolute;top:-5px;width:22px;height:22px;border-radius:50%;background:#6d28d9;border:3px solid white;box-shadow:var(--shadow)}
+
+body.dark .offer-card,body.dark .price-card,body.dark .kpi,body.dark .cell,body.dark .accordion,body.dark summary,body.dark .command-card{background:#1b1f2a;border-color:#303544}
+body.dark .dash-tile{background:#1b1f2a;border-color:#303544;color:#f6f0ea}
+body.dark .dash-tile.goodline{background:#0d1f14;border-color:#1a4a2a}
+body.dark .dash-tile.warnline{background:#1f1800;border-color:#4a3800}
+body.dark .dash-tile.badline{background:#1f0d0d;border-color:#4a1a1a}
+body.dark .onboard-card,.dark .step{background:#1b1f2a;border-color:#303544;color:#f6f0ea}
+body.dark .price-card.best{border-color:#1a4a2a;outline-color:rgba(19,128,61,.2)}
+body.dark .compare-row{background:#151923;border-color:#303544}
+body.dark .health-item{background:#151923;border-color:#303544}
+body.dark .insight-card{background:#151923;border-color:#303544}
+body.dark .funnel-track,.dark .source-track,.dark .progress{background:#1f2435}
+body.dark .feature-check{background:#151923;border-color:#303544}
+body.dark .heatmap .heat-cell{background:#151923;border-color:#303544}
+body.dark .calendar-day{background:#1b1f2a;border-color:#303544}
+body.dark .calendar-day.has{background:#1a1535;border-color:#4c3a85}
+body.dark .ux-command-nav button{background:#1b1f2a;border-color:#303544;color:#f6f0ea}
+body.dark .ux-command-nav i{background:#251b36}
+body.dark .dashboard-only-note{background:#1b1f2a;border-color:#303544}
+body.dark .copybox{background:#111827;border-color:#303544;color:#d1c5b8}
+body.dark .no-data{color:#9a8b82}
+body.dark th{background:#111827;color:#9a8b82}
+body.dark td{border-color:#303544}
+body.dark .table-wrap{background:#1b1f2a;border-color:#303544}
+body.dark table{background:#1b1f2a}
+body.dark .app-header{background:rgba(15,17,23,.92);border-color:#303544}
+body.dark .top-chip{background:#1b1f2a;border-color:#303544;color:#b7a99d}
+body.dark .chip{background:#1b1f2a;border-color:#303544;color:#b7a99d}
+body.dark .acc-body{background:#1b1f2a}
+body.dark .btn.mutedBtn{background:#1f2435;color:#c5b8b0;border-color:#303544}
+body.dark .btn.soft{background:#251b36;color:#c4b5fd}
+body.dark .tag.good{background:#0d2b18;color:#4ade80}
+body.dark .tag.warn{background:#2b1f00;color:#fbbf24}
+body.dark .tag.bad{background:#2b0f0f;color:#f87171}
+body.dark .pill.good{background:#0d2b18;color:#4ade80;border-color:#1a4a2a}
+body.dark .pill.warn{background:#2b1f00;color:#fbbf24;border-color:#4a3800}
+body.dark .pill.bad{background:#2b0f0f;color:#f87171;border-color:#4a1a1a}
+/* Confirm modal dark */
+body.dark .confirm-modal-card{background:#1b1f2a;border-color:#303544;color:#f6f0ea}
+
+.drawer-group-label{padding:10px 10px 4px;color:var(--muted);font-size:11px;font-weight:1000}.drawer-menu button.compact span span{font-size:10.5px}
+@media(min-width:760px){.feature-grid{grid-template-columns:1fr 1fr}.feature-panel.wide{grid-column:1/-1}.compare-box{grid-template-columns:1fr 1fr}.daily-entry{grid-template-columns:repeat(5,1fr)}.daily-entry .wide{grid-column:auto}.feature-actions{display:flex}.feature-actions .btn{flex:1}}
+@media(max-width:430px){.feature-actions{grid-template-columns:1fr}.calendar{gap:4px}.calendar-day{min-height:48px;border-radius:12px;padding:4px}.heatmap{gap:4px}.heat-cell{min-height:54px}.daily-entry{grid-template-columns:1fr 1fr}}
+
+
+
+/* V6.5 Executive Dashboard - connected command center */
+.command-center-v65{display:grid;gap:12px;margin:12px 0 0}
+.command-panel{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:28px;padding:14px;box-shadow:0 14px 34px rgba(43,18,63,.07)}
+.command-panel.soft-panel{background:linear-gradient(135deg,#fffaf5,#faf5ff)}
+.command-panel h3{margin:0 0 5px;font-size:16px;letter-spacing:-.25px}.command-panel p{margin:0;color:var(--muted);font-size:12px;line-height:1.65}
+.exec-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.exec-card{position:relative;overflow:hidden;border:1px solid var(--line);background:#fff;border-radius:22px;padding:12px;min-height:98px;box-shadow:0 10px 24px rgba(43,18,63,.045)}
+.exec-card:after{content:"";position:absolute;left:-28px;bottom:-42px;width:92px;height:92px;border-radius:50%;background:rgba(109,40,217,.06)}.exec-card small{display:block;color:var(--muted);font-size:10.5px;font-weight:1000;margin-bottom:7px}.exec-card b{display:block;font-size:20px;letter-spacing:-.45px}.exec-card span{display:block;color:var(--muted);font-size:10.5px;line-height:1.4;margin-top:5px}.exec-card.goodline{border-color:#bbf7d0;background:#f8fff9}.exec-card.warnline{border-color:#fde68a;background:#fffdf2}.exec-card.badline{border-color:#fecaca;background:#fff7f7}
+.module-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}.module-card{border:1px solid var(--line);background:#fff;border-radius:20px;padding:11px;display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;text-align:right;color:var(--ink)}.module-card i{font-style:normal;width:36px;height:36px;border-radius:15px;display:grid;place-items:center;background:#fbf4ee}.module-card strong{display:block;font-size:13px}.module-card small{display:block;font-size:10.5px;color:var(--muted);line-height:1.35;margin-top:2px}.module-card em{font-style:normal;border-radius:999px;padding:5px 7px;font-size:10px;font-weight:1000;background:#f1e7dd;color:#69584f}.module-card.ready em{background:#dcfce7;color:#166534}.module-card.warn em{background:#fff3c4;color:#92400e}.module-card.bad em{background:#fee2e2;color:#991b1b}
+.action-queue{display:grid;gap:8px;margin-top:12px}.action-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border:1px solid var(--line);background:#fbf7f4;border-radius:18px;padding:11px}.action-item b{display:block;font-size:13px}.action-item span{display:block;color:var(--muted);font-size:11px;line-height:1.45;margin-top:2px}.action-item button{border-radius:13px;min-height:36px;padding:7px 10px;font-size:11px;font-weight:1000;background:#2b123f;color:white}
+.bridge-list{display:grid;gap:8px;margin-top:12px}.bridge-row{display:grid;grid-template-columns:98px 1fr 72px;gap:8px;align-items:center}.bridge-row label{font-size:11px;color:#5d5048;font-weight:950}.bridge-track{height:12px;border-radius:999px;background:#f1e7dd;overflow:hidden}.bridge-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#22c55e,#6d28d9,#be185d)}.bridge-row b{font-size:11px;text-align:left}.pulse-strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.pulse-card{border:1px solid var(--line);background:#fff;border-radius:20px;padding:11px}.pulse-card small{display:block;color:var(--muted);font-size:10.5px;font-weight:950;margin-bottom:5px}.pulse-card b{font-size:18px}.pulse-card span{display:block;color:var(--muted);font-size:10.5px;line-height:1.4;margin-top:4px}.linked-title{display:flex;align-items:center;justify-content:space-between;gap:8px}.linked-title .chip{background:white}
+body.dark .command-panel,body.dark .exec-card,body.dark .module-card,body.dark .pulse-card{background:#1b1f2a;border-color:#303544;color:#f6f0ea}body.dark .command-panel.soft-panel{background:linear-gradient(135deg,#151923,#1a1535)}body.dark .module-card i{background:#251b36}body.dark .action-item{background:#151923;border-color:#303544}body.dark .bridge-track{background:#1f2435}body.dark .exec-card.goodline{background:#0d1f14;border-color:#1a4a2a}body.dark .exec-card.warnline{background:#1f1800;border-color:#4a3800}body.dark .exec-card.badline{background:#1f0d0d;border-color:#4a1a1a}
+@media(min-width:760px){.command-center-v65{grid-template-columns:1fr 1fr}.command-panel.wide{grid-column:1/-1}.exec-grid{grid-template-columns:repeat(4,1fr)}.module-grid{grid-template-columns:repeat(2,1fr)}.pulse-strip{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:430px){.command-center-v65{gap:10px}.command-panel{border-radius:24px;padding:12px}.exec-grid{grid-template-columns:1fr 1fr}.exec-card{min-height:88px;border-radius:20px}.exec-card b{font-size:18px}.module-card{grid-template-columns:34px 1fr;}.module-card em{grid-column:1/-1;width:max-content}.bridge-row{grid-template-columns:82px 1fr 58px}.pulse-strip{grid-template-columns:1fr 1fr}}
+
+</style>
+</head>
+<body>
+
+<header class="app-header no-print">
+  <div class="app-header-inner">
+    <button class="hamburger" id="menuBtn" aria-label="فتح القائمة" type="button"><span></span></button>
+    <div class="top-title">
+      <small id="currentSectionSmall">لوحة القيادة</small>
+      <b id="currentSectionTitle">Campaign Profit OS</b>
+    </div>
+    <span class="top-chip" id="topModeChip">Dashboard</span>
+  </div>
+</header>
+
+<main class="app">
+  <header class="hero">
+    <div class="hero-top"><span class="badge">📊 Campaign Profit OS V6.5</span><span id="modeBadge" class="mode-pill">أونلاين</span></div>
+    <h1>مساعد قرار الحملات والتسعير</h1>
+    <p>لوحة قيادة احترافية مرتبطة بالتسعير، الإعلانات، الفانل، المرتجعات، العروض، والسجل — مناسبة للموبايل.</p>
+  </header>
+
+  <nav class="tabs no-print">
+    <button class="active" data-view="overview">القرار</button>
+    <button data-view="setup">الإدخال</button>
+    <button data-view="pricing">التسعير</button>
+    <button data-view="growth">النمو</button>
+    <button data-view="records">السجل</button>
+  </nav>
+
+  <section id="overview" class="view active" data-title="لوحة القيادة">
+    <div class="dashboard-only-note"><div><h1>لوحة القيادة</h1><p>الداشبورد فقط في الوش — وباقي البرنامج من القائمة الجانبية.</p></div><span class="chip">Dashboard First</span></div>
+    <div class="ux-command-nav no-print" aria-label="اختصارات سريعة">
+      <button type="button" onclick="showView('setup')"><i>⚙️</i><span><b>إعداد الحملة</b><small>التكلفة والإعلانات والمرتجعات</small></span></button>
+      <button type="button" onclick="showView('pricing')"><i>💰</i><span><b>التسعير</b><small>أسعار وباكدجات ونقطة تعادل</small></span></button>
+      <button type="button" onclick="showView('growth')"><i>🚀</i><span><b>النمو</b><small>الفانل والعروض ومصادر البيع</small></span></button>
+      <button type="button" onclick="showView('compare')"><i>⚖️</i><span><b>مقارنة الحملات</b><small>قارن حملتين جنب بعض</small></span></button>
+      <button type="button" onclick="showView('records')"><i>🗂️</i><span><b>السجل</b><small>حفظ الحملات والتقارير</small></span></button>
+    </div>
+    <div class="decision-card">
+      <small id="productLabel">زيت 108 عشبة</small>
+      <h2 id="decisionTitle">—</h2>
+      <p id="decisionText">املأ بيانات المنتج والحملة، وسأعطيك قرار: السعر، تبدأ بميزانية كام، تكمل ولا توقف.</p>
+      <div class="decision-tags">
+        <span id="riskPill" class="pill">Risk —</span>
+        <span class="pill">أقل سعر آمن: <b id="safePrice">—</b></span>
+        <span class="pill">تعادل: <b id="breakEvenTop">—</b></span>
+      </div>
+    </div>
+
+    <div class="pro-dashboard">
+      <div class="command-card">
+        <div class="command-top">
+          <div>
+            <div class="command-title">مركز قيادة الحملة</div>
+            <div id="cmdPrice" class="command-price">—</div>
+            <p id="cmdText" class="command-sub">قرار سريع مبني على السعر، CPA، المرتجعات، والفانل.</p>
+          </div>
+          <div id="cmdScoreRing" class="score-ring" style="--score:0"><b id="cmdScore">—</b></div>
+        </div>
+      </div>
+
+      <div class="dashboard-strip" id="dashExecutiveCards">
+        <div class="dash-tile"><small>صافي متوقع</small><b>—</b><span>بعد التسويق</span></div>
+        <div class="dash-tile"><small>تعادل</small><b>—</b><span>عدد القطع</span></div>
+        <div class="dash-tile"><small>أفضل باكدج</small><b>—</b><span>أعلى قيمة طلب</span></div>
+        <div class="dash-tile"><small>قرار الصرف</small><b>—</b><span>اختبار أو توسيع</span></div>
+      </div>
+
+      <div class="dash-section">
+        <div class="section-title"><div><h2>Funnel بصري</h2><p>يوضح مكان القوة أو الضعف في الرحلة.</p></div><span class="chip">Linked</span></div>
+        <div id="funnelPro" class="funnel-pro"></div>
+      </div>
+
+      <div class="dash-section">
+        <div class="section-title"><div><h2>صحة الحملة</h2><p>قراءة مختصرة لأهم مؤشرات الخطر.</p></div><span class="chip">Health</span></div>
+        <div id="healthList" class="health-list"></div>
+      </div>
+
+      <div class="dash-section">
+        <div class="section-title"><div><h2>مصادر البيع الأقوى</h2><p>أي قناة أحق بالميزانية؟</p></div><span class="chip">Channels</span></div>
+        <div id="sourceBars" class="source-bars"></div>
+      </div>
+
+      <div class="dash-section actual-dash-section">
+        <div class="section-title"><div><h2>قبل vs بعد الحملة</h2><p>لو أدخلت نتائج فعلية، هتشوف الفرق فورًا.</p></div><span class="chip">Actual</span></div>
+        <div id="actualVsPlan" class="health-list"></div>
+        <div id="miniChart" class="mini-chart" aria-hidden="true"></div>
+      </div>
+
+      <div class="dash-section" style="grid-column:1/-1">
+        <div class="section-title"><div><h2>رؤية تنفيذية</h2><p>خطوات عملية مبنية على كل بيانات المشروع.</p></div><span class="chip">Next Action</span></div>
+        <div id="dashboardInsights" class="list"></div>
+      </div>
+    </div>
+
+
+    <div class="command-center-v65" aria-label="لوحة قيادة متقدمة مرتبطة بكل المشروع">
+      <div class="command-panel wide soft-panel">
+        <div class="linked-title">
+          <div><h3>Executive Dashboard متصلة بكل النظام</h3><p>ملخص حي من التسعير، الفانل، اليوميات، السجل، المنتجات، المقارنة، الأهداف، والمخاطر.</p></div>
+          <span class="chip">V6.5 Linked</span>
+        </div>
+        <div id="execDashboardCards" class="exec-grid"></div>
+      </div>
+
+      <div class="command-panel">
+        <div class="linked-title"><div><h3>حالة كل قسم</h3><p>كل كارت يفتح القسم المسؤول عن الرقم مباشرة.</p></div><span class="chip">Modules</span></div>
+        <div id="moduleStatusDashboard" class="module-grid"></div>
+      </div>
+
+      <div class="command-panel">
+        <div class="linked-title"><div><h3>قائمة قرارات اليوم</h3><p>أهم 3 إجراءات بناءً على بيانات الحملة الحالية.</p></div><span class="chip">Action</span></div>
+        <div id="dashboardActionQueue" class="action-queue"></div>
+      </div>
+
+      <div class="command-panel">
+        <div class="linked-title"><div><h3>Profit Bridge</h3><p>من المبيعات المتوقعة لحد صافي الربح.</p></div><span class="chip">Money Flow</span></div>
+        <div id="dashboardProfitBridge" class="bridge-list"></div>
+      </div>
+
+      <div class="command-panel">
+        <div class="linked-title"><div><h3>نبض المشروع</h3><p>اليوميات، الحملات، المنتجات، والأهداف في لمحة واحدة.</p></div><span class="chip">Pulse</span></div>
+        <div id="dashboardPulse" class="pulse-strip"></div>
+      </div>
+    </div>
+
+    <div class="sticky-action no-print">
+      <button class="btn primary" onclick="showView('setup')">تعديل الأرقام</button>
+      <button class="btn soft" onclick="saveCampaign()">حفظ الحملة</button>
+    </div>
+
+    <div class="card dashboard-grid">
+      <div>
+        <div class="section-title"><div><h2>لوحة القرار</h2><p>مختصر تنفيذي قبل الصرف.</p></div><span class="chip">Live</span></div>
+        <div class="kpis">
+          <div class="kpi"><small>السعر المقترح</small><b id="bestPrice">—</b><span id="bestPriceSub">—</span></div>
+          <div class="kpi"><small>ربح الطلب بعد CPA</small><b id="profitAfterCpa">—</b><span>بعد تكلفة المنتج والمصاريف المتغيرة</span></div>
+          <div class="kpi"><small>ميزانية اختبار</small><b id="testBudgetKpi">—</b><span id="testBudgetSub">أول مرحلة آمنة</span></div>
+          <div class="kpi"><small>ROAS التعادل</small><b id="breakRoas">—</b><span>أقل ROAS يغطي التكلفة</span></div>
+        </div>
+      </div>
+      <div class="mini-card desktop-only">
+        <h3>توصية الصرف</h3>
+        <p id="spendAdvice">—</p>
+        <div class="progress"><div id="riskBar" class="bar"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><div><h2>ملخص الـ Funnel</h2><p>مشاهدات → رسائل → أوردرات → استلام → ربح.</p></div><span class="chip">قبل الحملة</span></div>
+      <div class="kpis">
+        <div class="kpi"><small>رسائل متوقعة</small><b id="leadCount">—</b><span>من المشاهدات ونسبة الرسائل</span></div>
+        <div class="kpi"><small>أوردرات متوقعة</small><b id="orderCount">—</b><span>من الرسائل والتحويل</span></div>
+        <div class="kpi"><small>استلام فعلي</small><b id="deliveredCount">—</b><span>بعد غير المستلم والمرتجع</span></div>
+        <div class="kpi"><small>ربح متوقع</small><b id="expectedProfit">—</b><span>بعد الحملة والتكاليف</span></div>
+      </div>
+      <div class="quick-actions no-print">
+        <button class="btn primary" onclick="showView('setup')">تعديل البيانات</button>
+        <button class="btn soft" onclick="showView('pricing')">عرض السيناريوهات</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><div><h2>تنبيهات وتحسينات</h2><p>أهم المخاطر والاقتراحات تلقائيًا.</p></div><span class="chip">AI-like Rules</span></div>
+      <div id="warnings" class="list"></div>
+    </div>
+  </section>
+
+  <section id="setup" class="view" data-title="إعداد الحملة">
+    <div class="card">
+      <div class="section-title"><div><h2>إعداد الحملة</h2><p>مقسمة عشان الموبايل: افتح القسم المطلوب فقط.</p></div><span class="chip">Auto Save</span></div>
+      <div class="form-layout">
+        <details class="accordion" open><summary>1) المنتج ونوع البيع</summary><div class="acc-body">
+          <div class="field"><label>اسم المنتج</label><input id="productName" value="زيت 108 عشبة"></div>
+          <div class="grid two">
+            <div class="field"><label>اسم المشروع / المجموعة</label><input id="productProject" value="منتجات الشعر"></div>
+            <div class="field"><label>سعر المنافس</label><input id="competitorPrice" type="number" value="1599"></div>
+          </div>
+          <div class="field"><label>نوع الحملة</label><select id="salesMode"><option value="online">بيع أونلاين</option><option value="store">بيع من المحل</option><option value="mixed">مختلط</option></select></div>
+          <div class="grid two">
+            <div class="field"><label>تكلفة القطعة</label><input id="unitCost" type="number" value="850"></div>
+            <div class="field"><label>تغليف / هدية</label><input id="packCost" type="number" value="20"></div>
+          </div>
+          <div class="grid two">
+            <div class="field"><label>شحن عليك للطلب</label><input id="shipCost" type="number" value="0"></div>
+            <div class="field"><label>تكلفة تشغيل إضافية للقطعة</label><input id="variableCost" type="number" value="0"></div>
+          </div>
+        </div></details>
+
+        <details class="accordion" open><summary>2) التسويق والميزانية</summary><div class="acc-body">
+          <div class="grid two">
+            <div class="field"><label>تكلفة الريلز / التصوير</label><input id="reelCost" type="number" value="3000"></div>
+            <div class="field"><label>ميزانية الإعلانات</label><input id="adBudget" type="number" value="10000"></div>
+          </div>
+          <div class="grid two">
+            <div class="field"><label>مصروفات أخرى</label><input id="otherCost" type="number" value="0"></div>
+            <div class="field"><label>CPA متوقع / تكلفة الطلب</label><input id="cpa" type="number" value="300"></div>
+          </div>
+          <div class="grid two">
+            <div class="field"><label>ميزانية اختبار أولى</label><input id="testBudget" type="number" value="2000"></div>
+            <div class="field"><label>CPA حد أقصى للنجاح</label><input id="maxCpa" type="number" value="350"></div>
+          </div>
+        </div></details>
+
+        <details class="accordion"><summary>3) المرتجعات والخسائر</summary><div class="acc-body">
+          <div class="grid two">
+            <div class="field"><label>غير مستلم % <small style="color:var(--muted)">(الحد 60%)</small></label><input id="notReceivedRate" type="number" value="8" min="0" max="60"></div>
+            <div class="field"><label>مرتجع كامل % <small style="color:var(--muted)">(الحد 50%)</small></label><input id="returnRate" type="number" value="5" min="0" max="50"></div>
+          </div>
+          <div class="grid two">
+            <div class="field"><label>توالف / هالك % <small style="color:var(--muted)">(الحد 30%)</small></label><input id="damageRate" type="number" value="3" min="0" max="30"></div>
+            <div class="field"><label>خسارة شحن المرتجع</label><input id="returnShipLoss" type="number" value="60"></div>
+          </div>
+        </div></details>
+
+        <details class="accordion"><summary>4) الـ Funnel قبل الحملة</summary><div class="acc-body">
+          <div class="grid two">
+            <div class="field"><label>مشاهدات متوقعة</label><input id="views" type="number" value="100000"></div>
+            <div class="field"><label>نسبة الرسائل من المشاهدات %</label><input id="msgRate" type="number" step="0.1" value="0.5"></div>
+          </div>
+          <div class="grid two">
+            <div class="field"><label>تحويل الرسائل لأوردر %</label><input id="orderRate" type="number" value="16"></div>
+            <div class="field"><label>هدف ربح مطلوب</label><input id="targetProfit" type="number" value="10000"></div>
+          </div>
+        </div></details>
+
+        <details class="accordion"><summary>5) بعد الحملة الفعلي</summary><div class="acc-body">
+          <div class="grid two">
+            <div class="field"><label>مبيعات فعلية</label><input id="actualSold" type="number" value="0"></div>
+            <div class="field"><label>صرف فعلي</label><input id="actualSpend" type="number" value="0"></div>
+          </div>
+          <div class="grid two">
+            <div class="field"><label>رسائل فعلية</label><input id="actualLeads" type="number" value="0"></div>
+            <div class="field"><label>أوردرات فعلية</label><input id="actualOrders" type="number" value="0"></div>
+          </div>
+          <div class="grid two">
+            <div class="field"><label>مرتجعات فعلية</label><input id="actualReturns" type="number" value="0"></div>
+            <div class="field"><label>سعر بيع فعلي</label><input id="actualPrice" type="number" value="1599"></div>
+          </div>
+        </div></details>
+
+        <details class="accordion"><summary>6) بيانات الإعلان</summary><div class="acc-body">
+          <div class="field"><label>أهم فائدة / وعد المنتج</label><input id="mainBenefit" value="زيت هندي للعناية بالشعر بمكونات عشبية"></div>
+          <div class="field"><label>الجمهور المستهدف</label><input id="audience" value="السيدات المهتمات بالعناية بالشعر"></div>
+          <div class="field"><label>ملاحظة للعرض</label><textarea id="offerNote">عرض إطلاق بكمية محدودة</textarea></div>
+          <div class="field"><label>ملاحظات الفريق على الحملة</label><textarea id="teamNote" placeholder="مثال: نجحت مع جمهور 25-35 أو اتوقفت بسبب الشحن"></textarea></div>
+        </div></details>
+      </div>
+      <div class="quick-actions no-print">
+        <button class="btn primary" onclick="saveCampaign()">حفظ الحملة</button>
+        <button class="btn mutedBtn" onclick="resetInputs()">إعادة ضبط</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" class="view" data-title="التسعير والسيناريوهات">
+    <div class="card">
+      <div class="section-title"><div><h2>سيناريوهات الأسعار</h2><p>ربح، CPA، تعادل، وتحذير لكل سعر.</p></div><span class="chip">Pricing</span></div>
+      <div id="priceScenarios" class="scenario-grid"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><div><h2>الباكدجات والعروض</h2><p>رفع متوسط قيمة الطلب بدل ما تدفع CPA على قطعة واحدة.</p></div><span class="chip">Bundles</span></div>
+      <div id="offers" class="grid three"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><div><h2>جدول تفصيلي</h2><p>للأرقام الدقيقة والتصدير PDF.</p></div><button class="smallbtn mutedBtn no-print" onclick="window.print()">طباعة / PDF</button></div>
+      <div class="table-wrap"><table><thead><tr><th>السعر</th><th>ربح قبل التسويق</th><th>بعد CPA</th><th>تعادل</th><th>لربح الهدف</th><th>ROAS تعادل</th><th>التقييم</th></tr></thead><tbody id="scenarioRows"></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="growth" class="view" data-title="النمو والعروض">
+    <div class="card">
+      <div class="section-title"><div><h2>خطة اختبار الميزانية</h2><p>تمنعك تصرف رقم كبير قبل ما تتأكد.</p></div><span class="chip">Test Plan</span></div>
+      <div id="testPlan" class="grid three"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><div><h2>مصادر البيع</h2><p>قارن المنتج بين فيسبوك، واتساب، المحل، تليجرام، إنفلونسر.</p></div><span class="chip">Sources</span></div>
+      <div id="sources" class="list"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><div><h2>مولد نص إعلان سريع</h2><p>Hook + Caption + رد واتساب بناءً على السعر والعرض.</p></div><button class="smallbtn soft no-print" onclick="copyAdText()">نسخ</button></div>
+      <div id="adCopy" class="copybox"></div>
+    </div>
+  </section>
+
+
+  <section id="compare" class="view" data-title="مقارنة الحملات">
+    <div class="card feature-panel wide">
+      <div class="section-title"><div><h2>مقارنة حملتين جنب بجنب</h2><p>اختار حملتين محفوظتين وشوف فرق الصرف، السعر، CPA والربح.</p></div><span class="chip">Compare</span></div>
+      <div class="compare-box"><select id="compareA"></select><select id="compareB"></select></div>
+      <div class="feature-actions one"><button class="btn primary" onclick="compareCampaigns()">قارن الحملتين</button></div>
+      <div id="compareResult" class="compare-result"></div>
+    </div>
+  </section>
+
+  <section id="ai" class="view" data-title="AI Insight">
+    <div class="card feature-panel wide">
+      <div class="section-title"><div><h2>AI Insight بالذكاء الاصطناعي</h2><p>يحلل بيانات حملتك ويعطيك توصية مكتوبة فوراً: ابدأ، ارفع السعر، قلل CPA، أو وسّع الباكدج.</p></div><span class="chip">AI ✨</span></div>
+      <div style="background:#f5f3ff;border:1px solid #e9d5ff;border-radius:18px;padding:12px;margin-bottom:12px;font-size:12.5px;color:#5b21b6;line-height:1.6">
+        🤖 التحليل يعمل مباشرة من Claude داخل الأداة عند إضافة مفتاح Anthropic API من الإعدادات. ولو المفتاح غير موجود يظهر تحليل محلي مؤقت.
+      </div>
+      <div class="feature-actions"><button class="btn primary" id="aiBtn" onclick="generateAiInsight()">⚡ حلل حملتي بـ Claude الآن</button><button class="btn soft" onclick="showView('settings')">إعداد مفتاح Claude</button><button class="btn mutedBtn" onclick="openClaude()">فتح Claude يدوياً</button></div>
+      <div style="position:relative">
+      <div id="aiInsight" class="copybox" style="margin-top:10px;min-height:60px;white-space:pre-wrap;line-height:1.8"></div>
+      <button class="smallbtn soft no-print" onclick="copyAiInsight()" style="margin-top:8px">نسخ التحليل</button>
+     </div>
+    </div>
+  </section>
+
+  <section id="exports" class="view" data-title="التصدير والمشاركة">
+    <div class="card feature-panel wide">
+      <div class="section-title"><div><h2>تصدير Excel / CSV</h2><p>صدّر السيناريوهات والحملات واليوميات كملفات CSV تفتح في Excel.</p></div><span class="chip">CSV</span></div>
+      <div class="feature-actions"><button class="btn primary" onclick="exportScenariosCSV()">تصدير السيناريوهات</button><button class="btn soft" onclick="exportCampaignsCSV()">تصدير الحملات</button><button class="btn mutedBtn" onclick="exportDailyCSV()">تصدير اليوميات</button></div>
+    </div>
+    <div class="card feature-panel wide">
+      <div class="section-title"><div><h2>مشاركة الحملة</h2><p>ينشئ لينك يحتوي بيانات الحملة الحالية لمشاركته مع شريكك أو الفريق.</p></div><span class="chip">Share</span></div>
+      <div class="feature-actions"><button class="btn primary" onclick="generateShareLink()">إنشاء لينك</button><button class="btn soft" onclick="copyShareLink()">نسخ</button></div>
+      <div id="shareLink" class="copybox share-url" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <section id="daily" class="view" data-title="الأداء اليومي">
+    <div class="card feature-panel wide">
+      <div class="section-title"><div><h2>تتبع الأداء اليومي</h2><p>سجل نتائج كل يوم وشوف منحنى الربح مع الوقت.</p></div><span class="chip">Daily</span></div>
+      <div class="daily-entry">
+        <div><label>التاريخ</label><input id="dailyDate" type="date"></div>
+        <div><label>الصرف</label><input id="dailySpend" type="number" value="0"></div>
+        <div><label>أوردرات</label><input id="dailyOrders" type="number" value="0"></div>
+        <div><label>مبيعات مستلمة</label><input id="dailySold" type="number" value="0"></div>
+        <div><label>مرتجعات</label><input id="dailyReturns" type="number" value="0"></div>
+      </div>
+      <div class="feature-actions"><button class="btn primary" onclick="addDailyEntry()">إضافة يوم</button><button class="btn mutedBtn" onclick="clearDailyEntries()">مسح اليوميات</button></div>
+      <div id="dailyChart" class="sparkline"></div><div id="dailyList" class="list" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <section id="heatmapView" class="view" data-title="Heatmap الأيام">
+    <div class="card feature-panel wide">
+      <div class="section-title"><div><h2>Heatmap للأوقات والأيام</h2><p>من اليوميات، يوضح الأيام الأقوى في الأوردرات عشان تعرف إمتى تزود الإعلان.</p></div><span class="chip">Heatmap</span></div>
+      <div id="heatmap" class="heatmap"></div>
+      <div class="mini-note">سجل نتائجك اليومية من قسم <b>الأداء اليومي</b>، والـ Heatmap هيتحدث تلقائيًا.</div>
+    </div>
+  </section>
+
+  <section id="goals" class="view" data-title="Goal Calculator">
+    <div class="card feature-panel wide">
+      <div class="section-title"><div><h2>Goal Calculator معكوس</h2><p>بدل ما تدخل البيانات وتشوف الربح، اكتب صافي الربح المطلوب وشوف لازم تبيع كام.</p></div><span class="chip">Goals</span></div>
+      <div class="grid two"><div class="field"><label>ربح صافي مستهدف</label><input id="goalProfit" type="number" value="30000"></div><div class="field"><label>سعر البيع المرشح</label><input id="goalPrice" type="number" value="1599"></div></div>
+      <div class="grid two"><div class="field"><label>ميزانية مسموحة</label><input id="goalBudget" type="number" value="10000"></div><div class="field"><label>CPA مرشح</label><input id="goalCpa" type="number" value="300"></div></div>
+      <div class="feature-actions one"><button class="btn primary" onclick="renderGoalReverse()">احسب الهدف</button></div><div id="goalReverse" class="compare-result"></div>
+    </div>
+  </section>
+
+  <section id="benchmark" class="view" data-title="المنافسين و Stress Test">
+    <div class="card feature-panel wide">
+      <div class="section-title"><div><h2>Competitor Benchmark</h2><p>قارن سعرك بسعر المنافس وهل أنت تنافسي وربحان.</p></div><span class="chip">Benchmark</span></div>
+      <div id="benchmarkResult" class="compare-result"></div>
+    </div>
+    <div class="card feature-panel wide">
+      <div class="section-title"><div><h2>Scenario Stress Test</h2><p>أسوأ حالة: CPA يتضاعف والمرتجعات تزيد — هل الحملة تتحمل؟</p></div><span class="chip">Stress</span></div>
+      <div class="feature-actions one"><button class="btn danger" onclick="runStressTest()">شغّل أسوأ حالة</button></div><div id="stressResult" class="compare-result"></div>
+    </div>
+  </section>
+
+  <section id="projects" class="view" data-title="المنتجات والملاحظات">
+    <div class="card feature-panel wide">
+      <div class="section-title"><div><h2>Multi-Product / Projects</h2><p>حوّل المنتجات إلى مشاريع منفصلة وقارن بينهم من السجل.</p></div><span class="chip">Projects</span></div>
+      <div class="field"><label>اسم المشروع / المنتج</label><input id="productProjectQuick" placeholder="مثال: زيت هندي / كينتا / باكدج تفتيح"></div>
+      <div class="feature-actions one"><button class="btn soft" onclick="syncProjectName()">تحديث اسم المشروع</button></div>
+      <div id="productLibrary" class="list" style="margin-top:12px"></div>
+    </div>
+    <div class="card feature-panel wide">
+      <div class="section-title"><div><h2>Team Notes</h2><p>ملاحظات محفوظة مع كل حملة وتظهر في السجل والتصدير.</p></div><span class="chip">Notes</span></div>
+      <div class="field"><label>ملاحظة الفريق الحالية</label><textarea id="teamNoteQuick" placeholder="مثال: اتوقفت بسبب الشحن / نجحت مع جمهور 25-35"></textarea></div>
+      <div class="feature-actions one"><button class="btn soft" onclick="syncTeamNote()">تحديث الملاحظة</button></div>
+    </div>
+  </section>
+
+  <section id="calendar" class="view" data-title="تقويم الحملات">
+    <div class="card feature-panel wide">
+      <div class="section-title">
+        <div><h2>Calendar View للسجل</h2><p>بدل الليستة العادية، شوف الحملات على تقويم شهري.</p></div>
+        <span class="chip">Calendar</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px">
+        <button class="btn mutedBtn smallbtn" onclick="calNav(-1)">→ الشهر السابق</button>
+        <b id="calMonthLabel" style="font-size:14px;text-align:center;flex:1"></b>
+        <button class="btn mutedBtn smallbtn" onclick="calNav(1)">الشهر التالي ←</button>
+      </div>
+      <div id="calendarView" class="calendar"></div>
+    </div>
+  </section>
+
+  <section id="settings" class="view" data-title="الإعدادات والمساعدة">
+    <div class="card feature-panel wide">
+      <div class="section-title"><div><h2>Onboarding + Dark Mode + Shortcuts</h2><p>شرح أول مرة، وضع ليلي، واختصارات ديسكتوب.</p></div><span class="chip">UX</span></div>
+      <div class="toggle-row"><div><b>Dark Mode</b><div class="desktop-hint">مناسب للشغل بالليل.</div></div><button id="darkSwitch" class="switch" onclick="toggleDarkMode()"><i></i></button></div>
+      <details class="accordion" style="margin-top:12px" open>
+        <summary>اتصال Claude المباشر</summary>
+        <div class="acc-body">
+          <div class="field"><label>Anthropic API Key</label><input id="anthropicApiKey" type="password" placeholder="sk-ant-..." autocomplete="off"><div class="hint">يُحفظ على جهازك فقط داخل المتصفح. لا تضع المفتاح في نسخة سترفعها للناس.</div></div>
+          <div class="field"><label>Model</label><input id="anthropicModel" value="claude-sonnet-4-20250514"><div class="hint">لو عندك موديل أحدث من Claude، اكتبه هنا كما يظهر في حساب Anthropic.</div></div>
+          <div class="feature-actions"><button class="btn primary" onclick="saveClaudeSettings()">حفظ إعدادات Claude</button><button class="btn mutedBtn" onclick="clearClaudeSettings()">مسح المفتاح</button></div>
+          <div id="claudeStatus" class="mini-note">بعد حفظ المفتاح، زر “حلل حملتي” سيطلب التحليل من Claude مباشرة ويعرضه داخل الأداة.</div>
+        </div>
+      </details>
+      <div class="feature-actions"><button class="btn soft" onclick="openOnboarding()">شرح البداية</button><button class="btn mutedBtn" onclick="showShortcuts()">الاختصارات</button></div>
+      <div class="desktop-hint">Ctrl+S حفظ الحملة — Ctrl+E تصدير السيناريوهات — Ctrl+M فتح القائمة — Esc إغلاق القائمة.</div>
+    </div>
+  </section>
+
+  <section id="records" class="view" data-title="السجل والتقارير">
+    <div class="card">
+      <div class="section-title"><div><h2>Dashboard شهرية</h2><p>ملخص الحملات المحفوظة والربحية.</p></div><span class="chip">Records</span></div>
+      <div class="kpis">
+        <div class="kpi"><small>عدد الحملات</small><b id="dashCampaigns">0</b><span>المحفوظة على الجهاز</span></div>
+        <div class="kpi"><small>إجمالي الصرف</small><b id="dashSpend">0</b><span>إعلانات + ريلز + أخرى</span></div>
+        <div class="kpi"><small>إجمالي ربح متوقع</small><b id="dashProfit">0</b><span>حسب أفضل سعر</span></div>
+        <div class="kpi"><small>متوسط CPA</small><b id="dashCpa">0</b><span>متوسط الحملات</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><div><h2>مكتبة المنتجات والحملات</h2><p>احفظ كل منتج وقارن الحملات مع الوقت.</p></div><button class="smallbtn danger no-print" onclick="clearCampaigns()">مسح الكل</button></div>
+      <div id="savedList" class="list"></div>
+    </div>
+  </section>
+
+<!-- Custom Confirm Modal (replaces browser confirm()) -->
+<div id="confirmModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(15,12,20,.55);align-items:center;justify-content:center;padding:18px">
+  <div class="confirm-modal-card" style="width:min(400px,100%);background:white;border-radius:26px;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,.24);border:1px solid var(--line)">
+    <p id="confirmMsg" style="margin:0 0 18px;font-size:15px;font-weight:700;line-height:1.6;color:var(--ink)">هل أنت متأكد؟</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button class="btn danger" id="confirmYes">تأكيد</button>
+      <button class="btn mutedBtn" id="confirmNo">إلغاء</button>
+    </div>
+  </div>
+</div>
+</main>
+
+<nav class="bottom-nav no-print">
+  <button class="active" data-view="overview">القرار</button>
+  <button data-view="setup">الإدخال</button>
+  <button data-view="pricing">التسعير</button>
+  <button data-view="growth">النمو</button>
+  <button data-view="records">السجل</button>
+</nav>
+
+
+<div class="drawer-backdrop no-print" id="drawerBackdrop"></div>
+<aside class="drawer no-print" id="sideDrawer" aria-hidden="true">
+  <div class="drawer-head">
+    <div class="drawer-head-row">
+      <div>
+        <h3>كل أقسام البرنامج</h3>
+        <p>الداشبورد هي الواجهة الأساسية، وباقي الأدوات منفصلة هنا.</p>
+      </div>
+      <button class="close-drawer" id="closeDrawer" type="button">×</button>
+    </div>
+  </div>
+  <div class="drawer-menu">
+    <div class="drawer-group-label">الأساسيات</div>
+    <button class="active" data-view="overview"><i>📊</i><span><strong>لوحة القيادة</strong><span>ملخص القرار، المخاطر، الفانل، والتوصية</span></span></button>
+    <button data-view="setup"><i>⚙️</i><span><strong>إعداد الحملة</strong><span>تكلفة المنتج، الإعلانات، CPA، المرتجعات</span></span></button>
+    <button data-view="pricing"><i>💰</i><span><strong>التسعير والسيناريوهات</strong><span>أسعار، تعادل، أرباح، باكدجات</span></span></button>
+    <button data-view="growth"><i>🚀</i><span><strong>النمو والعروض</strong><span>Funnel، مصادر البيع، نص الإعلان، الاختبار</span></span></button>
+    <button data-view="records"><i>🗂️</i><span><strong>السجل والتقارير</strong><span>الحملات المحفوظة والداشبورد الشهرية</span></span></button>
+    <div class="drawer-group-label">التحليل والقرار</div>
+    <button class="compact" data-view="compare"><i>⚖️</i><span><strong>مقارنة حملتين</strong><span>فرق الأداء جنب بجنب</span></span></button>
+    <button class="compact" data-view="ai"><i>🧠</i><span><strong>AI Insight</strong><span>برومبت Claude وتحليل مكتوب</span></span></button>
+    <button class="compact" data-view="goals"><i>🎯</i><span><strong>Goal Calculator</strong><span>ربح مستهدف → كمية وسعر</span></span></button>
+    <button class="compact" data-view="benchmark"><i>🧪</i><span><strong>Benchmark & Stress</strong><span>المنافس وأسوأ حالة</span></span></button>
+    <div class="drawer-group-label">التتبع والتقارير</div>
+    <button class="compact" data-view="daily"><i>📈</i><span><strong>الأداء اليومي</strong><span>صرف، أوردرات، مستلم</span></span></button>
+    <button class="compact" data-view="heatmapView"><i>🔥</i><span><strong>Heatmap الأيام</strong><span>أقوى أيام الأسبوع</span></span></button>
+    <button class="compact" data-view="calendar"><i>📅</i><span><strong>تقويم الحملات</strong><span>عرض شهري للسجل</span></span></button>
+    <button class="compact" data-view="exports"><i>📤</i><span><strong>تصدير ومشاركة</strong><span>CSV + لينك مشاركة</span></span></button>
+    <div class="drawer-group-label">الإدارة</div>
+    <button class="compact" data-view="projects"><i>📦</i><span><strong>المنتجات والملاحظات</strong><span>Multi-Product + Team Notes</span></span></button>
+    <button class="compact" data-view="settings"><i>🌙</i><span><strong>الإعدادات والمساعدة</strong><span>Onboarding + Dark + Shortcuts</span></span></button>
+  </div>
+  <div class="drawer-actions">
+    <button class="btn soft" onclick="saveCampaign()">حفظ</button>
+    <button class="btn mutedBtn" onclick="window.print()">PDF</button>
+  </div>
+</aside>
+
+
+<div class="alert-stack no-print" id="alertStack"></div>
+<div class="onboarding no-print" id="onboarding">
+  <div class="onboard-card">
+    <h2>ابدأ منين؟</h2>
+    <p>الأداة بقت كبيرة، فده المسار الأسهل لاستخدامها بدون زحمة.</p>
+    <div class="steps">
+      <div class="step">1) افتح <b>إعداد الحملة</b> واكتب تكلفة المنتج والميزانية وCPA.</div>
+      <div class="step">2) ارجع للـ <b>Dashboard</b> وشوف القرار والسعر والتعادل.</div>
+      <div class="step">3) افتح <b>التسعير</b> لاختيار السعر أو الباكدج.</div>
+      <div class="step">4) بعد التشغيل، سجل النتائج من <b>الأداء اليومي</b> ثم احفظ الحملة.</div>
+    </div>
+    <div class="feature-actions"><button class="btn primary" onclick="closeOnboarding()">فهمت</button><button class="btn mutedBtn" onclick="showView('setup');closeOnboarding()">ابدأ الإدخال</button></div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const fmt=n=>isFinite(n)?Math.round(n).toLocaleString('ar-EG')+' ج':'—';
+const num=id=>parseFloat($(id)?.value)||0;
+const pct=id=>num(id)/100;
+const ids=['productName','productProject','competitorPrice','teamNote','salesMode','unitCost','packCost','shipCost','variableCost','reelCost','adBudget','otherCost','cpa','testBudget','maxCpa','notReceivedRate','returnRate','damageRate','returnShipLoss','views','msgRate','orderRate','targetProfit','goalProfit','goalPrice','goalBudget','goalCpa','actualSold','actualSpend','actualLeads','actualOrders','actualReturns','actualPrice','mainBenefit','audience','offerNote'];
+const defaultPrices=[1299,1499,1599,1699,1799,1999,2299];
+function openDrawer(){ $('sideDrawer')?.classList.add('open'); $('drawerBackdrop')?.classList.add('open'); $('sideDrawer')?.setAttribute('aria-hidden','false'); }
+function closeDrawer(){ $('sideDrawer')?.classList.remove('open'); $('drawerBackdrop')?.classList.remove('open'); $('sideDrawer')?.setAttribute('aria-hidden','true'); }
+function showView(id){
+ const target=$(id); if(!target)return;
+ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));
+ document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===id));
+ const title=target.dataset.title||'لوحة القيادة';
+ if($('currentSectionSmall')) $('currentSectionSmall').textContent=id==='overview'?'لوحة القيادة':'قسم مستقل';
+ if($('currentSectionTitle')) $('currentSectionTitle').textContent=title;
+ if($('topModeChip')) $('topModeChip').textContent=id==='overview'?'Dashboard':'Menu Section';
+ closeDrawer(); syncQuickFields(); window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+$('menuBtn')?.addEventListener('click',openDrawer);
+$('closeDrawer')?.addEventListener('click',closeDrawer);
+$('drawerBackdrop')?.addEventListener('click',closeDrawer);
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
+function getData(){
+ const d={}; ids.forEach(id=>d[id]=$(id)?.value||'');
+ d.unitCost=num('unitCost');d.packCost=num('packCost');d.shipCost=num('shipCost');d.variableCost=num('variableCost');d.reelCost=num('reelCost');d.adBudget=num('adBudget');d.otherCost=num('otherCost');d.cpa=num('cpa');d.testBudget=num('testBudget');d.maxCpa=num('maxCpa');d.notReceivedRate=pct('notReceivedRate');d.returnRate=pct('returnRate');d.damageRate=pct('damageRate');d.returnShipLoss=num('returnShipLoss');d.views=num('views');d.msgRate=pct('msgRate');d.orderRate=pct('orderRate');d.targetProfit=num('targetProfit');d.actualSold=num('actualSold');d.actualSpend=num('actualSpend');d.actualLeads=num('actualLeads');d.actualOrders=num('actualOrders');d.actualReturns=num('actualReturns');d.actualPrice=num('actualPrice');d.competitorPrice=num('competitorPrice');d.goalProfit=num('goalProfit');d.goalPrice=num('goalPrice');d.goalBudget=num('goalBudget');d.goalCpa=num('goalCpa');
+ d.realCost=d.unitCost+d.packCost+d.shipCost+d.variableCost;d.fixed=d.reelCost+d.adBudget+d.otherCost;
+ // Clamp individual rates to sane maximums before summing
+ d.notReceivedRate=Math.min(.60,d.notReceivedRate);
+ d.returnRate=Math.min(.50,d.returnRate);
+ d.damageRate=Math.min(.30,d.damageRate);
+ d.lossRate=Math.min(.85,d.notReceivedRate+d.returnRate+d.damageRate);
+ d.deliveryRate=Math.max(.05,1-d.lossRate);return d;
+}
+function calcScenario(price,d){
+ const gross=price-d.realCost;
+ const expectedLossPerOrder=(d.notReceivedRate+d.returnRate)*d.returnShipLoss + d.damageRate*d.unitCost;
+ const afterCpa=price-d.realCost-d.cpa-expectedLossPerOrder;
+ const adjustedGross=(gross*d.deliveryRate)-expectedLossPerOrder;
+ const breakEven=Math.ceil(d.fixed/Math.max(1,adjustedGross));
+ const targetUnits=Math.ceil((d.fixed+d.targetProfit)/Math.max(1,adjustedGross));
+ const roas=price/Math.max(1,price-d.realCost-expectedLossPerOrder);
+ let status='جيد',cls='good'; if(afterCpa<150||breakEven>55){status='خطر';cls='bad'} else if(afterCpa<350||breakEven>35){status='متوسط';cls='warn'}
+ return {price,gross,afterCpa,adjustedGross,breakEven,targetUnits,roas,status,cls};
+}
+function calc(){
+ const d=getData(); localStorage.setItem('cp_os_v4_inputs',JSON.stringify(Object.fromEntries(ids.map(id=>[id,$(id)?.value||'']))));
+ const scenarios=defaultPrices.filter(p=>p>d.realCost+50).map(p=>calcScenario(p,d));
+ const viable=scenarios.filter(s=>s.cls!=='bad'); const best=(viable.find(s=>s.afterCpa>=350&&s.breakEven<=35)||viable[0]||scenarios[0]);
+ const safePrice=Math.ceil((d.realCost+d.cpa+((d.notReceivedRate+d.returnRate)*d.returnShipLoss+d.damageRate*d.unitCost)+260)/50)*50-1;
+ const messages=Math.round(d.views*d.msgRate); const orders=Math.round(messages*d.orderRate); const delivered=Math.round(orders*d.deliveryRate); const expectedProfit=(delivered*(best?best.gross:0))-d.fixed-(orders*d.cpa)-((orders-delivered)*d.returnShipLoss)-(Math.round(orders*d.damageRate)*d.unitCost);
+ const risk=scoreRisk(d,best,expectedProfit); const decision=makeDecision(d,best,risk,expectedProfit);
+ $('productLabel').textContent=d.productName||'منتج'; $('modeBadge').textContent=d.salesMode==='store'?'محل':d.salesMode==='mixed'?'مختلط':'أونلاين';
+ $('decisionTitle').textContent=decision.title; $('decisionText').textContent=decision.text; $('riskPill').textContent='Risk '+risk+'/100'; $('riskPill').className='pill '+(risk>=75?'good':risk>=55?'warn':'bad'); $('riskBar').style.width=risk+'%';
+ $('safePrice').textContent=fmt(safePrice); $('breakEvenTop').textContent=(best?best.breakEven:'—')+' قطعة'; $('bestPrice').textContent=fmt(best?.price); $('bestPriceSub').textContent=best?'أفضل سيناريو حالي':'—'; $('profitAfterCpa').textContent=fmt(best?.afterCpa); $('testBudgetKpi').textContent=fmt(d.testBudget); $('testBudgetSub').textContent='اختبر قبل '+fmt(d.adBudget); $('breakRoas').textContent=(best?best.roas.toFixed(1):'—')+'x'; $('spendAdvice').textContent=decision.advice;
+ $('leadCount').textContent=messages.toLocaleString('ar-EG'); $('orderCount').textContent=orders.toLocaleString('ar-EG'); $('deliveredCount').textContent=delivered.toLocaleString('ar-EG'); $('expectedProfit').textContent=fmt(expectedProfit); $('expectedProfit').className=expectedProfit>=0?'good':'bad';
+ renderWarnings(d,best,risk,expectedProfit); renderSmartAlerts(d,best,risk,expectedProfit); renderBenchmark(d,best); renderGoalReverse(false); renderComparisonOptions(); renderDailyTracking(); renderSharePreview(); renderProDashboard(d,best,scenarios,risk,expectedProfit,{messages,orders,delivered,safePrice}); renderExecutiveDashboard(d,best,scenarios,risk,expectedProfit,{messages,orders,delivered,safePrice}); renderScenarios(scenarios,best); renderOffers(d,best); renderTestPlan(d,best); renderSources(d,best); renderAdCopy(d,best); renderActual(d,best); renderSaved();
+}
+function scoreRisk(d,b,e){let s=100;if(!b)return 25;if(b.afterCpa<200)s-=25;else if(b.afterCpa<350)s-=12;if(b.breakEven>50)s-=22;else if(b.breakEven>35)s-=12;if(d.lossRate>.22)s-=20;else if(d.lossRate>.13)s-=10;if(d.cpa>d.maxCpa)s-=14;if(e<0)s-=20;if(d.unitCost>900)s-=5;return Math.max(5,Math.min(100,Math.round(s)));}
+function makeDecision(d,b,risk,profit){if(!b)return{title:'أدخل سعر أعلى من التكلفة',text:'السيناريوهات الحالية غير كافية.',advice:'راجع تكلفة المنتج أو الأسعار.'};if(risk>=75)return{title:'ابدأ باختبار ثم وسّع',text:`السعر الأقرب: ${fmt(b.price)}. التعادل حوالي ${b.breakEven} قطعة، وربح الطلب بعد CPA ${fmt(b.afterCpa)}.`,advice:`ابدأ باختبار ${fmt(d.testBudget)}. لو CPA أقل من ${fmt(d.maxCpa)} كمل تدريجيًا.`};if(risk>=55)return{title:'مقبول لكن يحتاج حذر',text:`السعر ${fmt(b.price)} ممكن يشتغل، لكن راقب CPA والمرتجعات قبل صرف كامل الميزانية.`,advice:`لا تصرف ${fmt(d.adBudget)} مرة واحدة. اختبر أولًا وعدّل العرض.`};return{title:'لا تبدأ بالميزانية الكبيرة',text:`الأرقام فيها مخاطرة: CPA أو التعادل أو المرتجعات عالية.`,advice:`ارفع السعر، قلل CPA، أو اعمل باكدج قبل إطلاق الحملة.`};}
+
+
+function renderExecutiveDashboard(d,b,scenarios,risk,expectedProfit,extra){
+ const campaigns=getCampaigns();
+ const daily=getDaily();
+ const bestPrice=b?.price||0;
+ const grossSales=(extra.delivered||0)*bestPrice;
+ const productCost=(extra.delivered||0)*d.realCost;
+ const adCost=d.fixed+(extra.orders||0)*d.cpa;
+ const lossCost=((extra.orders||0)-(extra.delivered||0))*d.returnShipLoss + Math.round((extra.orders||0)*d.damageRate)*d.unitCost;
+ const net=expectedProfit;
+ const totalSpend=campaigns.reduce((a,r)=>a+(+r.spend||0),0);
+ const totalProfit=campaigns.reduce((a,r)=>a+(+r.profit||0),0);
+ const avgCpa=campaigns.length?campaigns.reduce((a,r)=>a+(+r.cpa||0),0)/campaigns.length:0;
+ const productGroups={};
+ campaigns.forEach(r=>{const k=r.project||r.name||'بدون مشروع'; productGroups[k]=(productGroups[k]||0)+1;});
+ const productCount=Object.keys(productGroups).length;
+ const deliveredRate=extra.orders?Math.round((extra.delivered/extra.orders)*100):0;
+ const bestScenario=scenarios.find(x=>x.price===bestPrice)||b;
+ const goalUnits=bestScenario?bestScenario.targetUnits:0;
+ const execCards=[
+  ['أفضل سعر الآن', bestPrice?fmt(bestPrice):'—', bestPrice>=extra.safePrice?'فوق أقل سعر آمن':'قريب من الخطر', bestPrice>=extra.safePrice?'goodline':'warnline'],
+  ['صافي الربح المتوقع', fmt(net), net>=d.targetProfit?'محقق الهدف':'محتاج تحسين', net>=0?(net>=d.targetProfit?'goodline':'warnline'):'badline'],
+  ['قوة الفانل', deliveredRate+'%', 'استلام من الأوردرات', deliveredRate>=80?'goodline':deliveredRate>=65?'warnline':'badline'],
+  ['خبرة السجل', campaigns.length+' حملة', campaigns.length?'في الأرشيف':'احفظ أول حملة', campaigns.length>=3?'goodline':campaigns.length?'warnline':'badline']
+ ];
+ if($('execDashboardCards')) $('execDashboardCards').innerHTML=execCards.map(c=>`<button class="exec-card ${c[3]}" onclick="showView('${c[0].includes('سعر')?'pricing':c[0].includes('فانل')?'growth':c[0].includes('سجل')?'records':'goals'}')"><small>${c[0]}</small><b>${c[1]}</b><span>${c[2]}</span></button>`).join('');
+ const modules=[
+  ['⚙️','إعداد الحملة',d.unitCost&&d.adBudget?'مكتمل':'ناقص بيانات','setup',d.unitCost&&d.adBudget?'ready':'warn'],
+  ['💰','التسعير',bestPrice?'مقترح جاهز':'يحتاج حساب','pricing',bestPrice?'ready':'warn'],
+  ['🚀','النمو والفانل',extra.orders?'متصل بالفانل':'أدخل المشاهدات','growth',extra.orders?'ready':'warn'],
+  ['📅','الأداء اليومي',daily.length?daily.length+' يوم مسجل':'ابدأ التتبع','daily',daily.length?'ready':'warn'],
+  ['🗂️','السجل والتقارير',campaigns.length?campaigns.length+' حملة محفوظة':'احفظ الحملة','records',campaigns.length?'ready':'warn'],
+  ['🎯','Goal Calculator',goalUnits?goalUnits+' قطعة للهدف':'حدد الهدف','goals',goalUnits?'ready':'warn'],
+  ['⚖️','Benchmark & Stress',d.competitorPrice?'سعر المنافس موجود':'أدخل المنافس','benchmark',d.competitorPrice?'ready':'warn'],
+  ['📤','تصدير ومشاركة','CSV + Link جاهز','exports','ready']
+ ];
+ if($('moduleStatusDashboard')) $('moduleStatusDashboard').innerHTML=modules.map(m=>`<button class="module-card ${m[4]}" onclick="showView('${m[3]}')"><i>${m[0]}</i><span><strong>${m[1]}</strong><small>${m[2]}</small></span><em>${m[4]==='ready'?'جاهز':'راجع'}</em></button>`).join('');
+ const actions=[];
+ if(d.cpa>d.maxCpa) actions.push(['قلل CPA أو ارفع الباكدج','تكلفة الطلب أعلى من حد النجاح.','setup']);
+ if(bestPrice<extra.safePrice) actions.push(['ارفع السعر عن الحد الآمن','السعر الحالي أقل من أقل سعر مربح.','pricing']);
+ if(d.lossRate>.15) actions.push(['راجع المرتجعات وعدم الاستلام','الخسائر أعلى من 15%.','setup']);
+ if(!daily.length) actions.push(['ابدأ تتبع الأداء اليومي','سجل الصرف والأوردرات كل يوم.','daily']);
+ if(!campaigns.length) actions.push(['احفظ الحملة كمرجع','السجل فاضي، احفظ أول نسخة.','records']);
+ if(actions.length<3) actions.push(['اختبر ثم وسّع تدريجيًا','ابدأ بميزانية اختبار وراقب CPA.','growth']);
+ if($('dashboardActionQueue')) $('dashboardActionQueue').innerHTML=actions.slice(0,3).map(a=>`<div class="action-item"><span><b>${a[0]}</b><span>${a[1]}</span></span><button onclick="showView('${a[2]}')">افتح</button></div>`).join('');
+ const maxBridge=Math.max(1,grossSales,productCost,adCost,Math.abs(net));
+ const bridge=[['مبيعات',grossSales,'good'],['تكلفة منتج',productCost,'warn'],['تسويق + CPA',adCost,'warn'],['خسائر',lossCost,'bad'],['صافي',net,net>=0?'good':'bad']];
+ if($('dashboardProfitBridge')) $('dashboardProfitBridge').innerHTML=bridge.map(x=>`<div class="bridge-row"><label>${x[0]}</label><div class="bridge-track"><div class="bridge-fill" style="width:${Math.max(3,Math.min(100,Math.abs(x[1])/maxBridge*100))}%"></div></div><b class="${x[2]}">${fmt(x[1])}</b></div>`).join('');
+ const lastDaily=daily[daily.length-1];
+ const bestCampaign=campaigns.slice().sort((a,b)=>(b.profit||0)-(a.profit||0))[0];
+ const pulse=[
+  ['آخر يوم', lastDaily?fmt(lastDaily.profit):'—', lastDaily?lastDaily.date:'لا يوجد تتبع'],
+  ['إجمالي الحملات', campaigns.length.toLocaleString('ar-EG'), 'صرف: '+fmt(totalSpend)],
+  ['صافي السجل', fmt(totalProfit), 'متوسط CPA: '+fmt(avgCpa)],
+  ['أفضل منتج/مشروع', bestCampaign?(bestCampaign.project||bestCampaign.name||'—'):'—', productCount+' مشروع محفوظ']
+ ];
+ if($('dashboardPulse')) $('dashboardPulse').innerHTML=pulse.map(p=>`<div class="pulse-card"><small>${p[0]}</small><b>${p[1]}</b><span>${p[2]}</span></div>`).join('');
+}
+
+function renderProDashboard(d,b,scenarios,risk,expectedProfit,extra){
+ const bestPrice=b?.price||0;
+ const decisionClass=risk>=75?'goodline':risk>=55?'warnline':'badline';
+ $('cmdPrice').textContent=bestPrice?fmt(bestPrice):'—';
+ $('cmdScore').textContent=risk+'/100';
+ $('cmdScoreRing').style.setProperty('--score',risk);
+ $('cmdText').textContent = risk>=75 ? 'الأرقام تسمح باختبار منظم ثم توسعة تدريجية.' : risk>=55 ? 'الحملة مقبولة لكن محتاجة اختبار قبل صرف كبير.' : 'الخطر عالي: عدّل السعر أو العرض أو CPA قبل الصرف.';
+ const package2=Math.round((bestPrice*2*.905)/10)*10-1;
+ const spendDecision = risk>=75?'اختبر ثم وسّع':risk>=55?'اختبار فقط':'لا توسّع';
+ const tiles=[
+  ['صافي متوقع',fmt(expectedProfit), expectedProfit>=0?'بعد التسويق والفانل':'الفانل المتوقع خاسر', expectedProfit>=0?'goodline':'badline'],
+  ['تعادل', (b?b.breakEven:'—')+' قطعة', 'لرد مصروفات الحملة', b&&b.breakEven<=30?'goodline':b&&b.breakEven<=45?'warnline':'badline'],
+  ['أفضل باكدج', package2?fmt(package2):'—', 'قطعتين لرفع قيمة الطلب', 'goodline'],
+  ['قرار الصرف', spendDecision, 'حسب Risk و CPA', decisionClass]
+ ];
+ $('dashExecutiveCards').innerHTML=tiles.map(t=>`<div class="dash-tile ${t[3]}"><small>${t[0]}</small><b>${t[1]}</b><span>${t[2]}</span></div>`).join('');
+ const max=Math.max(1,d.views,extra.messages,extra.orders,extra.delivered);
+ const funnel=[['مشاهدات',d.views],['رسائل',extra.messages],['أوردرات',extra.orders],['استلام',extra.delivered]];
+ $('funnelPro').innerHTML=funnel.map(x=>`<div class="funnel-row"><label>${x[0]}</label><div class="funnel-track"><div class="funnel-fill" style="width:${Math.max(4,Math.min(100,x[1]/max*100))}%"></div></div><div class="funnel-value">${Math.round(x[1]).toLocaleString('ar-EG')}</div></div>`).join('');
+ const margin=b?b.afterCpa:0;
+ const lossPct=Math.round(d.lossRate*100);
+ const health=[
+  ['هامش بعد CPA',fmt(margin), margin>=500?'good':margin>=250?'warn':'bad'],
+  ['نسبة خسائر',lossPct+'%', lossPct<=12?'good':lossPct<=20?'warn':'bad'],
+  ['CPA مقابل الحد',fmt(d.cpa)+' / '+fmt(d.maxCpa), d.cpa<=d.maxCpa?'good':'bad'],
+  ['أقل سعر آمن',fmt(extra.safePrice), bestPrice>=extra.safePrice?'good':'warn']
+ ];
+ $('healthList').innerHTML=health.map(h=>`<div class="health-item"><span>${h[0]}</span><b class="${h[2]}">${h[1]}</b></div>`).join('');
+ const sources=[['فيسبوك',d.cpa,margin],['ريلز عضوي',40,bestPrice-d.realCost-40],['واتساب',25,bestPrice-d.realCost-25],['المحل',0,bestPrice-d.realCost],['إنفلونسر',Math.round(d.cpa*1.25),margin-Math.round(d.cpa*.25)]];
+ const maxProfit=Math.max(1,...sources.map(s=>s[2]));
+ $('sourceBars').innerHTML=sources.map(s=>`<div class="source-line"><span>${s[0]}</span><div class="source-track"><div class="source-fill" style="width:${Math.max(5,Math.min(100,s[2]/maxProfit*100))}%"></div></div><b class="${s[2]>350?'good':s[2]>150?'warn':'bad'}">${fmt(s[2])}</b></div>`).join('');
+ const actualRevenue=d.actualSold*d.actualPrice;
+ const actualProfit=actualRevenue-d.actualSpend-(d.actualSold*d.realCost)-(d.actualReturns*d.returnShipLoss);
+ const actualCpa=d.actualOrders?d.actualSpend/d.actualOrders:0;
+ const actualRows=[
+  ['المبيعات الفعلية',d.actualSold?d.actualSold+' قطعة':'لم تدخل بعد', d.actualSold?'good':'warn'],
+  ['الربح الفعلي',d.actualSold?fmt(actualProfit):'—', actualProfit>=0?'good':'bad'],
+  ['CPA الفعلي',d.actualOrders?fmt(actualCpa):'—', actualCpa&&actualCpa<=d.maxCpa?'good':'warn'],
+  ['الفرق عن المتوقع',d.actualSold?fmt(actualProfit-expectedProfit):'—', actualProfit>=expectedProfit?'good':'warn']
+ ];
+ $('actualVsPlan').innerHTML=actualRows.map(h=>`<div class="health-item"><span>${h[0]}</span><b class="${h[2]}">${h[1]}</b></div>`).join('');
+ const bars=[d.views/1000,extra.messages,extra.orders*4,extra.delivered*5,Math.max(0,expectedProfit/100)];
+ const m=Math.max(1,...bars);
+ $('miniChart').innerHTML=bars.map(v=>`<i style="height:${Math.max(12,Math.min(62,v/m*62))}px"></i>`).join('');
+ const insights=[];
+ if(risk>=75) insights.push(['ابدأ بذكاء','ابدأ بميزانية اختبار، ولو CPA أقل من الحد خلال أول 24-48 ساعة وسّع تدريجيًا.','good']);
+ else if(risk>=55) insights.push(['لا تصرف كامل الميزانية','الأفضل اختبار صغير وتعديل العرض أو الكرياتيف قبل التوسيع.','warn']);
+ else insights.push(['أوقف التوسيع مؤقتًا','الأرقام الحالية لا تتحمل مخاطرة كبيرة. ارفع السعر أو اعمل باكدج أو قلل CPA.','bad']);
+ if(d.lossRate>.18) insights.push(['المرتجعات تضغط الربح','راجع سياسة التأكيد، رسالة واتساب قبل الشحن، وتقليل الدفع عند الاستلام لو أمكن.','bad']);
+ if(b&&b.breakEven>40) insights.push(['التعادل عالي','حاول تزود متوسط الطلب بباكدج قطعتين أو تقلل تكلفة الريلز/الإعلانات الأولى.','warn']);
+ if(bestPrice && package2) insights.push(['العرض الأفضل','استخدم قطعة بسعر واضح + باكدج قطعتين كاختيار موصى به لرفع الربح من نفس العميل.','good']);
+ $('dashboardInsights').innerHTML=insights.map(i=>`<div class="insight-card"><h4 class="${i[2]}">${i[0]}</h4><p>${i[1]}</p></div>`).join('');
+}
+
+function renderWarnings(d,b,risk,profit){const arr=[]; if(d.cpa>d.maxCpa)arr.push(['bad','CPA أعلى من حد النجاح','قلل تكلفة الطلب أو ارفع متوسط قيمة الطلب بباكدج.']); if(d.lossRate>.18)arr.push(['bad','نسبة الخسائر عالية','راجع عدم الاستلام والمرتجعات، خصوصًا في الدفع عند الاستلام.']); if(b&&b.breakEven>40)arr.push(['warn','نقطة التعادل عالية','ابدأ بميزانية اختبار ولا تدخل بكامل الميزانية.']); if(b&&b.afterCpa>500)arr.push(['good','هامش جيد بعد CPA','مناسب للتوسيع لو نتائج أول 24 ساعة جيدة.']); if(profit<0)arr.push(['bad','الـ Funnel المتوقع خاسر','محتاج مشاهدات/تحويل أعلى أو CPA أقل.']); if(!arr.length)arr.push(['good','الأرقام مستقرة','الحملة مناسبة كبداية اختبار منظمة.']); $('warnings').innerHTML=arr.map(x=>`<div class="mini-card"><h3 class="${x[0]}">${x[1]}</h3><p>${x[2]}</p></div>`).join('');}
+function renderScenarios(sc,best){$('priceScenarios').innerHTML=sc.map(s=>`<div class="price-card ${s.price===best?.price?'best':''}"><div class="price-head"><div><div class="price">${fmt(s.price)}</div><span class="tag ${s.cls}">${s.status}</span></div>${s.price===best?.price?'<span class="chip">مقترح</span>':''}</div><div class="mini-grid"><div class="cell"><small>قبل التسويق</small><b>${fmt(s.gross)}</b></div><div class="cell"><small>بعد CPA</small><b class="${s.afterCpa>=0?'good':'bad'}">${fmt(s.afterCpa)}</b></div><div class="cell"><small>تعادل</small><b>${s.breakEven} قطعة</b></div><div class="cell"><small>لربح الهدف</small><b>${s.targetUnits} قطعة</b></div><div class="cell wide"><small>ROAS تعادل</small><b>${s.roas.toFixed(1)}x</b></div></div></div>`).join('');$('scenarioRows').innerHTML=sc.map(s=>`<tr><td>${fmt(s.price)}</td><td>${fmt(s.gross)}</td><td>${fmt(s.afterCpa)}</td><td>${s.breakEven}</td><td>${s.targetUnits}</td><td>${s.roas.toFixed(1)}x</td><td class="${s.cls}">${s.status}</td></tr>`).join('');}
+function renderOffers(d,b){if(!b)return; const packs=[1,2,3].map(q=>{let disc=q===1?0:q===2?.095:.165; let price=Math.round((b.price*q*(1-disc))/10)*10-1; let cost=d.realCost*q+d.cpa; let profit=price-cost; return{q,price,profit,disc}}); $('offers').innerHTML=packs.map(p=>`<div class="offer-card"><h3>${p.q===1?'قطعة واحدة':p.q+' قطع'}</h3><p>سعر مقترح: <b>${fmt(p.price)}</b><br>ربح بعد CPA واحد: <b class="${p.profit>0?'good':'bad'}">${fmt(p.profit)}</b><br>${p.q>1?'يرفع متوسط الطلب ويقلل ضغط الإعلان.':'عرض أساسي واضح.'}</p></div>`).join('');}
+function renderTestPlan(d,b){const steps=[['اختبار 24 ساعة',d.testBudget,`نجاح لو CPA أقل من ${fmt(d.maxCpa)} وطلبات حقيقية.`],['اختبار 48 ساعة',Math.min(d.adBudget, d.testBudget*2),`نجاح لو يوجد ${Math.max(3,Math.floor(d.testBudget/Math.max(1,d.maxCpa)))}+ أوردرات.`],['توسيع تدريجي',d.adBudget,`وسع فقط لو ربح الطلب بعد CPA موجب ومستقر.`]];$('testPlan').innerHTML=steps.map(s=>`<div class="mini-card"><h3>${s[0]}</h3><p><b>${fmt(s[1])}</b><br>${s[2]}</p></div>`).join('');}
+function renderSources(d,b){const base=b?.afterCpa||0; const sources=[['Facebook Ads',d.cpa,base],['Reels Organic',40,(b?.price||0)-d.realCost-40],['WhatsApp Broadcast',25,(b?.price||0)-d.realCost-25],['Store Walk-in',0,(b?.price||0)-d.realCost],['Influencer',Math.round(d.cpa*1.25),base-Math.round(d.cpa*.25)]]; $('sources').innerHTML=sources.map(x=>`<div class="source-card"><div class="header-row"><h3>${x[0]}</h3><span class="tag ${x[2]>350?'good':x[2]>150?'warn':'bad'}">${x[2]>350?'قوي':x[2]>150?'متوسط':'خطر'}</span></div><p>CPA تقديري: <b>${fmt(x[1])}</b> — ربح الطلب: <b>${fmt(x[2])}</b></p></div>`).join('');}
+function renderAdCopy(d,b){const price=b?.price||1599; $('adCopy').textContent=`Hook:\nلو شعرك محتاج عناية مركزة، جربي ${d.productName || 'المنتج'} بعرض إطلاق محدود.\n\nCaption:\n${d.mainBenefit || 'منتج مميز للعناية'}\nالسعر المقترح: ${fmt(price)}\n${d.offerNote || ''}\nراسلينا الآن واحجزي قبل نفاد الكمية.\n\nرد واتساب سريع:\nأهلًا بحضرتك 🌸 المنتج متاح حاليًا بسعر ${fmt(price)}. مناسب لـ ${d.audience || 'العملاء المهتمين'}، والعرض لفترة محدودة.`;}
+function renderActual(d,b){ /* after campaign included in dashboard via saved/inputs; lightweight */ }
+function saveCampaign(){
+ const d=getData();
+ const scenarios=defaultPrices.filter(p=>p>d.realCost+50).map(p=>calcScenario(p,d));
+ const viable=scenarios.filter(s=>s.cls!=='bad');
+ const b=(viable.find(s=>s.afterCpa>=350&&s.breakEven<=35)||viable[0]||scenarios[0]||calcScenario(1599,d));
+ const messages=Math.round(d.views*d.msgRate);
+ const orders=Math.round(messages*d.orderRate);
+ const delivered=Math.round(orders*d.deliveryRate);
+ const campaignProfit=(delivered*b.gross)-d.fixed-(orders*d.cpa)-((orders-delivered)*d.returnShipLoss)-(Math.round(orders*d.damageRate)*d.unitCost);
+ const rec={id:Date.now(),date:new Date().toISOString().slice(0,10),displayDate:new Date().toLocaleDateString('ar-EG'),name:d.productName||'حملة جديدة',project:d.productProject,price:b.price,cpa:d.cpa,spend:d.fixed,profit:campaignProfit,mode:d.salesMode,note:d.teamNote,competitor:d.competitorPrice,lossRate:Math.round(d.lossRate*100),breakEven:b.breakEven};
+ const arr=JSON.parse(localStorage.getItem('cp_os_v4_campaigns')||'[]');
+ arr.unshift(rec);
+ localStorage.setItem('cp_os_v4_campaigns',JSON.stringify(arr.slice(0,30)));
+ renderSaved();
+ smartAlert('تم حفظ الحملة ✅','good');
+}
+function renderSaved(){
+ const arr=JSON.parse(localStorage.getItem('cp_os_v4_campaigns')||'[]');
+ $('savedList').innerHTML=arr.length?arr.map((r,i)=>`
+  <div class="saved-card">
+   <div class="header-row">
+    <h3>${r.name||'حملة'}</h3>
+    <button class="smallbtn danger no-print" onclick="deleteCampaign(${i})">حذف</button>
+   </div>
+   <p>${r.displayDate||r.date} — ${r.project||'بدون مشروع'} — ${r.mode==='store'?'محل':r.mode==='mixed'?'مختلط':'أونلاين'}</p>
+   <p>السعر: <b>${fmt(r.price)}</b> — CPA: <b>${fmt(r.cpa)}</b> — الصرف: <b>${fmt(r.spend)}</b>${r.breakEven?` — تعادل: <b>${r.breakEven} قطعة</b>`:''}</p>
+   <p>الربح المتوقع: <b class="${(r.profit||0)>=0?'good':'bad'}">${fmt(r.profit)}</b>${r.lossRate!=null?` — خسائر: <b>${r.lossRate}%</b>`:''}</p>
+   ${r.note?`<p><small>📝 ${r.note}</small></p>`:''}
+  </div>`).join(''):'<div class="no-data">لا توجد حملات محفوظة بعد. احفظ حملتك الأولى من إعداد الحملة.</div>';
+ renderComparisonOptions();
+ renderCalendarView(arr);
+ renderProductLibrary(arr);
+ const totalSpend=arr.reduce((a,r)=>a+(r.spend||0),0);
+ const totalProfit=arr.reduce((a,r)=>a+(r.profit||0),0);
+ const avgCpa=arr.length?arr.reduce((a,r)=>a+(r.cpa||0),0)/arr.length:0;
+ $('dashCampaigns').textContent=arr.length.toLocaleString('ar-EG');
+ $('dashSpend').textContent=fmt(totalSpend);
+ if($('dashProfit')){$('dashProfit').textContent=fmt(totalProfit);$('dashProfit').className=totalProfit>=0?'good':'bad';}
+ $('dashCpa').textContent=fmt(avgCpa);
+}
+function deleteCampaign(i){showConfirm('هل تريد حذف هذه الحملة؟',()=>{const arr=JSON.parse(localStorage.getItem('cp_os_v4_campaigns')||'[]'); arr.splice(i,1); localStorage.setItem('cp_os_v4_campaigns',JSON.stringify(arr)); renderSaved(); smartAlert('تم حذف الحملة','good');});}
+function clearCampaigns(){showConfirm('هل تريد مسح كل الحملات المحفوظة؟ لا يمكن التراجع.',()=>{localStorage.removeItem('cp_os_v4_campaigns');renderSaved();});}
+function copyAdText(){navigator.clipboard?.writeText($('adCopy').textContent); alert('تم نسخ نص الإعلان ✅');}
+function resetInputs(){showConfirm('هل تريد إعادة ضبط كل القيم الافتراضية؟',()=>{localStorage.removeItem('cp_os_v4_inputs');location.reload();});}
+
+function getCampaigns(){return JSON.parse(localStorage.getItem('cp_os_v4_campaigns')||'[]');}
+function downloadCSV(filename, rows){const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\n'); const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);}
+function exportScenariosCSV(){const d=getData(); const rows=[['السعر','ربح قبل التسويق','ربح بعد CPA','التعادل','قطع للهدف','ROAS','التقييم']]; defaultPrices.filter(p=>p>d.realCost+50).map(p=>calcScenario(p,d)).forEach(s=>rows.push([s.price,s.gross,s.afterCpa,s.breakEven,s.targetUnits,s.roas.toFixed(2),s.status])); downloadCSV('pricing-scenarios.csv',rows);}
+function exportCampaignsCSV(){const rows=[['التاريخ','المنتج','المشروع','السعر','CPA','الصرف','الربح','الملاحظات']]; getCampaigns().forEach(r=>rows.push([r.displayDate||r.date,r.name,r.project,r.price,r.cpa,r.spend,r.profit,r.note||''])); downloadCSV('campaigns.csv',rows);}
+function exportDailyCSV(){const rows=[['التاريخ','الصرف','الأوردرات','المبيعات','المرتجعات','ربح تقديري']]; getDaily().forEach(r=>rows.push([r.date,r.spend,r.orders,r.sold,r.returns,r.profit])); downloadCSV('daily-tracking.csv',rows);}
+function renderComparisonOptions(){const arr=getCampaigns(); ['compareA','compareB'].forEach((id,idx)=>{const el=$(id); if(!el)return; el.innerHTML=arr.length?arr.map((r,i)=>`<option value="${i}">${r.name||'حملة'} — ${r.displayDate||r.date} — ${fmt(r.profit||0)}</option>`).join(''):'<option>لا توجد حملات</option>'; if(arr[idx])el.value=idx;});}
+function compareCampaigns(){const arr=getCampaigns(); const a=arr[+($('compareA')?.value||0)], b=arr[+($('compareB')?.value||1)]; if(!a||!b){$('compareResult').innerHTML='<div class="no-data">احفظ حملتين على الأقل للمقارنة.</div>';return;} const rows=[['السعر',a.price,b.price],['CPA',a.cpa,b.cpa],['الصرف',a.spend,b.spend],['الربح',a.profit,b.profit],['فرق الربح',(a.profit||0)-(b.profit||0),'']]; $('compareResult').innerHTML=rows.map(r=>`<div class="compare-row"><span>${r[0]}</span><b>${fmt(r[1])} ${r[2]!==''?' / '+fmt(r[2]):''}</b></div>`).join('');}
+function buildClaudeCampaignPrompt(d,b,extra){
+ const funnelLeads=extra?.funnelLeads ?? Math.round(d.views*d.msgRate);
+ const funnelOrders=extra?.funnelOrders ?? Math.round(d.views*d.msgRate*d.orderRate);
+ const delivered=extra?.delivered ?? Math.round(funnelOrders*d.deliveryRate);
+ return `أنت مستشار تسويق مباشر وخبير ربحية حملات كاش أون دليفري في مصر والوطن العربي.
+حلل هذه الحملة بدقة واكتب توصية تنفيذية واضحة باللغة العربية المصرية، بدون كلام عام.
+
+بيانات الحملة:
+- المنتج: ${d.productName||'غير محدد'}
+- المشروع/التصنيف: ${d.productProject||'غير محدد'}
+- نوع البيع: ${d.salesMode==='store'?'محل':d.salesMode==='mixed'?'مختلط':'أونلاين'}
+- تكلفة القطعة الحقيقية: ${Math.round(d.realCost)} جنيه
+- تكلفة القطعة الخام: ${Math.round(d.unitCost)} جنيه
+- تغليف/هدية/شحن/تشغيل للطلب: ${Math.round(d.packCost+d.shipCost+d.variableCost)} جنيه
+- السعر المقترح الحالي: ${b?.price||'غير محدد'} جنيه
+- أقل سعر آمن ظاهر في الأداة: ${$('safePrice')?.textContent||'غير محدد'}
+- ميزانية الإعلانات: ${Math.round(d.adBudget)} جنيه
+- تكلفة الريلز/التصوير: ${Math.round(d.reelCost)} جنيه
+- مصروفات أخرى: ${Math.round(d.otherCost)} جنيه
+- إجمالي التسويق/المصاريف الثابتة: ${Math.round(d.fixed)} جنيه
+- CPA المتوقع: ${Math.round(d.cpa)} جنيه
+- CPA حد النجاح الأقصى: ${Math.round(d.maxCpa)} جنيه
+- نسبة غير مستلم: ${Math.round(d.notReceivedRate*100)}%
+- نسبة مرتجع كامل: ${Math.round(d.returnRate*100)}%
+- نسبة توالف/هالك: ${Math.round(d.damageRate*100)}%
+- إجمالي الخسائر/المرتجعات: ${Math.round(d.lossRate*100)}%
+- ربح الطلب بعد CPA حسب الأداة: ${Math.round(b?.afterCpa||0)} جنيه
+- نقطة التعادل: ${b?.breakEven||'غير محدد'} قطعة
+- هدف الربح: ${Math.round(d.targetProfit)} جنيه
+- سعر المنافس: ${Math.round(d.competitorPrice||0)} جنيه
+- الفانل المتوقع: ${funnelLeads} رسالة → ${funnelOrders} أوردر → ${delivered} استلام
+- أهم فائدة/وعد: ${d.mainBenefit||'غير محدد'}
+- الجمهور: ${d.audience||'غير محدد'}
+- ملاحظة العرض: ${d.offerNote||'لا يوجد'}
+- ملاحظات الفريق: ${d.teamNote||'لا يوجد'}
+
+المطلوب بالترتيب:
+1) القرار النهائي: ابدأ / اختبر فقط / لا تبدأ الآن.
+2) السعر الأنسب وسبب اختياره.
+3) هل CPA الحالي مقبول؟ وما الحد الذي لا أتخطاه؟
+4) أهم 3 مخاطر في الحملة.
+5) أهم 3 فرص أو تعديلات ترفع الربح.
+6) اقتراح عرض أو باكدج مناسب.
+7) خطة أول 48 ساعة: أصرف كام؟ أوقف إمتى؟ أزود إمتى؟
+8) رد نهائي مختصر كأنك بتكلم صاحب البيزنس مباشرة.`;
+}
+function getClaudeSettings(){
+ return {
+  key: localStorage.getItem('cp_os_anthropic_key') || $('anthropicApiKey')?.value || '',
+  model: localStorage.getItem('cp_os_anthropic_model') || $('anthropicModel')?.value || 'claude-sonnet-4-20250514'
+ };
+}
+function saveClaudeSettings(){
+ const key=($('anthropicApiKey')?.value||'').trim();
+ const model=($('anthropicModel')?.value||'claude-sonnet-4-20250514').trim();
+ if(key) localStorage.setItem('cp_os_anthropic_key',key);
+ localStorage.setItem('cp_os_anthropic_model',model);
+ if($('claudeStatus')) $('claudeStatus').textContent=key?'تم حفظ مفتاح Claude. زر “حلل حملتي” سيستخدم Claude مباشرة داخل الأداة.':'تم حفظ اسم الموديل فقط. أضف المفتاح لتفعيل الاتصال المباشر.';
+ smartAlert(key?'تم حفظ إعدادات Claude ✅':'أضف مفتاح Anthropic لتفعيل Claude المباشر','good');
+}
+function clearClaudeSettings(){
+ localStorage.removeItem('cp_os_anthropic_key');
+ if($('anthropicApiKey')) $('anthropicApiKey').value='';
+ if($('claudeStatus')) $('claudeStatus').textContent='تم مسح المفتاح. التحليل سيعود للوضع المحلي حتى تضيف مفتاح جديد.';
+ smartAlert('تم مسح مفتاح Claude','good');
+}
+async function callClaudeDirect(prompt){
+ const {key,model}=getClaudeSettings();
+ if(!key) throw new Error('NO_CLAUDE_KEY');
+ const resp=await fetch('https://api.anthropic.com/v1/messages',{
+  method:'POST',
+  headers:{
+   'content-type':'application/json',
+   'x-api-key':key,
+   'anthropic-version':'2023-06-01',
+   'anthropic-dangerous-direct-browser-access':'true'
+  },
+  body:JSON.stringify({
+   model,
+   max_tokens:1400,
+   temperature:.2,
+   messages:[{role:'user',content:prompt}]
+  })
+ });
+ const data=await resp.json().catch(()=>({}));
+ if(!resp.ok){
+  const msg=data?.error?.message||data?.message||('HTTP '+resp.status);
+  throw new Error(msg);
+ }
+ const text=(data.content||[]).map(x=>x.text||'').join('\n').trim();
+ if(!text) throw new Error('EMPTY_CLAUDE_RESPONSE');
+ return text;
+}
+function buildLocalInsight(d,b,extra,prompt){
+ const funnelLeads=extra.funnelLeads, funnelOrders=extra.funnelOrders, delivered=extra.delivered;
+ const riskPoints=[];
+ if(d.cpa>d.maxCpa) riskPoints.push('الـ CPA الحالي أعلى من حد النجاح؛ لازم تقلله أو ترفع السعر.');
+ if(d.lossRate>.15) riskPoints.push('نسبة المرتجعات/الخسائر أعلى من 15% وده بيضغط الربحية.');
+ if(b.afterCpa<250) riskPoints.push('ربح الطلب بعد CPA ضعيف؛ السعر أو العرض محتاج تعديل.');
+ if(b.breakEven>50) riskPoints.push('نقطة التعادل عالية؛ ابدأ باختبار صغير قبل التوسيع.');
+ const decision = b.afterCpa>=350 && d.cpa<=d.maxCpa && d.lossRate<=.18
+  ? 'ابدأ باختبار مضبوط، ثم وسّع لو CPA الحقيقي فضل تحت الحد.'
+  : b.afterCpa>150 ? 'ابدأ باختبار صغير فقط، ولا توسّع قبل تحسين السعر أو تقليل CPA.' : 'لا تبدأ بالميزانية الكبيرة الآن؛ عدّل السعر أو العرض أولاً.';
+ const actions=[];
+ if(d.cpa>d.maxCpa) actions.push(`قلل CPA من ${fmt(d.cpa)} إلى أقل من ${fmt(d.maxCpa)} قبل التوسيع.`);
+ if(b.afterCpa<350) actions.push(`جرّب سعر أعلى أو باكدج قطعتين لأن ربح الطلب الحالي ${fmt(b.afterCpa)} فقط.`);
+ if(d.lossRate>.15) actions.push('راجع الشحن والتأكيد قبل الإرسال لأن الخسائر مرتفعة.');
+ actions.push(`ابدأ بميزانية اختبار ${fmt(d.testBudget)} وراقب أول 24-48 ساعة.`);
+ return `⚠️ تحليل محلي مؤقت — Claude لم يعمل مباشرة
+
+القرار:
+${decision}
+
+السعر المقترح: ${fmt(b.price)}
+ربح الطلب بعد CPA: ${fmt(b.afterCpa)}
+نقطة التعادل: ${b.breakEven} قطعة
+الخسائر المتوقعة: ${Math.round(d.lossRate*100)}%
+الفانل المتوقع: ${funnelLeads} رسالة → ${funnelOrders} أوردر → ${delivered} استلام
+
+المخاطر:
+${(riskPoints.length?riskPoints:['لا توجد مخاطر كبيرة ظاهرة، لكن راقب CPA والمرتجعات أول يومين.']).slice(0,3).map(x=>'• '+x).join('\n')}
+
+أول إجراءات عملية:
+${actions.slice(0,4).map((x,i)=>(i+1)+'. '+x).join('\n')}
+
+برومبت Claude جاهز:
+${prompt}`;
+}
+async function generateAiInsight(){
+ const d=getData();
+ const scenarios=defaultPrices.filter(p=>p>d.realCost+50).map(p=>calcScenario(p,d));
+ const viable=scenarios.filter(s=>s.cls!=='bad');
+ const best=(viable.find(s=>s.afterCpa>=350&&s.breakEven<=35)||viable[0]||scenarios[0]||calcScenario(1599,d));
+ const el=$('aiInsight');
+ const btn=$('aiBtn');
+ const funnelLeads=Math.round(d.views*d.msgRate);
+ const funnelOrders=Math.round(d.views*d.msgRate*d.orderRate);
+ const delivered=Math.round(funnelOrders*d.deliveryRate);
+ const prompt=buildClaudeCampaignPrompt(d,best,{funnelLeads,funnelOrders,delivered});
+ window.cpLastAiPrompt=prompt;
+ if(btn){btn.disabled=true;btn.textContent='Claude بيحلل...';}
+ if(el) el.textContent='⏳ جاري إرسال بيانات الحملة إلى Claude وتحليلها مباشرة...';
+ try{
+  const {key}=getClaudeSettings();
+  if(!key){
+   if(el) el.textContent='لا يوجد مفتاح Anthropic API محفوظ. افتح الإعدادات وأضف المفتاح، أو استخدم التحليل المحلي بالأسفل.\n\n'+buildLocalInsight(d,best,{funnelLeads,funnelOrders,delivered},prompt);
+   smartAlert('أضف مفتاح Claude من الإعدادات لتفعيل التحليل المباشر','bad');
+   showView('settings');
+   return;
+  }
+  const result=await callClaudeDirect(prompt);
+  if(el) el.textContent='✅ تحليل Claude المباشر\n\n'+result;
+  smartAlert('تم تحليل الحملة بواسطة Claude ✅','good');
+ }catch(err){
+  const msg=String(err?.message||err);
+  if(el) el.textContent='تعذر الاتصال بـ Claude مباشرة: '+msg+'\n\n'+buildLocalInsight(d,best,{funnelLeads,funnelOrders,delivered},prompt);
+  smartAlert('تعذر اتصال Claude، ظهر تحليل محلي مؤقت','bad');
+ }finally{
+  if(btn){btn.disabled=false;btn.textContent='⚡ حلل حملتي بـ Claude الآن';}
+ }
+}
+function openClaude(){const p=window.cpLastAiPrompt||($('aiInsight')?.textContent||''); if(p){navigator.clipboard?.writeText(p); smartAlert('تم نسخ بيانات الحملة، الصقها في Claude ✅','good');} window.open('https://claude.ai/new','_blank');}
+function copyAiInsight(){const t=$('aiInsight')?.textContent||''; if(t&&t!=='⏳ جاري تحليل الحملة بالذكاء الاصطناعي...'){navigator.clipboard?.writeText(t);smartAlert('تم نسخ التحليل ✅','good');}else{smartAlert('لا يوجد تحليل للنسخ','warn');}}
+function renderGoalReverse(show=true){const el=$('goalReverse'); if(!el)return; const d=getData(); const price=d.goalPrice||1599; const cpa=d.goalCpa||d.cpa; const expectedLoss=(d.notReceivedRate+d.returnRate)*d.returnShipLoss + d.damageRate*d.unitCost; const unitNet=(price-d.realCost-cpa-expectedLoss)*d.deliveryRate; const fixed=d.reelCost+(d.goalBudget||d.adBudget)+d.otherCost; const units=Math.ceil((fixed+(d.goalProfit||d.targetProfit))/Math.max(1,unitNet)); el.innerHTML=`<div class="compare-row"><span>لازم تبيع</span><b>${units} قطعة</b></div><div class="compare-row"><span>ربح الطلب المستخدم</span><b>${fmt(unitNet)}</b></div><div class="compare-row"><span>إجمالي مبيعات تقريبي</span><b>${fmt(units*price)}</b></div>`; if(show) smartAlert('تم حساب الهدف المعكوس ✅','good');}
+function renderBenchmark(d,b){const el=$('benchmarkResult'); if(!el||!b)return; const comp=d.competitorPrice||b.price; const diff=b.price-comp; const margin=b.afterCpa; const pos=Math.max(0,Math.min(100,50+(diff/Math.max(1,comp))*100)); el.innerHTML=`<div class="compare-row"><span>سعرك مقابل المنافس</span><b class="${diff<=0?'good':'warn'}">${diff===0?'نفس السعر':diff<0?'أقل بـ '+fmt(Math.abs(diff)):'أعلى بـ '+fmt(diff)}</b></div><div class="benchmark-meter"><i style="right:${pos}%"></i></div><div class="compare-row"><span>الهامش بعد CPA</span><b class="${margin>350?'good':margin>150?'warn':'bad'}">${fmt(margin)}</b></div>`;}
+function runStressTest(){const d=getData(); const price=d.goalPrice||($('bestPrice')?.textContent?parseInt(($('bestPrice').textContent||'1599').replace(/\D/g,'')):1599); const stress={...d,cpa:d.cpa*2,notReceivedRate:Math.min(.6,d.notReceivedRate*2),returnRate:Math.min(.4,d.returnRate*2),damageRate:Math.min(.25,d.damageRate*2)}; stress.lossRate=Math.min(.9,stress.notReceivedRate+stress.returnRate+stress.damageRate); stress.deliveryRate=Math.max(.05,1-stress.lossRate); const s=calcScenario(price,stress); $('stressResult').innerHTML=`<div class="compare-row"><span>CPA في أسوأ حالة</span><b>${fmt(stress.cpa)}</b></div><div class="compare-row"><span>الخسائر</span><b>${Math.round(stress.lossRate*100)}%</b></div><div class="compare-row"><span>ربح الطلب</span><b class="${s.afterCpa>0?'warn':'bad'}">${fmt(s.afterCpa)}</b></div><div class="compare-row"><span>تعادل جديد</span><b>${s.breakEven} قطعة</b></div>`;}
+function smartAlert(msg,type='bad'){const stack=$('alertStack'); if(!stack)return; const div=document.createElement('div'); div.className='smart-alert '+type; div.textContent=msg; stack.appendChild(div); setTimeout(()=>div.remove(),4200);}
+function renderSmartAlerts(d,b,risk,profit){if(window.__lastSmartAlert && Date.now()-window.__lastSmartAlert<8000)return; const issues=[]; if(d.cpa>d.maxCpa)issues.push('تنبيه: CPA أعلى من الحد الأقصى للنجاح.'); if(d.lossRate>.15)issues.push('تنبيه: المرتجعات/الخسائر أعلى من 15%.'); if(b&&b.afterCpa<150)issues.push('تنبيه: هامش الطلب بعد CPA ضعيف جدًا.'); if(issues.length){window.__lastSmartAlert=Date.now(); smartAlert(issues[0],'bad');}}
+function generateShareLink(){
+ try{
+  const data=Object.fromEntries(ids.map(id=>[id,$(id)?.value||'']));
+  const json=JSON.stringify(data);
+  const encoded=btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g,(_,p)=>String.fromCharCode('0x'+p)));
+  const url=location.origin+location.pathname+'#share='+encoded;
+  $('shareLink').textContent=url;
+  return url;
+ }catch(e){smartAlert('تعذر إنشاء اللينك - تحقق من البيانات','bad');}
+}
+function renderSharePreview(){if($('shareLink')&&!$('shareLink').textContent)$('shareLink').textContent='اضغط إنشاء لينك لمشاركة بيانات الحملة.';}
+function copyShareLink(){const url=$('shareLink')?.textContent||generateShareLink(); navigator.clipboard?.writeText(url); smartAlert('تم نسخ لينك المشاركة ✅','good');}
+function loadShareFromHash(){
+ if(!location.hash.startsWith('#share='))return;
+ try{
+  const raw=atob(location.hash.slice(7));
+  const json=decodeURIComponent(raw.split('').map(c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0')).join(''));
+  const data=JSON.parse(json);
+  Object.entries(data).forEach(([k,v])=>{if($(k))$(k).value=v});
+  smartAlert('تم تحميل بيانات الحملة من اللينك ✅','good');
+ }catch(e){smartAlert('تعذر تحميل البيانات من اللينك','bad');}
+}
+function getDaily(){return JSON.parse(localStorage.getItem('cp_os_daily')||'[]');}
+function setDaily(arr){localStorage.setItem('cp_os_daily',JSON.stringify(arr.slice(-90)));}
+function addDailyEntry(){const d=getData(); const rec={date:$('dailyDate').value||new Date().toISOString().slice(0,10),spend:num('dailySpend'),orders:num('dailyOrders'),sold:num('dailySold'),returns:num('dailyReturns')}; const best=defaultPrices.filter(p=>p>d.realCost+50).map(p=>calcScenario(p,d)).find(s=>s.afterCpa>=300)||calcScenario(1599,d); rec.profit=(rec.sold*best.price)-(rec.sold*d.realCost)-rec.spend-(rec.returns*d.returnShipLoss); const arr=getDaily(); arr.push(rec); setDaily(arr); renderDailyTracking(); smartAlert('تم تسجيل اليوم ✅','good');}
+function clearDailyEntries(){showConfirm('هل تريد مسح سجل الأداء اليومي؟',()=>{localStorage.removeItem('cp_os_daily');renderDailyTracking();});}
+function renderDailyTracking(){const arr=getDaily(); if(!$('dailyList'))return; if(!$('dailyDate').value)$('dailyDate').value=new Date().toISOString().slice(0,10); $('dailyList').innerHTML=arr.length?arr.slice(-8).reverse().map(r=>`<div class="mini-card"><h3>${r.date}</h3><p>صرف: <b>${fmt(r.spend)}</b> — أوردرات: <b>${r.orders}</b> — مبيعات: <b>${r.sold}</b> — ربح: <b class="${r.profit>=0?'good':'bad'}">${fmt(r.profit)}</b></p></div>`).join(''):'<div class="no-data">لا توجد أيام مسجلة بعد.</div>'; const vals=arr.map(r=>Math.max(0,r.profit)); const max=Math.max(1,...vals); $('dailyChart').innerHTML=arr.length?vals.slice(-14).map(v=>`<i style="height:${Math.max(8,v/max*70)}px"></i>`).join(''):'<span class="no-data">المنحنى يظهر بعد تسجيل الأيام.</span>'; const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت']; const sums=days.map((name,i)=>({name,orders:arr.filter(r=>new Date(r.date).getDay()===i).reduce((a,r)=>a+(+r.orders||0),0)})); const maxO=Math.max(1,...sums.map(x=>x.orders)); $('heatmap').innerHTML=sums.map(x=>`<div class="heat-cell" style="background:rgba(109,40,217,${.07+(x.orders/maxO)*.22})"><b>${x.name}</b><span>${x.orders} أوردر</span></div>`).join('');}
+// renderCalendarView moved below with navigation support
+function renderProductLibrary(arr=getCampaigns()){const el=$('productLibrary'); if(!el)return; const groups={}; arr.forEach(r=>{const k=r.project||r.name||'بدون تصنيف'; groups[k]=groups[k]||{count:0,spend:0,profit:0}; groups[k].count++; groups[k].spend+=r.spend||0; groups[k].profit+=r.profit||0;}); const entries=Object.entries(groups); el.innerHTML=entries.length?entries.map(([k,v])=>`<div class="mini-card"><h3>${k}</h3><p>حملات: <b>${v.count}</b> — صرف: <b>${fmt(v.spend)}</b> — ربح: <b class="${v.profit>=0?'good':'bad'}">${fmt(v.profit)}</b></p></div>`).join(''):'<div class="no-data">احفظ حملات لتظهر مكتبة المنتجات.</div>';}
+function toggleDarkMode(){document.body.classList.toggle('dark'); const on=document.body.classList.contains('dark'); localStorage.setItem('cp_os_dark',on?'1':'0'); $('darkSwitch')?.classList.toggle('active',on);}
+function applyDarkMode(){const on=localStorage.getItem('cp_os_dark')==='1'; document.body.classList.toggle('dark',on); $('darkSwitch')?.classList.toggle('active',on);}
+function loadClaudeSettings(){const key=localStorage.getItem('cp_os_anthropic_key')||''; const model=localStorage.getItem('cp_os_anthropic_model')||'claude-sonnet-4-20250514'; if($('anthropicApiKey')) $('anthropicApiKey').value=key; if($('anthropicModel')) $('anthropicModel').value=model; if($('claudeStatus')) $('claudeStatus').textContent=key?'مفتاح Claude محفوظ على هذا الجهاز. التحليل المباشر مفعّل.':'أضف مفتاح Anthropic API لتفعيل تحليل Claude المباشر داخل الأداة.';}
+function openOnboarding(){ $('onboarding')?.classList.add('open');}
+function closeOnboarding(){ $('onboarding')?.classList.remove('open'); localStorage.setItem('cp_os_onboarded','1');}
+function showShortcuts(){smartAlert('Ctrl+S حفظ — Ctrl+E تصدير — Ctrl+M قائمة — Esc إغلاق','good');}
+
+function syncTeamNote(){const q=$('teamNoteQuick'); if(q && $('teamNote')){$('teamNote').value=q.value; localStorage.setItem('cp_os_last_team_note',q.value); calc(); smartAlert('تم تحديث ملاحظة الفريق ✅','good');}}
+function syncProjectName(){const q=$('productProjectQuick'); if(q && $('productProject')){$('productProject').value=q.value; calc(); smartAlert('تم تحديث اسم المشروع ✅','good');}}
+function syncQuickFields(){if($('teamNoteQuick') && $('teamNote')) $('teamNoteQuick').value=$('teamNote').value||localStorage.getItem('cp_os_last_team_note')||''; if($('productProjectQuick') && $('productProject')) $('productProjectQuick').value=$('productProject').value||'';}
+document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key.toLowerCase()==='s'){e.preventDefault();saveCampaign();} if(e.ctrlKey&&e.key.toLowerCase()==='e'){e.preventDefault();exportScenariosCSV();} if(e.ctrlKey&&e.key.toLowerCase()==='m'){e.preventDefault();openDrawer();}});
+window.addEventListener('load',()=>{applyDarkMode();loadClaudeSettings();loadShareFromHash(); if(!localStorage.getItem('cp_os_onboarded')) setTimeout(openOnboarding,700); renderDailyTracking(); renderCalendarView(); renderProductLibrary(); syncQuickFields();});
+
+function restore(){const saved=JSON.parse(localStorage.getItem('cp_os_v4_inputs')||'{}'); Object.entries(saved).forEach(([k,v])=>{if($(k))$(k).value=v}); ids.forEach(id=>$(id)?.addEventListener('input',calc)); ids.forEach(id=>$(id)?.addEventListener('change',calc)); calc();}
+restore();
+
+// ─── Custom Confirm Modal ───────────────────────────────────────────────
+let _confirmCb=null;
+function showConfirm(msg,onYes){
+ $('confirmMsg').textContent=msg;
+ $('confirmModal').style.display='flex';
+ _confirmCb=onYes;
+}
+$('confirmYes').onclick=()=>{$('confirmModal').style.display='none'; if(_confirmCb)_confirmCb(); _confirmCb=null;};
+$('confirmNo').onclick=()=>{$('confirmModal').style.display='none'; _confirmCb=null;};
+$('confirmModal').addEventListener('click',e=>{if(e.target===$('confirmModal')){$('confirmModal').style.display='none';_confirmCb=null;}});
+
+// ─── Calendar Month Navigation ──────────────────────────────────────────
+let _calOffset=0;
+function calNav(dir){_calOffset+=dir; renderCalendarView();}
+function renderCalendarView(arr=getCampaigns()){
+ const el=$('calendarView'); if(!el)return;
+ const now=new Date();
+ const y=now.getFullYear(), m=now.getMonth()+_calOffset;
+ const target=new Date(y,m,1);
+ const ry=target.getFullYear(), rm=target.getMonth();
+ const first=new Date(ry,rm,1).getDay(), days=new Date(ry,rm+1,0).getDate();
+ const monthNames=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+ if($('calMonthLabel')) $('calMonthLabel').textContent=monthNames[rm]+' '+ry;
+ const heads=['أح','إث','ث','أر','خ','ج','س'];
+ let html=heads.map(h=>`<div class="calendar-head">${h}</div>`).join('');
+ for(let i=0;i<first;i++)html+='<div></div>';
+ for(let d=1;d<=days;d++){
+  const key=`${ry}-${String(rm+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  const count=arr.filter(r=>(r.date||'').slice(0,10)===key).length;
+  const isToday=ry===now.getFullYear()&&rm===now.getMonth()&&d===now.getDate();
+  html+=`<div class="calendar-day ${count?'has':''}" style="${isToday?'border-color:#7c3aed;box-shadow:0 0 0 2px rgba(124,58,237,.18)':''}"><b>${d}</b>${count?`<small>${count} حملة</small>`:''}</div>`;
+ }
+ el.innerHTML=html;
+}
+
+</script>
+</body>
+</html>

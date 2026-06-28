@@ -1,0 +1,16 @@
+/* Extracted from V83 inline style block 23. Original id: mogahed-v762-remove-right-plus-only */
+
+#mogahedCommandWheel,
+      #mogahedCommandWheel .v75-wheel-main,
+      #mogahedCommandWheel .v75-wheel-action {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+      /* Do NOT hide #mogahedUnifiedFab: this is the other sparkle floating button that must remain. */
+      #mogahedUnifiedFab,
+      #mogahedUnifiedFab .mogahed-fab-main,
+      #mogahedUnifiedFab .mogahed-fab-item {
+        visibility: visible;
+      }
