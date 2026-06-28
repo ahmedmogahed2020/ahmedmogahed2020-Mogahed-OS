@@ -34,7 +34,7 @@ export const knownActions = [
   'open-emergency','emergency-pick','emergency-to-task',
   'open-decision-modal','edit-decision','delete-decision','review-decision',
   'open-review-modal','edit-review','delete-review',
-  'open-win-modal','edit-win','delete-win',
+  'open-win-modal','edit-win','delete-win','duplicate-win','record-suggested-win','set-win-filter','win-search',
   'open-campaign-modal','edit-campaign','delete-campaign','view-campaign','campaign-to-tasks','open-campaign-compare','set-campaign-filter','campaign-search',
   'open-search','search-jump',
   'show-backup','show-settings','show-qa','run-system-test','export-json','backup-date','clear-data','import-json',

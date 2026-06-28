@@ -9,7 +9,7 @@ import { openKnowledgeModal, editKnowledge, deleteKnowledge, knowledgeToTask, re
 import { openEmergencyModal, pickEmergency, emergencyToTask } from './modules/emergency.js';
 import { openDecisionModal, editDecision, deleteDecision, reviewDecision } from './modules/decisions.js';
 import { openReviewModal, editReview, deleteReview, createDailyReview, createWeeklyReview, reviewToTasks, setReviewFilter, setReviewSearch } from './modules/reviews.js';
-import { openWinModal, editWin, deleteWin } from './modules/wins.js';
+import { openWinModal, editWin, deleteWin, duplicateWin, recordSuggestedWin, setWinFilter, setWinSearch } from './modules/wins.js';
 import { openCampaignModal, editCampaign, deleteCampaign, viewCampaign, campaignToTasks, openCampaignCompare, setCampaignFilter, setCampaignSearch } from './modules/campaigns.js';
 import { openSearchModal, jumpTo, openSearchResult, openRecentItem, runSearchCommand, clearRecentItems } from './modules/search.js';
 import { startFocusSession } from './modules/dashboard.js';
@@ -23,7 +23,7 @@ const actionMap = {
   'open-emergency': () => openEmergencyModal(), 'emergency-pick': (_, el) => pickEmergency(el.dataset.state), 'emergency-to-task': () => emergencyToTask(),
   'open-decision-modal': () => openDecisionModal(), 'edit-decision': id => editDecision(id), 'delete-decision': id => deleteDecision(id), 'review-decision': id => reviewDecision(id),
   'open-review-modal': (_, el) => openReviewModal('', el.dataset.type), 'create-daily-review': () => createDailyReview(), 'create-weekly-review': () => createWeeklyReview(), 'review-to-tasks': id => reviewToTasks(id), 'set-review-filter': (_, el) => setReviewFilter(el.dataset.filter), 'edit-review': id => editReview(id), 'delete-review': id => deleteReview(id),
-  'open-win-modal': () => openWinModal(), 'edit-win': id => editWin(id), 'delete-win': id => deleteWin(id),
+  'open-win-modal': () => openWinModal(), 'edit-win': id => editWin(id), 'delete-win': id => deleteWin(id), 'duplicate-win': id => duplicateWin(id), 'record-suggested-win': id => recordSuggestedWin(id), 'set-win-filter': (_, el) => setWinFilter(el.dataset.filter),
   'open-campaign-modal': () => openCampaignModal(), 'edit-campaign': id => editCampaign(id), 'delete-campaign': id => deleteCampaign(id), 'view-campaign': id => viewCampaign(id), 'campaign-to-tasks': id => campaignToTasks(id), 'open-campaign-compare': () => openCampaignCompare(), 'set-campaign-filter': (_, el) => { setCampaignFilter(el.dataset.filter); },
   'start-focus-session': () => startFocusSession(),
   'open-search': () => openSearchModal(), 'search-jump': (_, el) => { closeModal(); jumpTo(el.dataset.routeTarget); }, 'search-open-result': (_, el) => openSearchResult(el.dataset.uid), 'search-open-recent': (_, el) => openRecentItem(el.dataset.uid), 'search-command': (_, el) => runSearchCommand(el.dataset.commandId), 'search-clear-recent': () => clearRecentItems(),
@@ -74,6 +74,7 @@ function handleInput(event) {
   if (el.matches('[data-action="project-search"]')) setProjectSearch(el.value);
   if (el.matches('[data-action="campaign-search"]')) setCampaignSearch(el.value);
   if (el.matches('[data-action="review-search"]')) setReviewSearch(el.value);
+  if (el.matches('[data-action="win-search"]')) setWinSearch(el.value);
 }
 
 function filterCards(query, listId) {
