@@ -38,8 +38,8 @@ export const knownActions = [
   'open-win-modal','edit-win','delete-win','duplicate-win','record-suggested-win','claim-win-reward','set-win-filter','win-search',
   'open-campaign-modal','edit-campaign','delete-campaign','view-campaign','campaign-to-tasks','open-campaign-compare','set-campaign-filter','campaign-search',
   'open-search','search-jump','search-open-result','search-open-recent','search-command','search-clear-recent',
-  'show-backup','show-settings','show-qa','show-notifications','show-guide','run-system-test','export-json','backup-date','force-save-data','clear-data','import-json','test-notification-sound','test-category-sound','reset-notification-sounds','request-notification-permission','mark-notification-read','clear-notification-log',
-  'settings-name','settings-store-name','settings-currency','settings-daily-task-target','settings-learning-minutes-target','settings-youtube-key','settings-quiet-mode','settings-compact-mode','settings-seed-data','settings-reset-section','notification-enabled','notification-sound-enabled','notification-browser-enabled','notification-sound-type','notification-category-sound','notification-lead-minutes','notification-volume',
+  'show-backup','show-settings','show-qa','show-notifications','show-guide','run-system-test','export-json','backup-date','force-save-data','clear-data','import-json','drive-connect','drive-disconnect','drive-upload-now','drive-list','drive-restore-latest','drive-client-id','drive-enabled','drive-interval','drive-history','test-notification-sound','test-category-sound','reset-notification-sounds','request-notification-permission','mark-notification-read','clear-notification-log',
+  'settings-name','settings-store-name','settings-currency','settings-daily-task-target','settings-learning-minutes-target','settings-youtube-key','drive-client-id','settings-quiet-mode','settings-compact-mode','settings-seed-data','settings-reset-section','notification-enabled','notification-sound-enabled','notification-browser-enabled','notification-sound-type','notification-category-sound','notification-lead-minutes','notification-volume',
   'close-modal','toggle-quick-actions','filter-list','modal-save','confirm-yes'
 ];
 
@@ -85,7 +85,7 @@ function checkDataShape() {
   for (const name of collectionNames) {
     results.push(Array.isArray(normalized[name]) ? pass(`بيانات ${name}`, 'Array سليم.') : fail(`بيانات ${name}`, 'ليست Array.'));
   }
-  const requiredSettings = ['userName','lastSavedAt','lastPage','autoSave','youtubeApiKey','storeName','currency','dailyTaskTarget','learningMinutesTarget','quietMode','compactMode','notifications'];
+  const requiredSettings = ['userName','lastSavedAt','lastPage','autoSave','youtubeApiKey','storeName','currency','dailyTaskTarget','learningMinutesTarget','quietMode','compactMode','notifications','googleDriveBackup'];
   const missingSettings = requiredSettings.filter(key => !(key in normalized.settings));
   results.push(missingSettings.length ? warn('الإعدادات', `ناقص: ${missingSettings.join(', ')}`) : pass('الإعدادات', 'كل مفاتيح الإعدادات الأساسية موجودة.'));
   return results;
@@ -184,6 +184,16 @@ function checkWinGamificationScale() {
   return results;
 }
 
+
+function checkGoogleDriveBackupSettings() {
+  const s = appState.data.settings.googleDriveBackup || {};
+  const results = [];
+  results.push('clientId' in s ? pass('Google Drive Client ID', s.clientId ? 'Client ID محفوظ.' : 'الخانة موجودة، أضف Client ID لتفعيل Drive.') : warn('Google Drive Client ID', 'إعداد Client ID غير موجود.'));
+  results.push('enabled' in s ? pass('Google Drive Auto Backup', s.enabled ? `مفعل كل ${safeNumber(s.intervalMinutes,30)} دقيقة أثناء فتح التطبيق.` : 'غير مفعل حاليًا.') : warn('Google Drive Auto Backup', 'إعداد التفعيل غير موجود.'));
+  results.push('keepHistory' in s ? pass('Google Drive History', s.keepHistory ? 'سيتم حفظ نسخة تاريخية بجانب آخر نسخة.' : 'سيتم تحديث آخر نسخة فقط.') : warn('Google Drive History', 'إعداد الاحتفاظ بالنسخ غير موجود.'));
+  return results;
+}
+
 function checkResetSafety() {
   const empty = createEmptyData();
   return empty && Array.isArray(empty.tasks) && empty.settings ? [pass('Reset Safety', 'شكل البيانات الافتراضي جاهز وآمن.')] : [fail('Reset Safety', 'شكل البيانات الافتراضي غير سليم.')];
@@ -203,6 +213,7 @@ export function runSystemTests() {
     ...checkDuplicateIds(),
     ...checkNotificationSoundSystem(),
     ...checkWinGamificationScale(),
+    ...checkGoogleDriveBackupSettings(),
     ...checkResetSafety()
   ];
   const summary = {

@@ -5,6 +5,7 @@ import { formatDate, safeNumber, safeText } from '../utils.js';
 import { renderTestReport, runSystemTests } from './qa.js';
 import { notificationsPanel } from './notifications.js';
 import { guidePanel } from './guide.js';
+import { driveBackupPanel, updateDriveClientId, updateDriveEnabled, updateDriveInterval, updateDriveKeepHistory } from './driveBackup.js';
 
 let lastQaReport = null;
 
@@ -80,6 +81,7 @@ export function backupPanel() {
   return `<section class="backup-pro">
     ${pageHeader('النسخ الاحتياطي', 'مركز حماية البيانات: تصدير، استيراد، فحص سلامة، ومسح آمن.', '<button class="btn primary" data-action="export-json">تصدير الآن</button>')}
     ${renderBackupStats()}
+    ${driveBackupPanel()}
     <div class="grid grid-2">
       <article class="card"><h3>إجراءات النسخ</h3>
         <p class="meta">احتفظ بملف JSON خارج المتصفح قبل أي تعديل كبير أو رفع نسخة جديدة.</p>
@@ -112,6 +114,7 @@ export function settingsPanel() {
       <label class="setting-field"><span>هدف مهام اليوم</span><input type="number" min="1" max="50" value="${safeNumber(s.dailyTaskTarget,5)}" data-action="settings-daily-task-target"></label>
       <label class="setting-field"><span>هدف التعلم اليومي بالدقائق</span><input type="number" min="5" max="600" value="${safeNumber(s.learningMinutesTarget,30)}" data-action="settings-learning-minutes-target"></label>
       <label class="setting-field wide"><span>YouTube API Key</span><input type="password" value="${settingsValue('youtubeApiKey')}" placeholder="AIza..." data-action="settings-youtube-key"><small>يُستخدم لجلب بيانات الفيديو والبلاي ليست. لو فاضي، التطبيق يظل يعمل بدون جلب كامل.</small></label>
+      <label class="setting-field wide"><span>Google OAuth Client ID للنسخ على Drive</span><input value="${safeText((s.googleDriveBackup || {}).clientId || '')}" placeholder="xxxxx.apps.googleusercontent.com" data-action="drive-client-id"><small>يستخدم للاتصال بجوجل درايف وحفظ نسخة احتياطية سحابية.</small></label>
     </div>
     <div class="setting-toggles">
       <label><input type="checkbox" data-action="settings-quiet-mode" ${s.quietMode?'checked':''}> وضع هادئ يقلل الرسائل والتنبيهات</label>

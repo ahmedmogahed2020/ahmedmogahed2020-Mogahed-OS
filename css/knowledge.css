@@ -291,3 +291,197 @@ button.tag-pill { cursor: pointer; }
     width: 100%;
   }
 }
+
+/* V15 Knowledge Library UX Redesign */
+.knowledge-library-page .page-header { margin-bottom: 12px; }
+.knowledge-strip,
+.knowledge-library-shell {
+  display: grid;
+  gap: 12px;
+  margin: 14px 0;
+}
+.section-title {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.section-title h3 { margin: 0; font-size: 1.05rem; font-weight: 1000; }
+.section-title p { margin: 0; color: var(--muted); font-weight: 800; line-height: 1.7; }
+.knowledge-strip-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.knowledge-strip-grid.compact { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.knowledge-type-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 0 8px;
+  scrollbar-width: thin;
+}
+.knowledge-type-tab {
+  flex: 0 0 auto;
+  min-width: 118px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255,255,255,.76);
+  color: var(--text);
+  padding: 8px 10px;
+  text-align: start;
+  box-shadow: var(--shadow-xs);
+}
+.knowledge-type-tab span { font-size: 1rem; }
+.knowledge-type-tab b { font-size: .82rem; font-weight: 1000; white-space: nowrap; }
+.knowledge-type-tab em {
+  font-style: normal;
+  min-width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--primary);
+  font-weight: 1000;
+}
+.knowledge-accordion-list { display: grid; gap: 10px; }
+.knowledge-accordion {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: rgba(255,255,255,.72);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+.knowledge-accordion summary {
+  cursor: pointer;
+  list-style: none;
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 13px 14px;
+}
+.knowledge-accordion summary::-webkit-details-marker { display: none; }
+.knowledge-accordion summary::after {
+  content: '⌄';
+  font-weight: 1000;
+  color: var(--muted);
+  transition: transform .18s ease;
+}
+.knowledge-accordion[open] summary::after { transform: rotate(180deg); }
+.knowledge-accordion summary > span { font-size: 1.15rem; }
+.knowledge-accordion summary > b { font-weight: 1000; }
+.knowledge-accordion summary > small { color: var(--muted); font-weight: 800; line-height: 1.5; }
+.knowledge-accordion summary > em {
+  font-style: normal;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--primary);
+  min-width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  font-weight: 1000;
+}
+.knowledge-library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
+  padding: 0 12px 12px;
+}
+.knowledge-library-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+  display: grid;
+}
+.knowledge-card-open {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 86px 1fr;
+  gap: 10px;
+  padding: 10px;
+  background: transparent;
+  border: 0;
+  text-align: start;
+  color: inherit;
+  cursor: pointer;
+}
+.knowledge-cover {
+  min-height: 86px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--surface-soft), rgba(255,255,255,.82));
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-size: 1.8rem;
+}
+.knowledge-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.knowledge-card-main { display: grid; gap: 7px; min-width: 0; }
+.knowledge-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.knowledge-card-head span,
+.knowledge-card-head em {
+  font-style: normal;
+  font-size: .72rem;
+  font-weight: 1000;
+  color: var(--muted);
+  background: var(--surface-soft);
+  border-radius: 999px;
+  padding: 5px 8px;
+  white-space: nowrap;
+}
+.knowledge-card-main h3 {
+  margin: 0;
+  font-size: .96rem;
+  line-height: 1.55;
+  font-weight: 1000;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.knowledge-card-stats { display: flex; flex-wrap: wrap; gap: 5px; }
+.knowledge-card-stats b {
+  font-size: .73rem;
+  color: var(--muted);
+  background: rgba(255,255,255,.7);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 7px;
+}
+.mini-progress { height: 7px; background: var(--surface-soft); border-radius: 999px; overflow: hidden; }
+.mini-progress span { display: block; height: 100%; background: var(--primary); border-radius: inherit; }
+.knowledge-card-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  padding: 0 10px 10px;
+}
+.knowledge-card-actions .btn { width: 100%; padding-inline: 8px; }
+.knowledge-library-card.small .knowledge-card-open { grid-template-columns: 64px 1fr; }
+.knowledge-library-card.small .knowledge-cover { min-height: 64px; border-radius: 16px; }
+.knowledge-reader-mode .item-card { margin: 0; }
+.modal-root.wide .modal-panel { width: min(1040px, calc(100vw - 24px)); }
+
+@media (max-width: 760px) {
+  .knowledge-learning-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .knowledge-strip-grid,
+  .knowledge-strip-grid.compact { grid-template-columns: 1fr; }
+  .knowledge-accordion summary { grid-template-columns: auto 1fr auto; }
+  .knowledge-accordion summary > small { grid-column: 2 / -1; }
+  .knowledge-library-grid { grid-template-columns: 1fr; padding: 0 10px 10px; }
+  .knowledge-card-open { grid-template-columns: 76px 1fr; padding: 9px; }
+  .knowledge-cover { min-height: 76px; }
+  .knowledge-card-actions { grid-template-columns: 1fr 1fr 1fr; }
+  .knowledge-card-actions .btn { font-size: .78rem; min-height: 38px; }
+  .knowledge-filter-bar { position: sticky; top: 0; z-index: 2; }
+}

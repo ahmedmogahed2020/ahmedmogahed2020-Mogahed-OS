@@ -25,11 +25,12 @@ let youtubeApiPromise = null;
 export function renderKnowledge() {
   const actions = '<button class="btn primary" data-action="open-knowledge-modal">إضافة معرفة</button>';
   const filtered = getFilteredKnowledge();
-  window.setTimeout(initYouTubePlayers, 0);
-  return `<section class="page">${pageHeader('المعرفة', 'نظام تعلم عملي: شاهد، لخّص، استخرج أفعال، راجع، وحوّل المعرفة لتنفيذ.', actions)}
+  return `<section class="page knowledge-library-page">${pageHeader('المعرفة', 'مكتبة منظمة: العناصر مختصرة هنا، والتفاصيل تظهر عند الفتح حتى لا تزحم الصفحة.', actions)}
     ${renderKnowledgeLearningSummary()}
     ${renderKnowledgeFilters()}
-    <div class="grid grid-2">${filtered.length ? filtered.map(knowledgeCard).join('') : emptyState('لا توجد نتائج مطابقة', 'غيّر الفلتر أو البحث، أو أضف معرفة جديدة من YouTube أو رابط خارجي.', actions)}</div>
+    ${renderContinueLearning()}
+    ${renderKnowledgeLibrary(filtered, actions)}
+    ${renderReviewQueue()}
   </section>`;
  }
 
@@ -127,6 +128,131 @@ function renderKnowledgeFilters() {
     <label>بحث داخل المعرفة<input data-action="knowledge-search" value="${safeText(appState.searchQuery || '')}" placeholder="ابحث بعنوان، Tag، فكرة، فعل..."></label>
     <div class="knowledge-tags-cloud">${tags.length ? tags.slice(0, 14).map(tag => `<button class="tag-pill" data-action="knowledge-search-tag" data-tag="${safeText(tag)}">#${safeText(tag)}</button>`).join('') : '<span class="meta">أضف Tags داخل كل فيديو لتظهر هنا.</span>'}</div>
   </div>`;
+}
+
+
+function getKnowledgeTypeKey(item = {}) {
+  if (item.type === 'Playlist' || item.youtube?.kind === 'playlist' || item.youtube?.playlistItems?.length) return 'playlists';
+  if (item.type === 'فيديو' || item.youtube?.kind === 'video' || getLocalFiles(item).some(file => file.kind === 'video')) return 'videos';
+  if (isPdfKnowledge(item)) return 'books';
+  if (item.type === 'صور' || getLocalFiles(item).some(file => file.kind === 'image')) return 'images';
+  if (item.type === 'مقال') return 'articles';
+  if (['فكرة', 'ملاحظة'].includes(item.type)) return 'notes';
+  return 'links';
+}
+
+function getKnowledgeGroups() {
+  return [
+    { key: 'playlists', title: 'Playlists', icon: '▶️', hint: 'كل بلاي ليست تظهر كمجلد واحد، والفيديوهات تظهر عند الفتح.' },
+    { key: 'videos', title: 'فيديوهات', icon: '🎬', hint: 'فيديوهات منفردة أو فيديوهات مرفوعة من الجهاز.' },
+    { key: 'books', title: 'كتب PDF', icon: '📚', hint: 'كتب وملفات PDF مع تقدم قراءة.' },
+    { key: 'images', title: 'صور وألبومات', icon: '🖼️', hint: 'مجموعات صور أو روابط صور.' },
+    { key: 'articles', title: 'مقالات', icon: '📰', hint: 'مقالات للقراءة والتحويل لأفعال.' },
+    { key: 'notes', title: 'أفكار وملاحظات', icon: '💡', hint: 'أفكار خام وملاحظات سريعة.' },
+    { key: 'links', title: 'روابط وبودكاست', icon: '🔗', hint: 'روابط عامة وبودكاست ومصادر خارجية.' }
+  ];
+}
+
+function renderContinueLearning() {
+  const items = appState.data.knowledge
+    .map(item => ({ item, score: getKnowledgeActivityScore(item) }))
+    .filter(record => record.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+  if (!items.length) return '';
+  return `<section class="knowledge-strip"><div class="section-title"><h3>استكمل التعلم</h3><p>آخر عناصر فيها تقدم أو قراءة.</p></div><div class="knowledge-strip-grid">${items.map(({ item }) => knowledgeLibraryCard(item, true)).join('')}</div></section>`;
+}
+
+function getKnowledgeActivityScore(item = {}) {
+  const progress = item.videoProgress || {};
+  const pdf = getPdfProgress(item);
+  const updated = Date.parse(item.updatedAt || item.createdAt || '') || 0;
+  return safeNumber(progress.watchedSeconds) + safeNumber(pdf.currentPage) * 50 + (updated / 100000000000);
+}
+
+function renderReviewQueue() {
+  const due = appState.data.knowledge.filter(item => getVideoEntries(item).some(entry => entry.content.learningStatus === 'أحتاج مراجعة' || isReviewDue(entry.content))).slice(0, 4);
+  if (!due.length) return '';
+  return `<section class="knowledge-strip"><div class="section-title"><h3>قائمة المراجعة</h3><p>عناصر تحتاج نظرة سريعة أو مراجعة مجدولة.</p></div><div class="knowledge-strip-grid compact">${due.map(item => knowledgeLibraryCard(item, true)).join('')}</div></section>`;
+}
+
+function renderKnowledgeLibrary(items = [], actions = '') {
+  if (!items.length) return emptyState('لا توجد نتائج مطابقة', 'غيّر الفلتر أو البحث، أو أضف معرفة جديدة من YouTube أو PDF أو صور أو رابط.', actions);
+  const groups = getKnowledgeGroups();
+  const byGroup = groups.reduce((acc, group) => ({ ...acc, [group.key]: [] }), {});
+  items.forEach(item => { (byGroup[getKnowledgeTypeKey(item)] ||= []).push(item); });
+  const total = items.length;
+  return `<section class="knowledge-library-shell">
+    <div class="section-title"><h3>مكتبة المعرفة</h3><p>إجمالي ${safeText(total)} عنصر — افتح النوع أو العنصر المطلوب فقط.</p></div>
+    <div class="knowledge-type-tabs">${groups.map(group => `<button class="knowledge-type-tab" data-action="knowledge-filter" value="${safeText(group.key === 'videos' ? 'video' : group.key === 'playlists' ? 'playlist' : 'all')}"><span>${group.icon}</span><b>${safeText(group.title)}</b><em>${safeText(byGroup[group.key]?.length || 0)}</em></button>`).join('')}</div>
+    <div class="knowledge-accordion-list">
+      ${groups.filter(group => byGroup[group.key]?.length).map((group, index) => `<details class="knowledge-accordion" ${index < 2 ? 'open' : ''}>
+        <summary><span>${group.icon}</span><b>${safeText(group.title)}</b><small>${safeText(group.hint)}</small><em>${safeText(byGroup[group.key].length)}</em></summary>
+        <div class="knowledge-library-grid">${byGroup[group.key].map(item => knowledgeLibraryCard(item)).join('')}</div>
+      </details>`).join('')}
+    </div>
+  </section>`;
+}
+
+function getKnowledgeCover(item = {}) {
+  const files = getLocalFiles(item);
+  const image = files.find(file => file.kind === 'image' && file.dataUrl);
+  if (image) return `<img src="${safeText(image.dataUrl)}" alt="${safeText(item.title)}">`;
+  if (item.youtube?.thumbnail) return `<img src="${safeText(item.youtube.thumbnail)}" alt="${safeText(item.title)}">`;
+  const key = getKnowledgeTypeKey(item);
+  const icon = { playlists: '▶️', videos: '🎬', books: '📚', images: '🖼️', articles: '📰', notes: '💡', links: '🔗' }[key] || '🧠';
+  return `<span>${icon}</span>`;
+}
+
+function getKnowledgeCardStats(item = {}) {
+  const key = getKnowledgeTypeKey(item);
+  if (key === 'playlists') {
+    const list = item.youtube?.playlistItems || getLocalFiles(item).filter(file => file.kind === 'video');
+    const done = item.videoProgress?.completedVideoIds?.length || 0;
+    const totalSeconds = safeNumber(item.youtube?.totalDurationSeconds || item.youtube?.durationSeconds || item.meta?.durationMinutes * 60);
+    return [`${list.length || item.youtube?.itemCount || 0} فيديو`, `${done} مكتمل`, secondsToTime(totalSeconds)];
+  }
+  if (key === 'videos') {
+    const totalSeconds = safeNumber(item.youtube?.durationSeconds || item.meta?.durationMinutes * 60);
+    const watched = safeNumber(item.videoProgress?.watchedSeconds || item.videoProgress?.byVideo?.[item.youtube?.videoId || 'general']);
+    return [secondsToTime(totalSeconds), watched ? `شوهد ${secondsToTime(watched)}` : 'لم يبدأ'];
+  }
+  if (key === 'books') {
+    const p = getPdfProgress(item);
+    const total = safeNumber(p.totalPages || item.meta?.pages);
+    const current = safeNumber(p.currentPage || item.meta?.currentPage);
+    return [`${current}/${total || '؟'} صفحة`, `${getPdfPercent(item)}% قراءة`, `${secondsToTime(safeNumber(p.readingSeconds))}`];
+  }
+  if (key === 'images') {
+    const count = getLocalFiles(item).filter(file => file.kind === 'image').length || safeNumber(item.meta?.imageCount);
+    return [`${count || 'رابط'} صورة`, item.category || 'عام'];
+  }
+  return [item.type || 'معرفة', item.category || 'عام', item.status || 'جديد'];
+}
+
+function knowledgeLibraryCard(item = {}, small = false) {
+  const stats = getKnowledgeCardStats(item).filter(Boolean);
+  const entries = getVideoEntries(item);
+  const completed = entries.filter(entry => ['انتهيت', 'تم تحويله لتنفيذ'].includes(entry.content.learningStatus)).length;
+  const percent = entries.length ? Math.round((completed / entries.length) * 100) : (isPdfKnowledge(item) ? getPdfPercent(item) : safeNumber(item.progress));
+  const typeKey = getKnowledgeTypeKey(item);
+  const typeName = getKnowledgeGroups().find(g => g.key === typeKey)?.title || item.type || 'معرفة';
+  return `<article class="knowledge-library-card ${small ? 'small' : ''}">
+    <button class="knowledge-card-open" data-action="open-knowledge-reader" data-id="${safeText(item.id)}" aria-label="فتح ${safeText(item.title)}">
+      <div class="knowledge-cover ${typeKey}">${getKnowledgeCover(item)}</div>
+      <div class="knowledge-card-main">
+        <div class="knowledge-card-head"><span>${safeText(typeName)}</span><em>${safeText(item.status || 'جديد')}</em></div>
+        <h3>${safeText(item.title || item.fileName || 'بدون عنوان')}</h3>
+        <div class="knowledge-card-stats">${stats.slice(0, 3).map(stat => `<b>${safeText(stat)}</b>`).join('')}</div>
+        <div class="mini-progress"><span style="width:${safeText(Math.min(100, Math.max(0, percent)))}%"></span></div>
+      </div>
+    </button>
+    <div class="knowledge-card-actions">
+      <button class="btn primary" data-action="open-knowledge-reader" data-id="${safeText(item.id)}">فتح</button>
+      <button class="btn ghost" data-action="edit-knowledge" data-id="${safeText(item.id)}">تعديل</button>
+      <button class="btn ghost" data-action="knowledge-to-task" data-id="${safeText(item.id)}">مهمة</button>
+    </div>
+  </article>`;
 }
 
 function knowledgeCard(item) {
@@ -458,6 +584,22 @@ function inferTitleFromUrl(url = '') {
 }
 
 
+
+
+export function openKnowledgeReader(id, videoId = '') {
+  const item = appState.data.knowledge.find(k => k.id === id);
+  if (!item) return toast('عنصر المعرفة غير موجود', 'error');
+  if (videoId && item.youtube) {
+    item.youtube.currentVideoId = videoId;
+    item.youtube.videoId = videoId;
+  }
+  openModal({
+    title: item.title || 'تفاصيل المعرفة',
+    body: `<div class="knowledge-reader-mode">${knowledgeCard(item)}</div>`,
+    size: 'wide'
+  });
+  window.setTimeout(initYouTubePlayers, 120);
+}
 
 export function openKnowledgeModal(id = '') {
   const item = appState.data.knowledge.find(x => x.id === id) || {};

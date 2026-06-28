@@ -531,3 +531,11 @@
   .win-collapsible summary b { font-size: .78rem; }
   .milestone-list, .reward-grid-large { max-height: 360px; padding-inline: 10px; }
 }
+
+/* Google Drive Backup */
+.drive-backup-card { border: 1px solid rgba(59, 130, 246, .18); background: linear-gradient(180deg, rgba(59,130,246,.06), rgba(255,255,255,.92)); }
+.drive-backup-list { display: grid; gap: 8px; margin-top: 12px; }
+.drive-row { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.75); }
+.drive-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.drive-row b, .drive-row small { color: var(--muted); font-size: 12px; }
+@media (max-width: 640px) { .drive-row { grid-template-columns: 1fr; } }
