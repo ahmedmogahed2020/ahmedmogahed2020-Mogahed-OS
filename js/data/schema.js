@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.12.0';
+export const APP_VERSION = '1.13.0';
 
 export const defaultSettings = {
   userName: 'مجاهد',
@@ -18,7 +18,7 @@ export const defaultSettings = {
   lastSystemTestSummary: null,
   recentItems: [],
   claimedWinRewards: [],
-  notifications: { enabled: true, soundEnabled: true, browserNotifications: false, leadMinutes: 10, volume: 0.35, soundType: 'soft', focusSound: true }
+  notifications: { enabled: true, soundEnabled: true, browserNotifications: false, leadMinutes: 10, volume: 0.35, soundType: 'soft', categorySounds: { tasks: 'clear', goals: 'goal', projects: 'project', knowledge: 'knowledge', decisions: 'decision', reviews: 'review', wins: 'success', campaigns: 'campaign', emergency: 'emergency', backup: 'minimal', system: 'soft' }, focusSound: true }
 };
 
 export function createEmptyData() {

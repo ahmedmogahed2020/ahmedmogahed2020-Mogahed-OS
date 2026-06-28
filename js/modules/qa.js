@@ -11,6 +11,7 @@ import { renderCampaigns, calculateCampaign } from './campaigns.js';
 import { renderDecisions } from './decisions.js';
 import { renderReviews } from './reviews.js';
 import { renderWins } from './wins.js';
+import { notificationSoundLibrary, notificationCategories } from './notifications.js';
 
 const routeRenderers = {
   home: renderHome,
@@ -27,18 +28,18 @@ const routeRenderers = {
 };
 
 export const knownActions = [
-  'open-goal-modal','edit-goal','delete-goal',
-  'open-project-modal','edit-project','delete-project',
+  'open-goal-modal','edit-goal','delete-goal','view-goal','goal-to-projects','goal-to-tasks','set-goal-filter','goal-search',
+  'open-project-modal','edit-project','delete-project','view-project','project-to-tasks','rescue-project','set-project-filter','project-search',
   'open-task-modal','edit-task','delete-task','complete-task','toggle-task-complete','toggle-task-step','set-task-filter',
   'open-knowledge-modal','edit-knowledge','delete-knowledge','knowledge-to-task','review-knowledge','knowledge-to-goal','knowledge-to-project','fetch-knowledge-metadata','add-video-note','seek-video-note','knowledge-select-video','save-video-content','mark-video-complete','schedule-video-review','video-content-to-tasks','knowledge-search-tag','knowledge-filter','knowledge-search',
   'open-emergency','emergency-pick','emergency-to-task',
   'open-decision-modal','edit-decision','delete-decision','review-decision','decision-to-tasks','set-decision-filter','decision-search',
-  'open-review-modal','edit-review','delete-review',
-  'open-win-modal','edit-win','delete-win','duplicate-win','record-suggested-win','set-win-filter','win-search',
+  'open-review-modal','create-daily-review','create-weekly-review','edit-review','delete-review','review-to-tasks','set-review-filter','review-search',
+  'open-win-modal','edit-win','delete-win','duplicate-win','record-suggested-win','claim-win-reward','set-win-filter','win-search',
   'open-campaign-modal','edit-campaign','delete-campaign','view-campaign','campaign-to-tasks','open-campaign-compare','set-campaign-filter','campaign-search',
-  'open-search','search-jump',
-  'show-backup','show-settings','show-qa','show-notifications','show-guide','run-system-test','export-json','backup-date','force-save-data','clear-data','import-json','test-notification-sound','request-notification-permission','mark-notification-read','clear-notification-log',
-  'settings-name','settings-store-name','settings-currency','settings-daily-task-target','settings-learning-minutes-target','settings-youtube-key','settings-quiet-mode','settings-compact-mode','settings-seed-data','settings-reset-section','notification-enabled','notification-sound-enabled','notification-browser-enabled','notification-sound-type','notification-lead-minutes','notification-volume',
+  'open-search','search-jump','search-open-result','search-open-recent','search-command','search-clear-recent',
+  'show-backup','show-settings','show-qa','show-notifications','show-guide','run-system-test','export-json','backup-date','force-save-data','clear-data','import-json','test-notification-sound','test-category-sound','reset-notification-sounds','request-notification-permission','mark-notification-read','clear-notification-log',
+  'settings-name','settings-store-name','settings-currency','settings-daily-task-target','settings-learning-minutes-target','settings-youtube-key','settings-quiet-mode','settings-compact-mode','settings-seed-data','settings-reset-section','notification-enabled','notification-sound-enabled','notification-browser-enabled','notification-sound-type','notification-category-sound','notification-lead-minutes','notification-volume',
   'close-modal','toggle-quick-actions','filter-list','modal-save','confirm-yes'
 ];
 
@@ -158,6 +159,20 @@ function checkDuplicateIds() {
   return duplicateIds.length ? [warn('IDs مكررة', duplicateIds.slice(0, 10).join(', '))] : [pass('IDs مكررة', 'لا توجد IDs مكررة واضحة بين الأقسام.')];
 }
 
+
+function checkNotificationSoundSystem() {
+  const settings = appState.data.settings.notifications || {};
+  const categorySounds = settings.categorySounds || {};
+  const soundIds = notificationSoundLibrary.map(sound => sound.id);
+  const missingCategories = notificationCategories.filter(category => !categorySounds[category.id]);
+  const invalidSounds = Object.entries(categorySounds).filter(([, soundId]) => !soundIds.includes(soundId));
+  const results = [];
+  results.push(notificationSoundLibrary.length >= 12 ? pass('مكتبة أصوات التنبيهات', `${notificationSoundLibrary.length} صوت متاح.`) : warn('مكتبة أصوات التنبيهات', 'عدد الأصوات أقل من المتوقع.'));
+  results.push(missingCategories.length ? warn('تخصيص الأصوات للأقسام', `ناقص: ${missingCategories.map(x => x.name).join(', ')}`) : pass('تخصيص الأصوات للأقسام', `تم ضبط ${notificationCategories.length} قسم.`));
+  results.push(invalidSounds.length ? fail('أصوات غير معروفة', invalidSounds.map(([key, value]) => `${key}:${value}`).join(', ')) : pass('أصوات غير معروفة', 'كل الأصوات المختارة موجودة في المكتبة.'));
+  return results;
+}
+
 function checkResetSafety() {
   const empty = createEmptyData();
   return empty && Array.isArray(empty.tasks) && empty.settings ? [pass('Reset Safety', 'شكل البيانات الافتراضي جاهز وآمن.')] : [fail('Reset Safety', 'شكل البيانات الافتراضي غير سليم.')];
@@ -175,6 +190,7 @@ export function runSystemTests() {
     ...checkKnowledgeSystem(),
     ...checkYouTubeSettings(),
     ...checkDuplicateIds(),
+    ...checkNotificationSoundSystem(),
     ...checkResetSafety()
   ];
   const summary = {

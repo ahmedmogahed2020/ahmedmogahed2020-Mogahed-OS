@@ -14,7 +14,7 @@ import { openCampaignModal, editCampaign, deleteCampaign, viewCampaign, campaign
 import { openSearchModal, jumpTo, openSearchResult, openRecentItem, runSearchCommand, clearRecentItems } from './modules/search.js';
 import { startFocusSession } from './modules/dashboard.js';
 import { doBackup, doClear, doExport, doImport, forceSaveData, showBackup, showSettings, showQA, showNotifications, showGuide, runQA, updateUserName, updateYouTubeApiKey, updateStoreName, updateCurrency, updateDailyTaskTarget, updateLearningMinutesTarget, updateQuietMode, updateCompactMode, updateSeedData } from './modules/backup.js';
-import { initNotifications, testNotificationSound, requestNotificationPermission, updateNotificationEnabled, updateNotificationSoundEnabled, updateNotificationBrowserEnabled, updateNotificationLeadMinutes, updateNotificationVolume, updateNotificationSoundType, markNotificationRead, clearNotificationLog } from './modules/notifications.js';
+import { initNotifications, testNotificationSound, testCategorySound, requestNotificationPermission, updateNotificationEnabled, updateNotificationSoundEnabled, updateNotificationBrowserEnabled, updateNotificationLeadMinutes, updateNotificationVolume, updateNotificationSoundType, updateNotificationCategorySound, resetNotificationSounds, markNotificationRead, clearNotificationLog } from './modules/notifications.js';
 
 const actionMap = {
   'open-goal-modal': () => openGoalModal(), 'edit-goal': id => editGoal(id), 'delete-goal': id => deleteGoal(id), 'view-goal': id => viewGoal(id), 'goal-to-projects': id => goalToProjects(id), 'goal-to-tasks': id => goalToTasks(id), 'set-goal-filter': (_, el) => setGoalFilter(el.dataset.filter),
@@ -29,7 +29,7 @@ const actionMap = {
   'start-focus-session': () => startFocusSession(),
   'open-search': () => openSearchModal(), 'search-jump': (_, el) => { closeModal(); jumpTo(el.dataset.routeTarget); }, 'search-open-result': (_, el) => openSearchResult(el.dataset.uid), 'search-open-recent': (_, el) => openRecentItem(el.dataset.uid), 'search-command': (_, el) => runSearchCommand(el.dataset.commandId), 'search-clear-recent': () => clearRecentItems(),
   'show-backup': () => showBackup(), 'show-settings': () => showSettings(), 'show-qa': () => showQA(), 'show-notifications': () => showNotifications(), 'show-guide': () => showGuide(), 'run-system-test': () => runQA(), 'export-json': () => doExport(), 'backup-date': () => doBackup(), 'force-save-data': () => forceSaveData(), 'clear-data': () => doClear(),
-  'test-notification-sound': () => testNotificationSound(), 'request-notification-permission': () => requestNotificationPermission(), 'mark-notification-read': id => markNotificationRead(id), 'clear-notification-log': () => clearNotificationLog(),
+  'test-notification-sound': (_, el) => testNotificationSound(el?.dataset?.soundId || ''), 'test-category-sound': (_, el) => testCategorySound(el?.dataset?.category || 'system'), 'reset-notification-sounds': () => resetNotificationSounds(), 'request-notification-permission': () => requestNotificationPermission(), 'mark-notification-read': id => markNotificationRead(id), 'clear-notification-log': () => clearNotificationLog(),
   'close-modal': () => closeModal(), 'toggle-quick-actions': () => toggleQuickActions(), 'set-task-filter': (_, el) => { setTaskFilter(el.dataset.filter); renderPage(); }
 };
 
@@ -64,6 +64,7 @@ function handleChange(event) {
   if (el.matches('[data-action="notification-sound-enabled"]')) updateNotificationSoundEnabled(el.checked);
   if (el.matches('[data-action="notification-browser-enabled"]')) updateNotificationBrowserEnabled(el.checked);
   if (el.matches('[data-action="notification-sound-type"]')) updateNotificationSoundType(el.value);
+  if (el.matches('[data-action="notification-category-sound"]')) updateNotificationCategorySound(el.dataset.category, el.value);
 }
 
 function handleInput(event) {
