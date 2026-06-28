@@ -27,4 +27,4 @@ export function pickEmergency(state) {
   document.getElementById('emergencyResult').innerHTML = `<div class="emergency-action"><b>الإجراء الآن:</b><p>${safeText(action)}</p><div class="btn-row"><button class="btn primary" data-action="emergency-to-task">حوّل لمهمة</button></div></div>`;
 }
 
-export function emergencyToTask() { if (!lastAction) return toast('اختر حالة أولًا'); closeModal(); openTaskModal('', { title: lastAction, type: 'إجراء سريع', priority: 'عالية', status: 'مفتوحة' }); }
+export function emergencyToTask() { if (!lastAction) return toast('اختر حالة أولًا'); closeModal(); openTaskModal('', { title: lastAction, type: 'إجراء سريع', source: 'طوارئ', priority: 'عالية', status: 'مفتوحة' }); }

@@ -522,6 +522,7 @@ export function videoContentToTasks(id) {
       goalId: content.linkedGoalId || item.linkedGoalId || '',
       projectId: content.linkedProjectId || item.linkedProjectId || '',
       type: 'إجراء سريع',
+      source: 'معرفة',
       priority: index === 0 ? 'عالية' : 'متوسطة',
       status: 'مفتوحة',
       dueDate: '',
@@ -545,7 +546,7 @@ export function knowledgeToTask(id) {
   if (!item && document.getElementById('entityForm')) { saveKnowledge({}); return; }
   if (!item) return toast('احفظ المعرفة أولًا');
   const content = getVideoContent(item);
-  openTaskModal('', { title: `إجراء من: ${item.title}`, description: content.summary || content.notes || item.summary || item.notes, type: 'إجراء سريع', priority: 'متوسطة', status: 'مفتوحة', goalId: content.linkedGoalId || item.linkedGoalId, projectId: content.linkedProjectId || item.linkedProjectId });
+  openTaskModal('', { title: `إجراء من: ${item.title}`, description: content.summary || content.notes || item.summary || item.notes, type: 'إجراء سريع', source: 'معرفة', priority: 'متوسطة', status: 'مفتوحة', goalId: content.linkedGoalId || item.linkedGoalId, projectId: content.linkedProjectId || item.linkedProjectId });
 }
 export function knowledgeToGoal(id) { const item = appState.data.knowledge.find(k=>k.id===id); if (!item) return toast('احفظ المعرفة أولًا'); const content = getVideoContent(item); upsert('goals', { id: generateId('goal'), title: item.title, description: content.summary || content.notes || item.summary || item.notes, reason: 'تم تحويله من المعرفة', status: 'نشط', priority: 'متوسطة', startDate: todayISO(), targetDate: '', progress: 0, linkedProjects: [], notes: item.url }); toast('تم تحويل المعرفة إلى هدف'); }
 export function knowledgeToProject(id) { const item = appState.data.knowledge.find(k=>k.id===id); if (!item) return toast('احفظ المعرفة أولًا'); const content = getVideoContent(item); upsert('projects', { id: generateId('project'), title: item.title, description: content.summary || content.notes || item.summary || item.notes, goalId: item.linkedGoalId || '', status: 'قيد التنفيذ', priority: 'متوسطة', startDate: todayISO(), targetDate: '', progress: 0, notes: item.url }); toast('تم تحويل المعرفة إلى مشروع'); }
