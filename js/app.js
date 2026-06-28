@@ -2,8 +2,8 @@ import { loadData, saveData } from './storage.js';
 import { appState } from './state.js';
 import { navigate, renderPage } from './router.js';
 import { closeModal, qs, toast } from './ui.js';
-import { openGoalModal, editGoal, deleteGoal } from './modules/goals.js';
-import { openProjectModal, editProject, deleteProject } from './modules/projects.js';
+import { openGoalModal, editGoal, deleteGoal, viewGoal, goalToProjects, goalToTasks, setGoalFilter, setGoalSearch } from './modules/goals.js';
+import { openProjectModal, editProject, deleteProject, viewProject, projectToTasks, rescueProject, setProjectFilter, setProjectSearch } from './modules/projects.js';
 import { openTaskModal, editTask, deleteTask, completeTask, setTaskFilter, toggleTaskComplete, toggleTaskStep, setTaskSearch } from './modules/tasks.js';
 import { openKnowledgeModal, editKnowledge, deleteKnowledge, knowledgeToTask, reviewKnowledge, knowledgeToGoal, knowledgeToProject, fetchKnowledgeMetadataFromForm, addTimedNote, seekVideoNote, selectKnowledgeVideo, saveVideoContent, setKnowledgeFilter, setKnowledgeSearch, searchKnowledgeTag, markVideoComplete, scheduleVideoReview, videoContentToTasks } from './modules/knowledge.js';
 import { openEmergencyModal, pickEmergency, emergencyToTask } from './modules/emergency.js';
@@ -16,8 +16,8 @@ import { startFocusSession } from './modules/dashboard.js';
 import { doBackup, doClear, doExport, doImport, showBackup, showSettings, showQA, runQA, updateUserName, updateYouTubeApiKey, updateStoreName, updateCurrency, updateDailyTaskTarget, updateLearningMinutesTarget, updateQuietMode, updateCompactMode, updateSeedData } from './modules/backup.js';
 
 const actionMap = {
-  'open-goal-modal': () => openGoalModal(), 'edit-goal': id => editGoal(id), 'delete-goal': id => deleteGoal(id),
-  'open-project-modal': () => openProjectModal(), 'edit-project': id => editProject(id), 'delete-project': id => deleteProject(id),
+  'open-goal-modal': () => openGoalModal(), 'edit-goal': id => editGoal(id), 'delete-goal': id => deleteGoal(id), 'view-goal': id => viewGoal(id), 'goal-to-projects': id => goalToProjects(id), 'goal-to-tasks': id => goalToTasks(id), 'set-goal-filter': (_, el) => setGoalFilter(el.dataset.filter),
+  'open-project-modal': () => openProjectModal(), 'edit-project': id => editProject(id), 'delete-project': id => deleteProject(id), 'view-project': id => viewProject(id), 'project-to-tasks': id => projectToTasks(id), 'rescue-project': id => rescueProject(id), 'set-project-filter': (_, el) => setProjectFilter(el.dataset.filter),
   'open-task-modal': () => openTaskModal(), 'edit-task': id => editTask(id), 'delete-task': id => deleteTask(id), 'complete-task': id => completeTask(id), 'toggle-task-complete': id => toggleTaskComplete(id), 'toggle-task-step': (id, el) => toggleTaskStep(id, el.dataset.stepIndex),
   'open-knowledge-modal': () => openKnowledgeModal(), 'edit-knowledge': id => editKnowledge(id), 'delete-knowledge': id => deleteKnowledge(id), 'knowledge-to-task': id => knowledgeToTask(id), 'review-knowledge': id => reviewKnowledge(id), 'knowledge-to-goal': id => knowledgeToGoal(id), 'knowledge-to-project': id => knowledgeToProject(id), 'fetch-knowledge-metadata': () => fetchKnowledgeMetadataFromForm(), 'add-video-note': id => addTimedNote(id), 'seek-video-note': (id, el) => seekVideoNote(id, el.dataset.noteId), 'knowledge-select-video': (id, el) => selectKnowledgeVideo(id, el.dataset.videoId), 'save-video-content': id => saveVideoContent(id), 'mark-video-complete': id => markVideoComplete(id), 'schedule-video-review': id => scheduleVideoReview(id), 'video-content-to-tasks': id => videoContentToTasks(id), 'knowledge-search-tag': (_, el) => searchKnowledgeTag(el.dataset.tag),
   'open-emergency': () => openEmergencyModal(), 'emergency-pick': (_, el) => pickEmergency(el.dataset.state), 'emergency-to-task': () => emergencyToTask(),
@@ -70,6 +70,8 @@ function handleInput(event) {
   if (el.matches('[data-action="filter-list"]')) filterCards(el.value, el.dataset.list);
   if (el.matches('[data-action="knowledge-search"]')) setKnowledgeSearch(el.value);
   if (el.matches('[data-action="task-search"]')) setTaskSearch(el.value);
+  if (el.matches('[data-action="goal-search"]')) setGoalSearch(el.value);
+  if (el.matches('[data-action="project-search"]')) setProjectSearch(el.value);
   if (el.matches('[data-action="campaign-search"]')) setCampaignSearch(el.value);
   if (el.matches('[data-action="review-search"]')) setReviewSearch(el.value);
 }
