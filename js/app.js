@@ -12,6 +12,7 @@ import { openReviewModal, editReview, deleteReview } from './modules/reviews.js'
 import { openWinModal, editWin, deleteWin } from './modules/wins.js';
 import { openCampaignModal, editCampaign, deleteCampaign, viewCampaign, campaignToTasks, openCampaignCompare, setCampaignFilter, setCampaignSearch } from './modules/campaigns.js';
 import { openSearchModal, jumpTo } from './modules/search.js';
+import { startFocusSession } from './modules/dashboard.js';
 import { doBackup, doClear, doExport, doImport, showBackup, showSettings, showQA, runQA, updateUserName, updateYouTubeApiKey, updateStoreName, updateCurrency, updateDailyTaskTarget, updateLearningMinutesTarget, updateQuietMode, updateCompactMode, updateSeedData } from './modules/backup.js';
 
 const actionMap = {
@@ -24,6 +25,7 @@ const actionMap = {
   'open-review-modal': (_, el) => openReviewModal('', el.dataset.type), 'edit-review': id => editReview(id), 'delete-review': id => deleteReview(id),
   'open-win-modal': () => openWinModal(), 'edit-win': id => editWin(id), 'delete-win': id => deleteWin(id),
   'open-campaign-modal': () => openCampaignModal(), 'edit-campaign': id => editCampaign(id), 'delete-campaign': id => deleteCampaign(id), 'view-campaign': id => viewCampaign(id), 'campaign-to-tasks': id => campaignToTasks(id), 'open-campaign-compare': () => openCampaignCompare(), 'set-campaign-filter': (_, el) => { setCampaignFilter(el.dataset.filter); },
+  'start-focus-session': () => startFocusSession(),
   'open-search': () => openSearchModal(), 'search-jump': (_, el) => { closeModal(); jumpTo(el.dataset.routeTarget); },
   'show-backup': () => showBackup(), 'show-settings': () => showSettings(), 'show-qa': () => showQA(), 'run-system-test': () => runQA(), 'export-json': () => doExport(), 'backup-date': () => doBackup(), 'clear-data': () => doClear(),
   'close-modal': () => closeModal(), 'toggle-quick-actions': () => toggleQuickActions(), 'set-task-filter': (_, el) => { setTaskFilter(el.dataset.filter); renderPage(); }

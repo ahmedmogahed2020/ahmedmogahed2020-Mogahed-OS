@@ -1,5 +1,5 @@
 import { appState } from '../state.js';
-import { pageHeader } from '../ui.js';
+import { openModal, pageHeader, toast } from '../ui.js';
 import { byUpdatedDesc, calculatePercentage, formatCurrency, formatDate, isPast, isToday, safeNumber, safeText, todayISO } from '../utils.js';
 import { calculateCampaign } from './campaigns.js';
 import { secondsToTime } from './youtube.js';
@@ -201,15 +201,165 @@ function renderKnowledgeIntelligenceSection(k) {
   </section>`;
 }
 
+
+function dueSort(a, b) {
+  const ad = a.dueDate || '9999-12-31';
+  const bd = b.dueDate || '9999-12-31';
+  if (ad !== bd) return ad.localeCompare(bd);
+  const priorityScore = { 'عالية': 3, 'متوسطة': 2, 'منخفضة': 1 };
+  return (priorityScore[b.priority] || 0) - (priorityScore[a.priority] || 0);
+}
+
+function getHomeCommandCenter(m) {
+  const d = appState.data;
+  const todayTasks = d.tasks.filter(t => t.status !== 'مكتملة' && (isToday(t.dueDate) || !t.dueDate)).sort(dueSort);
+  const urgentTasks = d.tasks.filter(t => t.status !== 'مكتملة' && (isPast(t.dueDate) || t.priority === 'عالية')).sort(dueSort);
+  const topTasks = [...new Map([...urgentTasks, ...todayTasks].map(t => [t.id, t])).values()].slice(0, 3);
+  const dailyTarget = Math.max(1, safeNumber(d.settings.dailyTaskTarget, 5));
+  const todayDone = d.tasks.filter(t => t.status === 'مكتملة' && (isToday(t.completedAt?.slice?.(0, 10)) || isToday(t.updatedAt?.slice?.(0, 10)) || isToday(t.dueDate))).length;
+  const dailyProgress = calculatePercentage(todayDone, dailyTarget);
+  const learningTargetSeconds = Math.max(5, safeNumber(d.settings.learningMinutesTarget, 30)) * 60;
+  const learningProgress = calculatePercentage(Math.min(m.knowledgeIntel.watchedSeconds, learningTargetSeconds), learningTargetSeconds);
+  const reviewKnowledge = m.knowledgeIntel.reviewDueEntries.slice(0, 3);
+  const actionableKnowledge = m.knowledgeIntel.mostActionable.filter(entry => entry.actions.length || entry.ideas.length).slice(0, 3);
+  const campaignsNeedDecision = d.campaigns.map(c => ({ campaign: c, result: calculateCampaign(c) }))
+    .filter(x => x.result.risk.includes('عالية') || safeNumber(x.result.expectedProfit) < 0 || x.result.decision.includes('اختبر'))
+    .slice(0, 3);
+  const lateProjects = d.projects
+    .map(project => ({ ...project, score: calculatePercentage(d.tasks.filter(t => t.projectId === project.id && t.status === 'مكتملة').length, d.tasks.filter(t => t.projectId === project.id).length) || safeNumber(project.progress) }))
+    .filter(project => project.targetDate && isPast(project.targetDate) && project.score < 100)
+    .slice(0, 3);
+  const warnings = [];
+  if (urgentTasks.some(t => isPast(t.dueDate))) warnings.push('فيه مهام متأخرة محتاجة قرار سريع.');
+  if (m.knowledgeIntel.actionlessCompleted) warnings.push(`${m.knowledgeIntel.actionlessCompleted} درس مكتمل بدون أفعال تنفيذ.`);
+  if (campaignsNeedDecision.length) warnings.push('فيه حملة تحتاج قرار قبل التوسع.');
+  if (lateProjects.length) warnings.push('فيه مشروع متأخر محتاج إنقاذ.');
+  const focusTask = topTasks[0] || d.tasks.find(t => t.status !== 'مكتملة') || null;
+  return { topTasks, todayTasks, urgentTasks, dailyTarget, todayDone, dailyProgress, learningProgress, learningTargetSeconds, reviewKnowledge, actionableKnowledge, campaignsNeedDecision, lateProjects, warnings, focusTask };
+}
+
+function renderCommandList(items, emptyText, renderer) {
+  if (!items.length) return `<p class="meta">${safeText(emptyText)}</p>`;
+  return `<div class="command-list">${items.map(renderer).join('')}</div>`;
+}
+
+function renderTopTask(task, index) {
+  return `<div class="command-task"><span class="command-rank">${safeText(index + 1)}</span><div><b>${safeText(task.title)}</b><div class="meta"><span>${safeText(task.dueDate ? formatDate(task.dueDate) : 'بدون تاريخ')}</span><span>${safeText(task.priority || 'بدون أولوية')}</span><span>${safeText(task.source || 'يدوي')}</span></div></div><button class="btn primary" data-action="complete-task" data-id="${safeText(task.id)}">تم</button></div>`;
+}
+
+export function startFocusSession() {
+  const m = getMetrics();
+  const command = getHomeCommandCenter(m);
+  const task = command.focusTask;
+  const body = task ? `<div class="focus-session-box">
+    <div class="focus-session-main"><span>25 دقيقة</span><h3>${safeText(task.title)}</h3><p>${safeText(task.description || 'ابدأ بأصغر خطوة واضحة، واقفل أي مشتت لحد ما تخلص الجولة.')}</p></div>
+    <div class="focus-session-steps">
+      <b>قواعد الجلسة</b>
+      <ol>
+        <li>افتح المهمة فقط.</li>
+        <li>اقفل السوشيال والإشعارات.</li>
+        <li>اشتغل 25 دقيقة بدون تبديل.</li>
+        <li>بعد الجولة علّم المهمة أو خطوة منها كمكتملة.</li>
+      </ol>
+    </div>
+    <div class="btn-row"><button class="btn primary" data-action="complete-task" data-id="${safeText(task.id)}">أنهيت المهمة</button><button class="btn ghost" data-route="tasks">فتح المهام</button></div>
+  </div>` : `<div class="focus-session-box"><h3>لا توجد مهمة مفتوحة</h3><p class="meta">أضف مهمة واحدة فقط، والنظام سيقترحها كبداية جلسة تركيز.</p><button class="btn primary" data-action="open-task-modal">إضافة مهمة</button></div>`;
+  openModal({ title: 'جلسة تركيز', body, size: 'wide' });
+  toast('ابدأ جلسة تركيز قصيرة الآن');
+}
+
 export function renderHome() {
   const m = getMetrics();
   const k = m.knowledgeIntel;
-  return `<section class="page home-stack">
-    <article class="card hero-card"><h2>أهلاً يا ${safeText(appState.data.settings.userName || 'مجاهد')} 👋</h2><p>مركز القيادة اليومي: ركّز على أهم فعل، حوّل المعرفة إلى تنفيذ، وراجع تقدمك بدون زحمة.</p><div class="btn-row" style="margin-top:14px"><button class="btn primary" data-action="open-task-modal">إضافة مهمة</button><button class="btn ghost" data-action="open-knowledge-modal">إضافة معرفة</button><button class="btn ghost" data-action="open-emergency">طوارئ</button><button class="btn dark" data-route="dashboard">Dashboard كامل</button></div></article>
-    <div class="kpi-grid"><div class="kpi-card"><small>مهام مفتوحة</small><strong>${m.open}</strong></div><div class="kpi-card"><small>مهام مكتملة</small><strong>${m.done}</strong></div><div class="kpi-card"><small>أهداف نشطة</small><strong>${m.activeGoals}</strong></div><div class="kpi-card"><small>مشاريع</small><strong>${m.projects}</strong></div></div>
-    <article class="card home-knowledge-intel"><div><h3>نبض المعرفة</h3><p class="meta">${k.reviewDue ? `عندك ${safeText(k.reviewDue)} درس يحتاج مراجعة.` : `اكتمال التعلم ${safeText(k.learningCompletion)}% — متبقي ${safeText(secondsToTime(k.remainingSeconds))}.`}</p></div><div class="progress"><span style="width:${safeText(k.learningCompletion)}%"></span></div><div class="btn-row"><button class="btn ghost" data-route="knowledge">فتح المعرفة</button><button class="btn dark" data-route="dashboard">تحليل كامل</button></div></article>
-    <article class="card"><h3>مهام اليوم</h3><div class="today-list" style="margin-top:10px">${m.todayTasks.length ? m.todayTasks.slice(0,5).map(t=>`<div class="today-task"><div><b>${safeText(t.title)}</b><div class="meta"><span>${safeText(t.dueTime||'بدون وقت')}</span><span>${safeText(t.priority||'')}</span></div></div><button class="btn primary" data-action="complete-task" data-id="${safeText(t.id)}">تم</button></div>`).join('') : '<p class="meta">لا توجد مهام اليوم. أضف مهمة واحدة فقط وابدأ.</p>'}</div></article>
-    <div class="grid grid-2"><article class="card"><h3>تركيز اليوم</h3><p class="meta">اختر مهمة عميقة واحدة، واقفل باقي المشتتات 25 دقيقة.</p></article><article class="card"><h3>آخر معرفة</h3><p>${safeText(m.lastKnowledge?.title || 'لا توجد معرفة بعد')}</p></article><article class="card"><h3>آخر قرار</h3><p>${safeText(m.lastDecision?.title || 'لا يوجد قرار بعد')}</p></article><article class="card"><h3>آخر فوز</h3><p>${safeText(m.lastWin?.title || 'لا يوجد فوز بعد')}</p></article></div>
+  const command = getHomeCommandCenter(m);
+  const executiveSignal = command.warnings[0] || (command.topTasks.length ? 'اليوم واضح: ابدأ بأهم 3 مهام فقط.' : 'اليوم خفيف. أضف مهمة واحدة تقربك من هدفك.');
+  return `<section class="page home-stack command-center">
+    <article class="command-hero">
+      <div class="command-hero-copy">
+        <span class="eyebrow">مركز القيادة اليومي</span>
+        <h2>أهلاً يا ${safeText(appState.data.settings.userName || 'مجاهد')} 👋</h2>
+        <p>${safeText(executiveSignal)}</p>
+        <div class="btn-row">
+          <button class="btn primary" data-action="start-focus-session">ابدأ جلسة تركيز</button>
+          <button class="btn ghost" data-action="open-task-modal">إضافة مهمة</button>
+          <button class="btn ghost" data-action="open-knowledge-modal">إضافة معرفة</button>
+          <button class="btn dark" data-route="dashboard">Dashboard كامل</button>
+        </div>
+      </div>
+      <div class="command-score-card">
+        <div class="progress-ring command-ring" style="--value:${safeText(Math.min(100, command.dailyProgress))}"><strong>${safeText(command.dailyProgress)}%</strong></div>
+        <b>تقدم اليوم</b>
+        <span>${safeText(command.todayDone)} من ${safeText(command.dailyTarget)} مهام مستهدفة</span>
+      </div>
+    </article>
+
+    <div class="kpi-grid command-kpis">
+      <div class="kpi-card"><small>مهام مفتوحة</small><strong>${safeText(m.open)}</strong></div>
+      <div class="kpi-card"><small>مهام مكتملة</small><strong>${safeText(m.done)}</strong></div>
+      <div class="kpi-card"><small>أهداف نشطة</small><strong>${safeText(m.activeGoals)}</strong></div>
+      <div class="kpi-card"><small>مشاريع</small><strong>${safeText(m.projects)}</strong></div>
+      <div class="kpi-card"><small>مراجعة معرفة</small><strong>${safeText(k.reviewDue)}</strong></div>
+      <div class="kpi-card"><small>حملات</small><strong>${safeText(m.campaigns)}</strong></div>
+    </div>
+
+    ${command.warnings.length ? `<article class="command-alerts">${command.warnings.map(w => `<div><b>تنبيه</b><span>${safeText(w)}</span></div>`).join('')}</article>` : ''}
+
+    <div class="command-layout">
+      <section class="command-main">
+        <article class="card command-panel">
+          <div class="section-title"><div><h3>أهم 3 مهام الآن</h3><p class="meta">مرتبة حسب التأخير والأولوية ومهام اليوم.</p></div><button class="btn ghost" data-route="tasks">فتح المهام</button></div>
+          ${renderCommandList(command.topTasks, 'لا توجد مهام مهمة الآن. أضف مهمة واحدة فقط وابدأ.', renderTopTask)}
+        </article>
+
+        <article class="card command-panel">
+          <div class="section-title"><div><h3>خطة اليوم</h3><p class="meta">نظرة عملية على المطلوب بدون زحمة.</p></div><button class="btn ghost" data-action="open-review-modal" data-type="يومية">مراجعة يومية</button></div>
+          <div class="command-plan-grid">
+            <div><b>ابدأ</b><span>${safeText(command.topTasks[0]?.title || 'مهمة واحدة صغيرة')}</span></div>
+            <div><b>راجع</b><span>${safeText(command.reviewKnowledge[0]?.title || 'لا توجد مراجعة معرفة مستحقة')}</span></div>
+            <div><b>احسم</b><span>${safeText(command.campaignsNeedDecision[0]?.campaign.productName || command.lateProjects[0]?.title || 'لا يوجد قرار عاجل')}</span></div>
+          </div>
+        </article>
+
+        <article class="card command-panel">
+          <div class="section-title"><div><h3>معرفة تحتاج إجراء</h3><p class="meta">التعلم المفيد هو الذي يتحول إلى مهمة.</p></div><button class="btn ghost" data-route="knowledge">فتح المعرفة</button></div>
+          ${renderCommandList(command.actionableKnowledge, 'لا توجد معرفة جاهزة للتنفيذ الآن.', entry => `<div class="command-item"><b>${safeText(entry.title)}</b><span>${safeText(entry.actions.length)} فعل / ${safeText(entry.ideas.length)} فكرة</span></div>`)}
+        </article>
+      </section>
+
+      <aside class="command-side">
+        <article class="card command-panel">
+          <h3>نبض المعرفة</h3>
+          <p class="meta">اكتمال التعلم ${safeText(k.learningCompletion)}% — متبقي ${safeText(secondsToTime(k.remainingSeconds))}</p>
+          <div class="progress"><span style="width:${safeText(k.learningCompletion)}%"></span></div>
+          <div class="bar-chart mini-command-bars">
+            <div class="bar-row"><div class="bar-label"><span>هدف التعلم اليومي</span><b>${safeText(command.learningProgress)}%</b></div><div class="bar-track"><span style="width:${safeText(command.learningProgress)}%"></span></div></div>
+            <div class="bar-row"><div class="bar-label"><span>تحويل المعرفة لتنفيذ</span><b>${safeText(k.converted)}</b></div><div class="bar-track"><span style="width:${safeText(calculatePercentage(k.converted, Math.max(1, k.totalLessons)))}%"></span></div></div>
+          </div>
+        </article>
+
+        <article class="card command-panel">
+          <h3>معرفة للمراجعة</h3>
+          ${renderCommandList(command.reviewKnowledge, 'لا توجد مراجعات مستحقة.', entry => `<div class="command-item"><b>${safeText(entry.title)}</b><span>${safeText(entry.reviewAt ? formatDate(entry.reviewAt) : 'مراجعة الآن')}</span></div>`)}
+        </article>
+
+        <article class="card command-panel">
+          <h3>حملات تحتاج قرار</h3>
+          ${renderCommandList(command.campaignsNeedDecision, 'لا توجد حملات تحتاج قرار عاجل.', x => `<div class="command-item"><b>${safeText(x.campaign.productName)}</b><span>${safeText(x.result.decision)} — ${safeText(x.result.risk)}</span></div>`)}
+        </article>
+
+        <article class="card command-panel">
+          <h3>مشاريع متأخرة</h3>
+          ${renderCommandList(command.lateProjects, 'لا يوجد مشروع متأخر واضح.', project => `<div class="command-item"><b>${safeText(project.title)}</b><span>${safeText(project.score)}% — ${safeText(formatDate(project.targetDate))}</span></div>`)}
+        </article>
+      </aside>
+    </div>
+
+    <div class="grid grid-2">
+      <article class="card"><h3>آخر معرفة</h3><p>${safeText(m.lastKnowledge?.title || 'لا توجد معرفة بعد')}</p></article>
+      <article class="card"><h3>آخر قرار</h3><p>${safeText(m.lastDecision?.title || 'لا يوجد قرار بعد')}</p></article>
+      <article class="card"><h3>آخر فوز</h3><p>${safeText(m.lastWin?.title || 'لا يوجد فوز بعد')}</p></article>
+      <article class="card"><h3>تركيز سريع</h3><p class="meta">جلسة واحدة قصيرة أفضل من تخطيط طويل بدون تنفيذ.</p><button class="btn primary" data-action="start-focus-session">ابدأ الآن</button></article>
+    </div>
   </section>`;
 }
 
