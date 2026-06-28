@@ -93,3 +93,23 @@
   .command-item span { white-space: normal; }
   .section-title { align-items: start; flex-direction: column; }
 }
+
+/* Final contrast fix: hero quick buttons must stay readable on dark gradient */
+.command-hero .btn.ghost {
+  color: #fff;
+  border-color: rgba(255,255,255,.28);
+  background: rgba(255,255,255,.10);
+  text-shadow: 0 1px 1px rgba(0,0,0,.16);
+}
+.command-hero .btn.ghost:hover {
+  background: rgba(255,255,255,.16);
+  border-color: rgba(255,255,255,.42);
+}
+.command-hero .btn.dark {
+  color: #fff;
+  background: rgba(17,24,39,.88);
+  border-color: rgba(255,255,255,.12);
+}
+@media (max-width: 640px) {
+  .command-hero .btn-row .btn { flex: 1 1 145px; }
+}
