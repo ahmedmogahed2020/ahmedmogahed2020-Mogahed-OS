@@ -12,6 +12,9 @@ import { renderDecisions } from './decisions.js';
 import { renderReviews } from './reviews.js';
 import { renderWins, winGamificationCounts } from './wins.js';
 import { notificationSoundLibrary, notificationCategories } from './notifications.js';
+import { getBackendReadinessReport } from '../services/dataService.js';
+import { getSupabaseConfigStatus } from '../services/supabaseAdapter.js';
+import { getFileServiceStatus } from '../services/fileService.js';
 
 const routeRenderers = {
   home: renderHome,
@@ -31,15 +34,15 @@ export const knownActions = [
   'open-goal-modal','edit-goal','delete-goal','view-goal','goal-to-projects','goal-to-tasks','set-goal-filter','goal-search',
   'open-project-modal','edit-project','delete-project','view-project','project-to-tasks','rescue-project','set-project-filter','project-search',
   'open-task-modal','edit-task','delete-task','complete-task','toggle-task-complete','toggle-task-step','set-task-filter',
-  'open-knowledge-modal','edit-knowledge','delete-knowledge','knowledge-to-task','review-knowledge','knowledge-to-goal','knowledge-to-project','fetch-knowledge-metadata','add-video-note','seek-video-note','knowledge-select-video','save-video-content','mark-video-complete','schedule-video-review','video-content-to-tasks','knowledge-search-tag','knowledge-filter','knowledge-search',
+  'open-knowledge-modal','edit-knowledge','delete-knowledge','knowledge-to-task','review-knowledge','knowledge-to-goal','knowledge-to-project','fetch-knowledge-metadata','fetch-pdf-metadata','refresh-knowledge-cloud-files','add-video-note','seek-video-note','knowledge-select-video','save-video-content','mark-video-complete','schedule-video-review','video-content-to-tasks','knowledge-search-tag','knowledge-filter','knowledge-search',
   'open-emergency','emergency-pick','emergency-to-task',
   'open-decision-modal','edit-decision','delete-decision','review-decision','decision-to-tasks','set-decision-filter','decision-search',
   'open-review-modal','create-daily-review','create-weekly-review','edit-review','delete-review','review-to-tasks','set-review-filter','review-search',
   'open-win-modal','edit-win','delete-win','duplicate-win','record-suggested-win','claim-win-reward','set-win-filter','win-search',
   'open-campaign-modal','edit-campaign','delete-campaign','view-campaign','campaign-to-tasks','open-campaign-compare','set-campaign-filter','campaign-search',
   'open-search','search-jump','search-open-result','search-open-recent','search-command','search-clear-recent',
-  'show-backup','show-settings','show-qa','show-notifications','show-guide','run-system-test','export-json','backup-date','force-save-data','clear-data','import-json','drive-connect','drive-disconnect','drive-upload-now','drive-list','drive-restore-latest','drive-client-id','drive-enabled','drive-interval','drive-history','test-notification-sound','test-category-sound','reset-notification-sounds','request-notification-permission','mark-notification-read','clear-notification-log',
-  'settings-name','settings-store-name','settings-currency','settings-daily-task-target','settings-learning-minutes-target','settings-youtube-key','drive-client-id','settings-quiet-mode','settings-compact-mode','settings-seed-data','settings-reset-section','notification-enabled','notification-sound-enabled','notification-browser-enabled','notification-sound-type','notification-category-sound','notification-lead-minutes','notification-volume',
+  'show-backup','show-settings','show-qa','show-notifications','show-guide','run-system-test','export-json','backup-date','force-save-data','clear-data','import-json','drive-connect','drive-disconnect','drive-upload-now','drive-list','drive-restore-latest','cloud-sign-in','cloud-sign-up','cloud-sign-out','cloud-upload','cloud-download','cloud-merge','cloud-status','drive-client-id','drive-enabled','drive-interval','drive-history','test-notification-sound','test-category-sound','reset-notification-sounds','request-notification-permission','mark-notification-read','clear-notification-log',
+  'settings-name','settings-store-name','settings-currency','settings-daily-task-target','settings-learning-minutes-target','settings-youtube-key','drive-client-id','backend-provider','backend-url','backend-anon-key','backend-sync-mode','backend-file-storage','backend-storage-bucket','backend-enabled','backend-auto-sync','migrate-knowledge-files','settings-quiet-mode','settings-compact-mode','settings-seed-data','settings-reset-section','notification-enabled','notification-sound-enabled','notification-browser-enabled','notification-sound-type','notification-category-sound','notification-lead-minutes','notification-volume',
   'close-modal','toggle-quick-actions','filter-list','modal-save','confirm-yes'
 ];
 
@@ -85,7 +88,7 @@ function checkDataShape() {
   for (const name of collectionNames) {
     results.push(Array.isArray(normalized[name]) ? pass(`بيانات ${name}`, 'Array سليم.') : fail(`بيانات ${name}`, 'ليست Array.'));
   }
-  const requiredSettings = ['userName','lastSavedAt','lastPage','autoSave','youtubeApiKey','storeName','currency','dailyTaskTarget','learningMinutesTarget','quietMode','compactMode','notifications','googleDriveBackup'];
+  const requiredSettings = ['userName','lastSavedAt','lastPage','autoSave','youtubeApiKey','storeName','currency','dailyTaskTarget','learningMinutesTarget','quietMode','compactMode','notifications','googleDriveBackup','backend'];
   const missingSettings = requiredSettings.filter(key => !(key in normalized.settings));
   results.push(missingSettings.length ? warn('الإعدادات', `ناقص: ${missingSettings.join(', ')}`) : pass('الإعدادات', 'كل مفاتيح الإعدادات الأساسية موجودة.'));
   return results;
@@ -194,12 +197,39 @@ function checkGoogleDriveBackupSettings() {
   return results;
 }
 
+
+function checkBackendReadiness() {
+  const report = getBackendReadinessReport(appState.data.settings);
+  const config = getSupabaseConfigStatus(appState.data.settings);
+  const results = [];
+  results.push(report.layers?.length >= 4 ? pass('Backend Readiness Layers', `${report.layers.length} طبقات جاهزة: Data/Auth/File/Sync.`) : fail('Backend Readiness Layers', 'طبقات الباك إند غير مكتملة.'));
+  results.push(report.storage?.ok ? pass('Data Service Adapter', `يعمل عبر ${report.adapter}.`) : fail('Data Service Adapter', report.storage?.message || 'فشل Adapter.'));
+  results.push(report.auth?.ready ? pass('Auth Service', report.auth.message) : fail('Auth Service', 'غير جاهز.'));
+  results.push(report.files?.ready ? pass('File Service', report.files.message) : warn('File Service', 'غير جاهز بالكامل.'));
+  results.push(report.sync?.initialized ? pass('Sync Service', report.sync.message) : warn('Sync Service', 'لم يبدأ بعد.'));
+  results.push(config.table === 'mogahed_os_snapshots' ? pass('Supabase Snapshot Table', 'جدول mogahed_os_snapshots معتمد للمزامنة.') : fail('Supabase Snapshot Table', 'اسم جدول المزامنة غير مضبوط.'));
+  results.push(config.ok ? pass('Supabase Config', 'إعدادات Supabase مكتملة.') : warn('Supabase Config', `ناقص: ${config.missing.join('، ')}`));
+  return results;
+}
+
 function checkResetSafety() {
   const empty = createEmptyData();
   return empty && Array.isArray(empty.tasks) && empty.settings ? [pass('Reset Safety', 'شكل البيانات الافتراضي جاهز وآمن.')] : [fail('Reset Safety', 'شكل البيانات الافتراضي غير سليم.')];
 }
 
-export function runSystemTests() {
+export 
+function checkSupabaseFileStorage() {
+  const status = getFileServiceStatus(appState.data.settings);
+  const cloudFiles = (appState.data.knowledge || []).flatMap(item => item.localFiles || []).filter(file => file.storageMode === 'supabase-storage');
+  const localFiles = (appState.data.knowledge || []).flatMap(item => item.localFiles || []).filter(file => file.dataUrl && file.storageMode !== 'supabase-storage');
+  const results = [];
+  results.push(status.ready ? pass('Supabase File Storage Layer', status.message) : warn('Supabase File Storage Layer', status.message));
+  results.push(pass('ملفات المعرفة', `سحابي: ${cloudFiles.length}، محلي: ${localFiles.length}.`));
+  if (status.mode === 'supabase-storage' && !status.cloudReady) results.push(warn('إعداد Storage', 'تم اختيار Supabase Storage لكن إعداد Supabase أو Cloud غير مكتمل.'));
+  return results;
+}
+
+function runSystemTests() {
   const startedAt = new Date().toISOString();
   const results = [
     ...checkRoutes(),
@@ -214,6 +244,8 @@ export function runSystemTests() {
     ...checkNotificationSoundSystem(),
     ...checkWinGamificationScale(),
     ...checkGoogleDriveBackupSettings(),
+    ...checkBackendReadiness(),
+    ...checkSupabaseFileStorage(),
     ...checkResetSafety()
   ];
   const summary = {

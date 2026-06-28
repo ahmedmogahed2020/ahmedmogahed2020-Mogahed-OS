@@ -5,6 +5,7 @@ import { addDaysISO, formatDate, generateId, linesToText, parseLines, safeNumber
 import { linkedFields, removeItem, simpleCard, upsert } from './shared.js';
 import { openTaskModal } from './tasks.js';
 import { buildEmbedUrl, fetchYouTubeMetadata, parseYouTubeUrl, secondsToTime } from './youtube.js';
+import { refreshCloudFileUrl, uploadFileToSupabaseStorage } from '../services/fileService.js';
 
 const types = ['فيديو','Playlist','بودكاست','كتاب PDF','مقال','رابط','ملاحظة','فكرة','صور'];
 const statuses = ['جديد','قيد المراجعة','تم تلخيصه','تحول لأفعال','مؤرشف'];
@@ -463,29 +464,30 @@ function formatFileSize(bytes = 0) {
 function renderLocalFileSummary(item = {}) {
   const files = getLocalFiles(item);
   if (!files.length) return '<p class="meta">لا توجد ملفات مرفوعة محفوظة لهذا العنصر.</p>';
-  return `<div class="uploaded-file-list">${files.map(file => `<div class="uploaded-file-chip"><span>${file.kind === 'image' ? '🖼️' : file.kind === 'video' ? '🎬' : file.kind === 'pdf' ? '📄' : '📎'}</span><b>${safeText(file.name)}</b><small>${safeText(formatFileSize(file.size))}</small></div>`).join('')}</div>`;
+  const hasCloud = files.some(file => file.storageMode === 'supabase-storage');
+  return `${hasCloud ? `<button class="btn ghost" data-action="refresh-knowledge-cloud-files" data-id="${safeText(item.id)}">تحديث روابط الملفات السحابية</button>` : ''}<div class="uploaded-file-list">${files.map(file => `<div class="uploaded-file-chip"><span>${file.kind === 'image' ? '🖼️' : file.kind === 'video' ? '🎬' : file.kind === 'pdf' ? '📄' : '📎'}</span><b>${safeText(file.name)}</b><small>${safeText(formatFileSize(file.size))}${file.storageMode === 'supabase-storage' ? ' · سحابي' : ''}</small></div>`).join('')}</div>`;
 }
 
 function renderLocalMediaPreview(item = {}) {
-  const files = getLocalFiles(item).filter(file => file?.dataUrl);
+  const files = getLocalFiles(item).filter(file => file?.dataUrl || file?.signedUrl || file?.storagePath);
   if (!files.length) return '';
   const pdf = files.find(file => file.kind === 'pdf' || file.type === 'application/pdf');
   const videos = files.filter(file => file.kind === 'video' || String(file.type || '').startsWith('video/'));
   const images = files.filter(file => file.kind === 'image' || String(file.type || '').startsWith('image/'));
   if (pdf) {
-    return renderPdfViewer(item, pdf.dataUrl, `ملف PDF مرفوع · ${pdf.name} · ${formatFileSize(pdf.size)}`);
+    return renderPdfViewer(item, pdf.dataUrl || pdf.signedUrl || '', `${pdf.storageMode === 'supabase-storage' ? 'PDF سحابي' : 'ملف PDF مرفوع'} · ${pdf.name} · ${formatFileSize(pdf.size)}`);
   }
   if (videos.length) {
     return `<div class="local-media-box local-video-box">
       <div class="local-media-head"><b>فيديو مرفوع من الجهاز</b><span>${safeText(videos[0].name)} · ${safeText(formatFileSize(videos[0].size))}</span></div>
-      <video class="local-video-player" controls playsinline preload="metadata" src="${safeText(videos[0].dataUrl)}"></video>
-      ${videos.length > 1 ? `<div class="uploaded-file-list">${videos.slice(1).map(file => `<a class="uploaded-file-chip" href="${safeText(file.dataUrl)}" target="_blank" rel="noopener">🎬 <b>${safeText(file.name)}</b><small>${safeText(formatFileSize(file.size))}</small></a>`).join('')}</div>` : ''}
+      <video class="local-video-player" controls playsinline preload="metadata" src="${safeText(videos[0].dataUrl || videos[0].signedUrl || '')}"></video>
+      ${videos.length > 1 ? `<div class="uploaded-file-list">${videos.slice(1).map(file => `<a class="uploaded-file-chip" href="${safeText(file.dataUrl || file.signedUrl || '#')}" target="_blank" rel="noopener">🎬 <b>${safeText(file.name)}</b><small>${safeText(formatFileSize(file.size))}</small></a>`).join('')}</div>` : ''}
     </div>`;
   }
   if (images.length) {
     return `<div class="local-media-box local-images-box">
       <div class="local-media-head"><b>صور مرفوعة</b><span>${safeText(images.length)} صورة</span></div>
-      <div class="local-image-grid">${images.map(file => `<a href="${safeText(file.dataUrl)}" target="_blank" rel="noopener"><img src="${safeText(file.dataUrl)}" alt="${safeText(file.name)}"><small>${safeText(file.name)}</small></a>`).join('')}</div>
+      <div class="local-image-grid">${images.map(file => `<a href="${safeText(file.dataUrl || file.signedUrl || '#')}" target="_blank" rel="noopener"><img src="${safeText(file.dataUrl || file.signedUrl || '')}" alt="${safeText(file.name)}"><small>${safeText(file.name)}</small></a>`).join('')}</div>
     </div>`;
   }
   return '';
@@ -779,27 +781,48 @@ async function readFileAsDataURL(file) {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
-  const payload = { id: generateId('file'), name: file.name, type: file.type, size: file.size, kind: getFileKind(file), dataUrl, createdAt: new Date().toISOString() };
+  const payload = { id: generateId('file'), name: file.name, type: file.type, size: file.size, kind: getFileKind(file), dataUrl, createdAt: new Date().toISOString(), storageMode: 'local-inline' };
   if (payload.kind === 'pdf') {
     try { payload.pageCount = await countPdfPagesFromArrayBuffer(await file.arrayBuffer()); } catch { payload.pageCount = 0; }
   }
   return payload;
 }
 
-async function collectLocalUploads(form, knowledgeType = '') {
-  const input = form.querySelector('input[name="localFiles"]');
-  const files = Array.from(input?.files || []);
-  if (!files.length) return [];
-  const totalSize = files.reduce((sum, file) => sum + file.size, 0);
-  const maxSingle = 8 * 1024 * 1024;
-  const maxBatch = 14 * 1024 * 1024;
-  const tooLarge = files.find(file => file.size > maxSingle);
-  if (tooLarge) throw new Error(`الملف ${tooLarge.name} كبير جدًا للحفظ المحلي. استخدم رابط خارجي أو ملف أصغر من 8MB.`);
-  if (totalSize > maxBatch) throw new Error('إجمالي الملفات كبير جدًا للتخزين المحلي. ارفع عددًا أقل أو استخدم روابط خارجية.');
-  const uploaded = await Promise.all(files.map(readFileAsDataURL));
+function validateUploads(uploaded = [], knowledgeType = '') {
   if (knowledgeType === 'كتاب PDF' && uploaded.some(file => file.kind !== 'pdf')) throw new Error('نوع الكتاب يقبل ملفات PDF فقط.');
   if (knowledgeType === 'صور' && uploaded.some(file => file.kind !== 'image')) throw new Error('نوع الصور يقبل ملفات صور فقط.');
   if ((knowledgeType === 'فيديو' || knowledgeType === 'Playlist') && uploaded.some(file => file.kind !== 'video')) throw new Error('نوع الفيديو يقبل ملفات فيديو فقط.');
+}
+
+async function readFileForConfiguredStorage(file, itemId) {
+  const wantsCloud = appState.data.settings?.backend?.fileStorage === 'supabase-storage';
+  if (wantsCloud) {
+    try {
+      const uploaded = await uploadFileToSupabaseStorage(appState.data.settings, file, { itemId, folder: 'knowledge', kind: getFileKind(file) });
+      if (uploaded.kind === 'pdf') {
+        try { uploaded.pageCount = await countPdfPagesFromArrayBuffer(await file.arrayBuffer()); } catch { uploaded.pageCount = 0; }
+      }
+      return uploaded;
+    } catch (error) {
+      toast(`تعذر رفع ${file.name} للسحابة، سيتم حفظه محليًا: ${error.message}`, 'error');
+    }
+  }
+  return readFileAsDataURL(file);
+}
+
+async function collectLocalUploads(form, knowledgeType = '', itemId = '') {
+  const input = form.querySelector('input[name="localFiles"]');
+  const files = Array.from(input?.files || []);
+  if (!files.length) return [];
+  const wantsCloud = appState.data.settings?.backend?.fileStorage === 'supabase-storage';
+  const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+  const maxSingle = wantsCloud ? 50 * 1024 * 1024 : 8 * 1024 * 1024;
+  const maxBatch = wantsCloud ? 120 * 1024 * 1024 : 14 * 1024 * 1024;
+  const tooLarge = files.find(file => file.size > maxSingle);
+  if (tooLarge) throw new Error(`الملف ${tooLarge.name} كبير جدًا. الحد الحالي ${wantsCloud ? '50MB مع Supabase Storage' : '8MB للتخزين المحلي'}.`);
+  if (totalSize > maxBatch) throw new Error(`إجمالي الملفات كبير جدًا. الحد الحالي ${wantsCloud ? '120MB مع Supabase Storage' : '14MB للتخزين المحلي'}.`);
+  const uploaded = await Promise.all(files.map(file => readFileForConfiguredStorage(file, itemId || generateId('know'))));
+  validateUploads(uploaded, knowledgeType);
   return uploaded;
 }
 
@@ -816,8 +839,10 @@ async function saveKnowledge(existing = {}) {
   const form = document.getElementById('entityForm'); if (!form.reportValidity()) return;
   const data = objectFromForm(form);
   try {
-    const uploads = await collectLocalUploads(form, data.type);
+    const provisionalId = data.id || existing.id || generateId('know');
+    data.id = provisionalId;
     const payload = buildKnowledgePayload(existing, data);
+    const uploads = await collectLocalUploads(form, data.type, payload.id);
     payload.localFiles = mergeKnowledgeFiles(existing.localFiles || [], uploads, data.type);
     if (!payload.fileName && payload.localFiles.length) payload.fileName = payload.localFiles[0].name;
     if (!payload.title && payload.fileName) payload.title = payload.fileName.replace(/\.[^.]+$/, '');
@@ -833,6 +858,24 @@ async function saveKnowledge(existing = {}) {
     closeModal(); toast(uploads.length ? 'تم حفظ المعرفة والملفات المرفوعة' : 'تم حفظ المعرفة');
   } catch (error) {
     toast(error.message || 'فشل رفع الملف داخل المعرفة', 'error');
+  }
+}
+
+
+export async function refreshKnowledgeCloudFiles(id) {
+  const item = appState.data.knowledge.find(x => x.id === id);
+  if (!item) return;
+  const cloudFiles = getLocalFiles(item).filter(file => file.storageMode === 'supabase-storage' && file.storagePath);
+  if (!cloudFiles.length) return toast('لا توجد ملفات سحابية لتحديث روابطها');
+  try {
+    const refreshed = await Promise.all(item.localFiles.map(file => file.storageMode === 'supabase-storage' ? refreshCloudFileUrl(appState.data.settings, file) : file));
+    item.localFiles = refreshed;
+    item.updatedAt = new Date().toISOString();
+    autoSave();
+    toast('تم تحديث روابط الملفات السحابية');
+    openKnowledgeReader(id);
+  } catch (error) {
+    toast(error.message || 'فشل تحديث روابط الملفات السحابية', 'error');
   }
 }
 

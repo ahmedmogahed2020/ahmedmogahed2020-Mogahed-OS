@@ -539,3 +539,19 @@
 .drive-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .drive-row b, .drive-row small { color: var(--muted); font-size: 12px; }
 @media (max-width: 640px) { .drive-row { grid-template-columns: 1fr; } }
+
+/* V18 Supabase Database Sync */
+.cloud-sync-card .code-block {
+  background: rgba(15, 23, 42, 0.92);
+  color: #e5e7eb;
+  border-radius: 14px;
+  padding: 14px;
+  overflow: auto;
+  max-height: 280px;
+  line-height: 1.6;
+  font-size: 12px;
+  direction: ltr;
+  text-align: left;
+  white-space: pre-wrap;
+}
+.cloud-sync-card input[type="email"], .cloud-sync-card input[type="password"] { direction: ltr; text-align: left; }

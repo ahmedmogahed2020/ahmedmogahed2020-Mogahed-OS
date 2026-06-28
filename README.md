@@ -494,3 +494,150 @@ Because this phase is still backend-free and stores data locally in the browser,
 - js/modules/knowledge.js
 - js/app.js
 - css/knowledge.css
+
+## V16 — Backend Readiness Refactor
+
+تم تجهيز المشروع للانتقال إلى Backend لاحقًا بدون كسر النسخة الحالية.
+
+### ما تم إضافته
+
+- طبقة `Data Service` بين التطبيق والتخزين.
+- `localStorageAdapter` كأول Adapter يعمل بنفس التخزين الحالي.
+- `Auth Service` مبدئي يعمل بوضع Local User حاليًا، وجاهز لاحقًا لـ Supabase Auth.
+- `File Service` مبدئي لتجهيز نقل PDF والصور والفيديوهات إلى Storage سحابي لاحقًا.
+- `Sync Service` مبدئي لتجهيز طابور المزامنة و Last Sync.
+- إعدادات Backend داخل صفحة النسخ الاحتياطي:
+  - Provider
+  - Supabase URL
+  - Supabase Anon Key
+  - Sync Mode
+  - File Storage
+  - Cloud Enabled
+- تحديث System Health لفحص جاهزية طبقات الباك إند.
+
+### المهم
+
+هذه المرحلة لا تفعل Supabase بعد. التطبيق ما زال يعمل محليًا بنفس LocalStorage، لكن أصبح جاهزًا لتركيب Supabase في المرحلة التالية بدون تغيير كل الموديولات.
+
+### المرحلة التالية المقترحة
+
+V17 — Supabase Auth
+
+## V18 — Supabase Database Sync
+
+تمت إضافة مزامنة قاعدة بيانات اختيارية عبر Supabase مع الحفاظ على LocalStorage كطبقة آمنة.
+
+### ما تم إضافته
+
+- ملف `js/services/supabaseAdapter.js` للاتصال بـ Supabase.
+- تسجيل دخول / إنشاء حساب عبر Supabase Auth من داخل النسخ الاحتياطي.
+- رفع نسخة البيانات المحلية للسحابة.
+- تحميل نسخة السحابة للجهاز.
+- دمج المحلي والسحابة حسب `id` و `updatedAt`.
+- إعداد مزامنة تلقائية اختيارية عند الحفظ بعد تسجيل الدخول.
+- استمرار Local Mode لو Supabase غير مفعّل أو الإنترنت غير متاح.
+
+### SQL المطلوب في Supabase
+
+افتح Supabase SQL Editor ونفذ:
+
+```sql
+create table if not exists public.mogahed_os_snapshots (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  data jsonb not null default '{}'::jsonb,
+  version text,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.mogahed_os_snapshots enable row level security;
+
+create policy "Users can read own snapshot" on public.mogahed_os_snapshots
+for select using (auth.uid() = user_id);
+
+create policy "Users can insert own snapshot" on public.mogahed_os_snapshots
+for insert with check (auth.uid() = user_id);
+
+create policy "Users can update own snapshot" on public.mogahed_os_snapshots
+for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+```
+
+### طريقة التشغيل
+
+1. أنشئ مشروع Supabase.
+2. نفذ SQL السابق.
+3. من Supabase Project Settings انسخ:
+   - Project URL
+   - anon public key
+4. داخل Mogahed OS افتح: المزيد → النسخ الاحتياطي.
+5. اختر Backend Provider = Supabase.
+6. فعّل Cloud.
+7. ضع URL وAnon Key.
+8. أنشئ حساب أو سجل دخول.
+9. اضغط رفع المحلي للسحابة.
+
+### ملاحظة أمان
+
+كل مستخدم يقرأ ويكتب نسخته فقط بسبب Row Level Security.
+
+## V19 Mobile UX Rebuild Layer
+
+تمت إضافة طبقة موبايل مستقلة في `css/mobile.css` محملة بعد `responsive.css` حتى تكون آخر طبقة تحكم في تجربة الموبايل.
+
+ما تم تحسينه:
+
+- إخفاء الهيدر الداخلي على الموبايل لتقليل الزحمة.
+- إعادة بناء الصفحة الرئيسية كمركز قيادة موبايل واضح.
+- جعل أزرار الهيرو تظهر كاملة في Grid بدون قص.
+- تحويل مؤشرات الرئيسية إلى Grid من عمودين.
+- جعل صفحة المزيد Grid نظيف بدون هيدر علوي متكرر.
+- تحسين صفحة المعرفة كمكتبة موبايل، والقارئ/الفيديو/PDF داخل Reader Mode فقط.
+- تحويل المودالات إلى Bottom Sheet حقيقي.
+- منع الـ horizontal scroll وخروج الجداول والفيديو وPDF خارج الشاشة.
+- ضبط Bottom Nav وFloating Action Button وQuick Actions على الموبايل.
+
+
+## V20 — Supabase File Storage
+
+تمت إضافة طبقة تخزين ملفات اختيارية عبر Supabase Storage مع الحفاظ على التشغيل المحلي.
+
+### الهدف
+
+الملفات الكبيرة مثل PDF والصور والفيديوهات لا يجب أن تبقى داخل LocalStorage عند مشاركة المشروع مع مستخدمين. في V20 يمكن رفع الملفات الجديدة إلى Supabase Storage وحفظ المسار والرابط داخل بيانات المعرفة بدل Base64 الثقيل.
+
+### ما تم إضافته
+
+- تطوير `js/services/fileService.js` ليدعم Supabase Storage.
+- اختيار وضع الملفات من النسخ الاحتياطي:
+  - محلي الآن
+  - Supabase Storage
+- اختيار اسم Bucket، والافتراضي: `mogahed-os-files`.
+- رفع ملفات المعرفة الجديدة إلى Supabase Storage عند تفعيل الوضع السحابي وتسجيل الدخول.
+- دعم PDF / صور / فيديوهات مرفوعة من الجهاز.
+- تخزين `storagePath`, `bucket`, `signedUrl`, `storageMode` بدل الاعتماد الكامل على Base64.
+- زر لتحديث روابط الملفات السحابية داخل عنصر المعرفة.
+- زر داخل النسخ الاحتياطي لنقل الملفات المحلية القديمة إلى Supabase Storage.
+- SQL/Policies جاهزة داخل صفحة النسخ الاحتياطي.
+- فحص QA جديد لـ Supabase File Storage.
+
+### خطوات التفعيل
+
+1. تأكد أن Supabase Auth وDatabase Sync يعملان.
+2. افتح: المزيد → النسخ الاحتياطي.
+3. في Backend Readiness اختر:
+   - Backend Provider = Supabase
+   - Cloud = مفعل
+   - File Storage = Supabase Storage
+4. في قسم Supabase File Storage انسخ SQL/Policies وشغلها في Supabase SQL Editor.
+5. تأكد من وجود Bucket باسم `mogahed-os-files` أو غيّر الاسم من الإعداد.
+6. سجل دخول إلى Supabase من نفس صفحة النسخ الاحتياطي.
+7. أضف معرفة جديدة وارفع PDF أو صورة أو فيديو.
+8. الملف الجديد سيرفع للسحابة إذا كانت الإعدادات صحيحة، ولو فشل الرفع سيحفظ محليًا كـ fallback آمن.
+
+### ملاحظات مهمة
+
+- الـ Bucket يفضل أن يكون Private.
+- التطبيق ينشئ Signed URL لمدة 7 أيام للعرض داخل المشروع.
+- لو انتهى الرابط، افتح عنصر المعرفة واضغط “تحديث روابط الملفات السحابية”.
+- الملفات القديمة المخزنة محليًا يمكن نقلها من زر “نقل ملفات المعرفة للسحابة”.
+- لا يتم حذف الملف المحلي أثناء النقل إلا بعد نجاح رفعه.
+

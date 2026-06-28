@@ -2,25 +2,29 @@ import { createEmptyData, collectionNames } from './data/schema.js';
 import { createSeedData } from './data/seed.js';
 import { appState, setData } from './state.js';
 import { downloadText } from './utils.js';
+import { checkDataServiceHealth, estimateDataSize, readRawData, removeRawData, writeRawData, pushDataToCloud } from './services/dataService.js';
 
-const STORAGE_KEY = 'mogahed_os_data_v1';
 let saveTimer = null;
 
 export function normalizeData(input) {
   const base = createEmptyData();
   const incoming = input && typeof input === 'object' ? input : {};
   const normalized = { ...base, ...incoming, settings: { ...base.settings, ...(incoming.settings || {}) } };
+  normalized.settings.backend = { ...base.settings.backend, ...((incoming.settings || {}).backend || {}) };
+  normalized.settings.notifications = { ...base.settings.notifications, ...((incoming.settings || {}).notifications || {}) };
+  normalized.settings.notifications.categorySounds = { ...base.settings.notifications.categorySounds, ...(((incoming.settings || {}).notifications || {}).categorySounds || {}) };
+  normalized.settings.googleDriveBackup = { ...base.settings.googleDriveBackup, ...((incoming.settings || {}).googleDriveBackup || {}) };
   for (const name of collectionNames) normalized[name] = Array.isArray(incoming[name]) ? incoming[name] : [];
   return normalized;
 }
 
 export function loadData() {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = readRawData();
     if (!stored) {
       const data = createEmptyData();
       const seed = createSeedData();
-      Object.assign(data, seed);
+      if (data.settings.enableSeedData) Object.assign(data, seed);
       data.settings = { ...data.settings, seedLoaded: true };
       setData(data);
       saveData();
@@ -40,7 +44,12 @@ export function loadData() {
 export function saveData() {
   try {
     appState.data.settings.lastSavedAt = new Date().toISOString();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState.data));
+    writeRawData(JSON.stringify(appState.data));
+    if (appState.data.settings?.backend?.autoSync && appState.data.settings?.backend?.enabled && appState.data.settings?.backend?.provider === 'supabase') {
+      pushDataToCloud(appState.data.settings, appState.data).then(result => {
+        if (result?.ok) appState.data.settings.backend.lastSyncAt = new Date().toISOString();
+      }).catch(() => {});
+    }
     return { ok: true };
   } catch (error) {
     console.error('Save failed', error);
@@ -75,18 +84,19 @@ export function importJSON(file) {
 }
 
 export function clearData() {
-  localStorage.removeItem(STORAGE_KEY);
+  removeRawData();
   const data = createEmptyData();
   setData(data); saveData();
 }
 
 export function checkStorageHealth() {
-  try {
-    const testKey = '__mogahed_os_test__';
-    localStorage.setItem(testKey, 'ok');
-    localStorage.removeItem(testKey);
-    return { ok: true, message: 'التخزين يعمل بشكل سليم.' };
-  } catch (error) {
-    return { ok: false, message: 'هناك مشكلة في التخزين المحلي. صدّر نسخة احتياطية الآن.' };
-  }
+  const health = checkDataServiceHealth();
+  return health.ok
+    ? { ok: true, message: health.message || 'التخزين يعمل بشكل سليم.' }
+    : { ok: false, message: health.message || 'هناك مشكلة في التخزين. صدّر نسخة احتياطية الآن.' };
+}
+
+export function getStorageSizeBytes(data = appState.data) {
+  try { return estimateDataSize(JSON.stringify(data)); }
+  catch { return 0; }
 }
