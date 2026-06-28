@@ -22,3 +22,166 @@
   .fab { left: 12px; }
   .quick-actions { left: 12px; }
 }
+
+/* V12 Mobile UX Polish & Stability */
+@media (max-width: 679px) {
+  :root { --bottom-nav-height: 78px; }
+  body { overflow-x: hidden; }
+  .main-view {
+    padding: 12px 12px calc(var(--bottom-nav-height) + 92px);
+  }
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    backdrop-filter: blur(18px);
+  }
+  .page-header {
+    gap: 12px;
+    align-items: stretch;
+  }
+  .page-header .btn-row,
+  .section-title .btn-row,
+  .card > .btn-row {
+    width: 100%;
+    justify-content: stretch;
+  }
+  .page-header .btn-row .btn,
+  .section-title .btn-row .btn,
+  .card > .btn-row .btn {
+    flex: 1 1 auto;
+  }
+  .grid,
+  .grid-2,
+  .grid-3,
+  .grid-4,
+  .kpi-grid,
+  .dashboard-grid,
+  .decision-intel-grid,
+  .backup-stats,
+  .campaign-kpis,
+  .win-kpi-grid,
+  .progress-story-grid,
+  .task-meta-grid,
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .card,
+  .item-card,
+  .kpi-card {
+    border-radius: 20px;
+    padding: 14px;
+  }
+  .btn-row,
+  .filters {
+    gap: 8px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .btn-row .btn,
+  .filters .filter-btn,
+  .filters button {
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+  .bottom-nav {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    width: auto;
+    border-radius: 24px;
+    padding: 7px 7px calc(7px + env(safe-area-inset-bottom));
+  }
+  .nav-item {
+    min-width: 0;
+    padding: 7px 4px;
+    border-radius: 18px;
+  }
+  .nav-item span { font-size: 1rem; }
+  .nav-item b { font-size: .67rem; }
+  .fab {
+    left: 14px;
+    bottom: calc(var(--bottom-nav-height) + 18px + env(safe-area-inset-bottom));
+    width: 56px;
+    height: 56px;
+    border-radius: 22px;
+  }
+  .quick-actions {
+    left: 14px;
+    right: auto;
+    bottom: calc(var(--bottom-nav-height) + 84px + env(safe-area-inset-bottom));
+    max-width: min(290px, calc(100vw - 28px));
+  }
+  .modal-panel {
+    inset: auto 8px 8px;
+    max-height: min(88vh, calc(100vh - 24px));
+    width: auto;
+    border-radius: 26px 26px 20px 20px;
+  }
+  .modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--surface);
+    border-radius: 26px 26px 0 0;
+  }
+  .modal-body {
+    padding-bottom: calc(22px + env(safe-area-inset-bottom));
+  }
+  input,
+  select,
+  textarea,
+  .btn {
+    font-size: 16px;
+  }
+  textarea { min-height: 110px; }
+  .knowledge-player,
+  .video-frame,
+  iframe {
+    max-width: 100%;
+  }
+  .video-frame,
+  .youtube-frame,
+  .embed-frame {
+    aspect-ratio: 16 / 9;
+    height: auto !important;
+  }
+  .win-level-card,
+  .win-streak-card {
+    grid-template-columns: 1fr;
+    text-align: start;
+  }
+  .win-level-icon,
+  .win-streak-number {
+    width: 84px;
+    min-height: 84px;
+    border-radius: 24px;
+  }
+  .reward-grid,
+  .title-badges,
+  .win-relations,
+  .win-lessons {
+    max-width: 100%;
+  }
+  .toast-root {
+    left: 10px;
+    right: 10px;
+    bottom: calc(var(--bottom-nav-height) + 90px);
+    width: auto;
+  }
+  table,
+  .table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    display: block;
+  }
+}
+
+@media (max-width: 390px) {
+  .main-view { padding-inline: 10px; }
+  .card, .item-card, .kpi-card { padding: 12px; }
+  .nav-item b { font-size: .62rem; }
+  .btn { padding-inline: 11px; }
+}

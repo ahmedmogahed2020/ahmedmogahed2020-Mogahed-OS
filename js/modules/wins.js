@@ -11,6 +11,34 @@ const winFilters = [
   ['all','الكل'], ['today','اليوم'], ['week','الأسبوع'], ['month','الشهر'], ['linked','مرتبط'], ['suggested','اقتراحات'], ['big','كبير/محوري']
 ];
 
+
+const sizePoints = { 'صغير': 10, 'متوسط': 25, 'كبير': 55, 'محوري': 100 };
+const typeBonus = { 'تغلب على تشتت': 8, 'تعلم': 6, 'مبيعات': 10, 'حملة ناجحة': 12, 'قرار صحيح': 9, 'مراجعة': 5, 'طوارئ نجحت': 8 };
+const winLevels = [
+  { min: 0, name: 'بداية الطريق', icon: '🌱', stage: 'المرحلة 1', message: 'سجل انتصارات صغيرة حتى يتكون الإيقاع.' },
+  { min: 120, name: 'محارب التركيز', icon: '⚔️', stage: 'المرحلة 2', message: 'بدأت تنتصر على التشتت وتراكم خطوات حقيقية.' },
+  { min: 300, name: 'صانع العادة', icon: '🔥', stage: 'المرحلة 3', message: 'الفوز تحول من حدث عابر إلى عادة متكررة.' },
+  { min: 650, name: 'قائد التنفيذ', icon: '🚀', stage: 'المرحلة 4', message: 'أصبحت تربط الفوز بالأهداف والمشاريع والعمل.' },
+  { min: 1200, name: 'Architect of Progress', icon: '🏆', stage: 'المرحلة 5', message: 'النظام أصبح ماكينة تقدم شخصية وتجارية.' }
+];
+const winRewards = [
+  { id: 'coffee-100', points: 100, title: 'هدية صغيرة', reward: 'مشروب تحبه أو 20 دقيقة راحة بدون جلد ذات.' },
+  { id: 'focus-250', points: 250, title: 'ترقية مساحة العمل', reward: 'حسّن مكتبك بشيء بسيط: ترتيب، إضاءة، خلفية، أو أداة صغيرة.' },
+  { id: 'learning-500', points: 500, title: 'مكافأة تعلم', reward: 'اختار كورس/كتاب/أداة تساعدك تكمل المسار.' },
+  { id: 'premium-900', points: 900, title: 'مكافأة إنجاز كبيرة', reward: 'اعمل مكافأة محترمة بعد أسبوع قوي: خروجة، شراء نافع، أو يوم هادي.' },
+  { id: 'legend-1500', points: 1500, title: 'هدية القائد', reward: 'احتفل بإنجازك وراجع الرحلة بالكامل وسجل أكبر 5 انتصارات.' }
+];
+const titleRules = [
+  { id: 'starter', title: 'مبتدئ منتظم', test: stats => stats.total >= 3 },
+  { id: 'daily', title: 'حارس اليوم', test: stats => stats.today >= 1 },
+  { id: 'streak3', title: 'صاحب سلسلة', test: stats => stats.currentStreak >= 3 },
+  { id: 'streak7', title: 'أسبوع بلا انقطاع', test: stats => stats.currentStreak >= 7 || stats.bestStreak >= 7 },
+  { id: 'learner', title: 'صياد المعرفة', test: stats => stats.weeklyLearning >= 3 },
+  { id: 'executor', title: 'محول الأفكار لأفعال', test: stats => stats.weeklyActions >= 3 },
+  { id: 'hero', title: 'بطل الرجوع من التشتت', test: stats => stats.weeklyEmergency >= 2 },
+  { id: 'pro', title: 'قائد تقدم', test: stats => stats.total >= 25 && stats.linkedRate >= 50 }
+];
+
 function normalizeWin(win = {}) {
   return {
     ...win,
@@ -143,6 +171,39 @@ function knowledgeLessonsTouchedThisWeek() {
   return entries;
 }
 
+
+function getWinPoints(win) {
+  const base = sizePoints[win.size] || 10;
+  const bonus = typeBonus[win.type] || 0;
+  const relationBonus = (win.linkedGoalId || win.linkedProjectId || win.linkedTaskId || win.linkedKnowledgeId || win.linkedCampaignId || win.linkedDecisionId || win.linkedReviewId) ? 5 : 0;
+  return Number(win.points || 0) || (base + bonus + relationBonus);
+}
+
+function getTotalWinPoints(wins = getWins()) {
+  return wins.reduce((sum, win) => sum + getWinPoints(win), 0);
+}
+
+function getLevelInfo(points) {
+  const current = [...winLevels].reverse().find(level => points >= level.min) || winLevels[0];
+  const index = winLevels.findIndex(level => level.name === current.name);
+  const next = winLevels[index + 1] || null;
+  const progress = next ? calculatePercentage(points - current.min, next.min - current.min) : 100;
+  return { current, next, progress: Math.min(100, Math.max(0, progress)) };
+}
+
+function getUnlockedTitles(stats) {
+  return titleRules.filter(rule => rule.test(stats)).map(rule => rule.title);
+}
+
+function getClaimedRewards() {
+  return Array.isArray(appState.data.settings?.claimedWinRewards) ? appState.data.settings.claimedWinRewards : [];
+}
+
+function getRewardState(points) {
+  const claimed = new Set(getClaimedRewards());
+  return winRewards.map(reward => ({ ...reward, unlocked: points >= reward.points, claimed: claimed.has(reward.id), remaining: Math.max(0, reward.points - points) }));
+}
+
 function getWinStats() {
   const wins = getWins();
   const weekWins = wins.filter(w => isThisWeek(w.date));
@@ -151,8 +212,12 @@ function getWinStats() {
   const typeTop = countBy(wins, w => w.type)[0];
   const projectTop = countBy(wins, w => linkedTitle('projects', w.linkedProjectId))[0];
   const todayHasWin = wins.some(w => isToday(w.date));
+  const points = getTotalWinPoints(wins);
+  const levelInfo = getLevelInfo(points);
   return {
     total: wins.length,
+    points,
+    levelInfo,
     today: wins.filter(w => isToday(w.date)).length,
     week: weekWins.length,
     month: monthWins.length,
@@ -256,6 +321,40 @@ function renderWinStats(stats) {
     <article class="kpi-card"><small>أفضل سلسلة</small><strong>${safeText(stats.bestStreak)}</strong></article>
     <article class="kpi-card"><small>مرتبط بالأهداف</small><strong>${safeText(stats.linkedRate)}%</strong></article>
     <article class="kpi-card"><small>أكثر نوع</small><strong>${safeText(stats.topType)}</strong></article>
+    <article class="kpi-card"><small>نقاط الفوز</small><strong>${safeText(stats.points)}</strong></article>
+  </div>`;
+}
+
+
+function renderWinGamification(stats) {
+  const rewards = getRewardState(stats.points);
+  const titles = getUnlockedTitles(stats);
+  const level = stats.levelInfo.current;
+  const next = stats.levelInfo.next;
+  return `<div class="win-game-grid">
+    <article class="card win-level-card">
+      <div class="win-level-icon">${safeText(level.icon)}</div>
+      <div>
+        <p class="eyebrow">${safeText(level.stage)}</p>
+        <h3>${safeText(level.name)}</h3>
+        <p>${safeText(level.message)}</p>
+        <div class="xp-track"><span style="width:${safeText(stats.levelInfo.progress)}%"></span></div>
+        <div class="meta"><span>${safeText(stats.points)} نقطة فوز</span><span>${next ? `المستوى التالي: ${safeText(next.name)} عند ${safeText(next.min)} نقطة` : 'وصلت لأعلى مرحلة حالية'}</span></div>
+      </div>
+    </article>
+    <article class="card win-titles-card">
+      <div class="section-title"><div><h3>الألقاب</h3><p class="meta">ألقاب تتفتح تلقائيًا حسب استمرارك.</p></div></div>
+      <div class="title-badges">${titles.length ? titles.map(title => `<span>🏅 ${safeText(title)}</span>`).join('') : '<span>سجل 3 انتصارات لفتح أول لقب</span>'}</div>
+    </article>
+    <article class="card win-rewards-card full-span">
+      <div class="section-title"><div><h3>الهدايا والمكافآت</h3><p class="meta">كل هدية مرتبطة بنقاط الفوز. الهدف تشجيع الاستمرار بدون مبالغة.</p></div></div>
+      <div class="reward-grid">${rewards.map(reward => `<div class="reward-card ${reward.unlocked ? 'unlocked' : 'locked'} ${reward.claimed ? 'claimed' : ''}">
+        <b>${reward.unlocked ? '🎁' : '🔒'} ${safeText(reward.title)}</b>
+        <p>${safeText(reward.reward)}</p>
+        <small>${reward.claimed ? 'تم استلامها' : reward.unlocked ? 'جاهزة للاستلام' : `باقي ${safeText(reward.remaining)} نقطة`}</small>
+        ${reward.unlocked && !reward.claimed ? `<button class="btn small primary" data-action="claim-win-reward" data-id="${safeText(reward.id)}">استلم الهدية</button>` : ''}
+      </div>`).join('')}</div>
+    </article>
   </div>`;
 }
 
@@ -313,6 +412,7 @@ export function renderWins() {
   return `<section class="page win-system">
     ${pageHeader('خطة الفوز', 'نظام انتصارات يحافظ على الدافع ويربط التقدم بالأهداف والمشاريع والتنفيذ.', actions)}
     ${renderWinStats(stats)}
+    ${renderWinGamification(stats)}
     <div class="grid grid-2">${renderStreakCard(stats, suggestions)}${renderProgressStory(stats)}</div>
     ${renderSuggestions(suggestions)}
     ${renderToolbar()}
@@ -405,6 +505,17 @@ export function recordSuggestedWin(key) {
     sourceId: suggestion.key
   });
   toast('تم تسجيل الفوز');
+}
+
+export function claimWinReward(id) {
+  const reward = winRewards.find(item => item.id === id);
+  if (!reward) return;
+  const points = getTotalWinPoints();
+  if (points < reward.points) { toast('الهدية لم تفتح بعد', 'warning'); return; }
+  appState.data.settings.claimedWinRewards = Array.from(new Set([...(getClaimedRewards()), id]));
+  autoSave();
+  renderPage();
+  toast('تم استلام الهدية. استمتع بها بوعي');
 }
 
 export function setWinFilter(value = 'all') {

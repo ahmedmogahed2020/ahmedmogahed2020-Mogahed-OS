@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.11.0';
+export const APP_VERSION = '1.12.0';
 
 export const defaultSettings = {
   userName: 'مجاهد',
@@ -17,6 +17,7 @@ export const defaultSettings = {
   lastSystemTestAt: null,
   lastSystemTestSummary: null,
   recentItems: [],
+  claimedWinRewards: [],
   notifications: { enabled: true, soundEnabled: true, browserNotifications: false, leadMinutes: 10, volume: 0.35, soundType: 'soft', focusSound: true }
 };
 

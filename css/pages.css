@@ -309,3 +309,93 @@
     flex-direction: column;
   }
 }
+
+/* V12 Win gamification */
+.win-game-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr;
+  margin: 14px 0;
+}
+.win-level-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(17,24,39,.96), rgba(109,61,46,.86));
+  color: #fff;
+  border: 0;
+}
+.win-level-card .eyebrow,
+.win-level-card p,
+.win-level-card .meta { color: rgba(255,255,255,.78); }
+.win-level-card h3 { color: #fff; margin: 2px 0 6px; }
+.win-level-icon {
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  border-radius: 26px;
+  background: rgba(255,255,255,.14);
+  font-size: 2.35rem;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.12);
+}
+.xp-track {
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.18);
+  overflow: hidden;
+  margin: 12px 0 8px;
+}
+.xp-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: rgba(255,255,255,.82);
+}
+.win-titles-card,
+.win-rewards-card { display: grid; gap: 12px; }
+.title-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.title-badges span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: .85rem;
+  font-weight: 900;
+}
+.reward-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr;
+}
+.reward-card {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 18px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+.reward-card p { margin: 0; color: var(--muted); line-height: 1.7; }
+.reward-card small { color: var(--muted); font-weight: 900; }
+.reward-card.unlocked { background: rgba(109,61,46,.07); border-color: rgba(109,61,46,.22); }
+.reward-card.claimed { opacity: .72; }
+.full-span { grid-column: 1 / -1; }
+.btn.small { min-height: 36px; padding: 8px 12px; font-size: .82rem; }
+
+@media (min-width: 760px) {
+  .win-game-grid { grid-template-columns: 1.1fr .9fr; }
+  .reward-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1100px) {
+  .reward-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
