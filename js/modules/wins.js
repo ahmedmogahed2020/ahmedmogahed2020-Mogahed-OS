@@ -14,30 +14,49 @@ const winFilters = [
 
 const sizePoints = { 'صغير': 10, 'متوسط': 25, 'كبير': 55, 'محوري': 100 };
 const typeBonus = { 'تغلب على تشتت': 8, 'تعلم': 6, 'مبيعات': 10, 'حملة ناجحة': 12, 'قرار صحيح': 9, 'مراجعة': 5, 'طوارئ نجحت': 8 };
-const winLevels = [
-  { min: 0, name: 'بداية الطريق', icon: '🌱', stage: 'المرحلة 1', message: 'سجل انتصارات صغيرة حتى يتكون الإيقاع.' },
-  { min: 120, name: 'محارب التركيز', icon: '⚔️', stage: 'المرحلة 2', message: 'بدأت تنتصر على التشتت وتراكم خطوات حقيقية.' },
-  { min: 300, name: 'صانع العادة', icon: '🔥', stage: 'المرحلة 3', message: 'الفوز تحول من حدث عابر إلى عادة متكررة.' },
-  { min: 650, name: 'قائد التنفيذ', icon: '🚀', stage: 'المرحلة 4', message: 'أصبحت تربط الفوز بالأهداف والمشاريع والعمل.' },
-  { min: 1200, name: 'Architect of Progress', icon: '🏆', stage: 'المرحلة 5', message: 'النظام أصبح ماكينة تقدم شخصية وتجارية.' }
-];
-const winRewards = [
-  { id: 'coffee-100', points: 100, title: 'هدية صغيرة', reward: 'مشروب تحبه أو 20 دقيقة راحة بدون جلد ذات.' },
-  { id: 'focus-250', points: 250, title: 'ترقية مساحة العمل', reward: 'حسّن مكتبك بشيء بسيط: ترتيب، إضاءة، خلفية، أو أداة صغيرة.' },
-  { id: 'learning-500', points: 500, title: 'مكافأة تعلم', reward: 'اختار كورس/كتاب/أداة تساعدك تكمل المسار.' },
-  { id: 'premium-900', points: 900, title: 'مكافأة إنجاز كبيرة', reward: 'اعمل مكافأة محترمة بعد أسبوع قوي: خروجة، شراء نافع، أو يوم هادي.' },
-  { id: 'legend-1500', points: 1500, title: 'هدية القائد', reward: 'احتفل بإنجازك وراجع الرحلة بالكامل وسجل أكبر 5 انتصارات.' }
-];
-const titleRules = [
-  { id: 'starter', title: 'مبتدئ منتظم', test: stats => stats.total >= 3 },
-  { id: 'daily', title: 'حارس اليوم', test: stats => stats.today >= 1 },
-  { id: 'streak3', title: 'صاحب سلسلة', test: stats => stats.currentStreak >= 3 },
-  { id: 'streak7', title: 'أسبوع بلا انقطاع', test: stats => stats.currentStreak >= 7 || stats.bestStreak >= 7 },
-  { id: 'learner', title: 'صياد المعرفة', test: stats => stats.weeklyLearning >= 3 },
-  { id: 'executor', title: 'محول الأفكار لأفعال', test: stats => stats.weeklyActions >= 3 },
-  { id: 'hero', title: 'بطل الرجوع من التشتت', test: stats => stats.weeklyEmergency >= 2 },
-  { id: 'pro', title: 'قائد تقدم', test: stats => stats.total >= 25 && stats.linkedRate >= 50 }
-];
+const levelNames = ['بداية الطريق','محارب التركيز','صانع العادة','قائد التنفيذ','Architect of Progress','حارس الإيقاع','مهندس العادة','صائد التشتت','باني الزخم','قائد الأسبوع','مدير الطاقة','محرك المشاريع','صانع القرار','جامع المعرفة','منفذ الأفكار','قائد الحملة','محافظ السلسلة','صاحب النفس الطويل','مؤسس النظام','أسطورة التقدم'];
+const levelIcons = ['🌱','⚔️','🔥','🚀','🏆','🧭','🧱','🎯','⚡','📈','🔋','🛠️','🧠','📚','✅','📣','🔗','⛰️','🏛️','👑'];
+const rewardIdeas = ['مشروب تحبه بوعي','راحة 15 دقيقة بلا جلد ذات','ترتيب المكتب','نزهة قصيرة','كتاب أو كورس صغير','أداة تساعدك','وقت عائلي هادئ','تجربة مكان جديد','تحديث مساحة العمل','جلسة تخطيط ممتعة','وجبة تحبها','هدية رمزية لنفسك','إغلاق السوشيال ساعة','مكافأة تعلم','مراجعة رحلة التقدم','شراء شيء نافع','يوم خفيف بعد إنجاز كبير','صورة تذكارية للإنجاز','تطوير نظامك خطوة','استثمار صغير في مشروعك'];
+const titleSeeds = ['مبتدئ منتظم','حارس اليوم','صاحب سلسلة','أسبوع بلا انقطاع','صياد المعرفة','محول الأفكار لأفعال','بطل الرجوع من التشتت','قائد تقدم','مهندس التنفيذ','محارب التركيز','قائد المشاريع','صانع القرار','مدرب العادة','حامي الطاقة','صائد الفرص','باني الزخم','محترف المراجعة','قائد الحملات','مروض التشتت','صاحب النفس الطويل','مكتشف المعرفة','منجز هادئ','قائد الأسبوع','صانع الفوز','حارس النظام'];
+
+const winLevels = Array.from({ length: 300 }, (_, index) => {
+  const number = index + 1;
+  const min = index === 0 ? 0 : Math.round(80 * index + Math.pow(index, 1.22) * 22);
+  const name = `${levelNames[index % levelNames.length]} ${number}`;
+  return {
+    min,
+    name,
+    icon: levelIcons[index % levelIcons.length],
+    stage: `المرحلة ${number} من 300`,
+    message: number === 1 ? 'سجل انتصارات صغيرة حتى يتكون الإيقاع.' : `كل ${number} خطوة تثبت أنك تبني نظام تقدم مستمر، وليس دفعة حماس عابرة.`
+  };
+});
+
+const winRewards = Array.from({ length: 700 }, (_, index) => {
+  const number = index + 1;
+  const points = 75 + index * 55 + Math.floor(index / 10) * 45;
+  const idea = rewardIdeas[index % rewardIdeas.length];
+  return {
+    id: `reward-${String(number).padStart(3, '0')}`,
+    points,
+    title: `مكافأة ${number} من 700`,
+    reward: `${idea}. افتحها كمكافأة صغيرة ومحسوبة بعد تراكم نقاط الفوز.`
+  };
+});
+
+const titleRules = Array.from({ length: 300 }, (_, index) => {
+  const number = index + 1;
+  const minPoints = 40 + index * 45;
+  const title = `${titleSeeds[index % titleSeeds.length]} ${number}`;
+  return {
+    id: `title-${String(number).padStart(3, '0')}`,
+    title,
+    minPoints,
+    test: stats => stats.points >= minPoints || (number <= 10 && stats.total >= number) || (number % 25 === 0 && stats.bestStreak >= Math.floor(number / 5))
+  };
+});
+
+export const winGamificationCounts = { levels: winLevels.length, titles: titleRules.length, rewards: winRewards.length };
 
 function normalizeWin(win = {}) {
   return {
@@ -326,35 +345,70 @@ function renderWinStats(stats) {
 }
 
 
+function renderMilestoneList(items, type, mapper) {
+  return `<div class="milestone-list ${safeText(type)}">${items.map(mapper).join('')}</div>`;
+}
+
 function renderWinGamification(stats) {
   const rewards = getRewardState(stats.points);
-  const titles = getUnlockedTitles(stats);
+  const titles = titleRules.map(rule => ({ ...rule, unlocked: rule.test(stats), remaining: Math.max(0, rule.minPoints - stats.points) }));
   const level = stats.levelInfo.current;
   const next = stats.levelInfo.next;
+  const currentLevelIndex = Math.max(1, winLevels.findIndex(item => item.name === level.name) + 1);
+  const unlockedTitles = titles.filter(title => title.unlocked);
+  const unlockedRewards = rewards.filter(reward => reward.unlocked);
+  const claimedRewards = rewards.filter(reward => reward.claimed);
+
+  const levelsHtml = renderMilestoneList(winLevels, 'levels', item => {
+    const active = item.name === level.name;
+    const unlocked = stats.points >= item.min;
+    return `<div class="milestone-row ${unlocked ? 'unlocked' : 'locked'} ${active ? 'active' : ''}">
+      <span>${safeText(item.icon)}</span>
+      <div><b>${safeText(item.stage)} — ${safeText(item.name)}</b><small>${unlocked ? 'مفتوحة' : `تفتح عند ${safeText(item.min)} نقطة`} · ${safeText(item.message)}</small></div>
+    </div>`;
+  });
+
+  const titlesHtml = renderMilestoneList(titles, 'titles', item => `<div class="milestone-row ${item.unlocked ? 'unlocked' : 'locked'}">
+    <span>${item.unlocked ? '🏅' : '🔒'}</span>
+    <div><b>${safeText(item.title)}</b><small>${item.unlocked ? 'لقب مفتوح' : `باقي ${safeText(item.remaining)} نقطة تقريبًا`}</small></div>
+  </div>`);
+
+  const rewardsHtml = renderMilestoneList(rewards, 'rewards', reward => `<div class="reward-card ${reward.unlocked ? 'unlocked' : 'locked'} ${reward.claimed ? 'claimed' : ''}">
+    <b>${reward.unlocked ? '🎁' : '🔒'} ${safeText(reward.title)}</b>
+    <p>${safeText(reward.reward)}</p>
+    <small>${reward.claimed ? 'تم استلامها' : reward.unlocked ? 'جاهزة للاستلام' : `باقي ${safeText(reward.remaining)} نقطة`}</small>
+    ${reward.unlocked && !reward.claimed ? `<button class="btn small primary" data-action="claim-win-reward" data-id="${safeText(reward.id)}">استلم الهدية</button>` : ''}
+  </div>`);
+
   return `<div class="win-game-grid">
-    <article class="card win-level-card">
+    <article class="card win-level-card full-span">
       <div class="win-level-icon">${safeText(level.icon)}</div>
       <div>
         <p class="eyebrow">${safeText(level.stage)}</p>
         <h3>${safeText(level.name)}</h3>
         <p>${safeText(level.message)}</p>
         <div class="xp-track"><span style="width:${safeText(stats.levelInfo.progress)}%"></span></div>
-        <div class="meta"><span>${safeText(stats.points)} نقطة فوز</span><span>${next ? `المستوى التالي: ${safeText(next.name)} عند ${safeText(next.min)} نقطة` : 'وصلت لأعلى مرحلة حالية'}</span></div>
+        <div class="meta"><span>${safeText(stats.points)} نقطة فوز</span><span>${next ? `التالي: ${safeText(next.name)} عند ${safeText(next.min)} نقطة` : 'وصلت لأعلى مرحلة'}</span></div>
       </div>
     </article>
-    <article class="card win-titles-card">
-      <div class="section-title"><div><h3>الألقاب</h3><p class="meta">ألقاب تتفتح تلقائيًا حسب استمرارك.</p></div></div>
-      <div class="title-badges">${titles.length ? titles.map(title => `<span>🏅 ${safeText(title)}</span>`).join('') : '<span>سجل 3 انتصارات لفتح أول لقب</span>'}</div>
-    </article>
-    <article class="card win-rewards-card full-span">
-      <div class="section-title"><div><h3>الهدايا والمكافآت</h3><p class="meta">كل هدية مرتبطة بنقاط الفوز. الهدف تشجيع الاستمرار بدون مبالغة.</p></div></div>
-      <div class="reward-grid">${rewards.map(reward => `<div class="reward-card ${reward.unlocked ? 'unlocked' : 'locked'} ${reward.claimed ? 'claimed' : ''}">
-        <b>${reward.unlocked ? '🎁' : '🔒'} ${safeText(reward.title)}</b>
-        <p>${safeText(reward.reward)}</p>
-        <small>${reward.claimed ? 'تم استلامها' : reward.unlocked ? 'جاهزة للاستلام' : `باقي ${safeText(reward.remaining)} نقطة`}</small>
-        ${reward.unlocked && !reward.claimed ? `<button class="btn small primary" data-action="claim-win-reward" data-id="${safeText(reward.id)}">استلم الهدية</button>` : ''}
-      </div>`).join('')}</div>
-    </article>
+
+    <details class="card win-collapsible" open>
+      <summary><span>المراحل</span><b>${safeText(currentLevelIndex)} / 300</b></summary>
+      <p class="meta">300 مرحلة تقدم. افتحها أو اقفلها بالسهم حتى لا تزحم الصفحة.</p>
+      ${levelsHtml}
+    </details>
+
+    <details class="card win-collapsible">
+      <summary><span>الألقاب</span><b>${safeText(unlockedTitles.length)} / 300</b></summary>
+      <p class="meta">كل لقب يفتح تلقائيًا حسب نقاط الفوز والسلاسل والاستمرار.</p>
+      ${titlesHtml}
+    </details>
+
+    <details class="card win-collapsible full-span">
+      <summary><span>الهدايا والمكافآت</span><b>${safeText(unlockedRewards.length)} مفتوحة · ${safeText(claimedRewards.length)} مستلمة / 700</b></summary>
+      <p class="meta">700 مكافأة متدرجة. استخدمها كتشجيع محسوب وليس كتشتيت.</p>
+      <div class="reward-grid reward-grid-large">${rewardsHtml}</div>
+    </details>
   </div>`;
 }
 

@@ -10,7 +10,7 @@ import { renderKnowledge } from './knowledge.js';
 import { renderCampaigns, calculateCampaign } from './campaigns.js';
 import { renderDecisions } from './decisions.js';
 import { renderReviews } from './reviews.js';
-import { renderWins } from './wins.js';
+import { renderWins, winGamificationCounts } from './wins.js';
 import { notificationSoundLibrary, notificationCategories } from './notifications.js';
 
 const routeRenderers = {
@@ -173,6 +173,17 @@ function checkNotificationSoundSystem() {
   return results;
 }
 
+
+function checkWinGamificationScale() {
+  const results = [];
+  results.push(winGamificationCounts.levels >= 300 ? pass('مراحل الفوز', `${winGamificationCounts.levels} مرحلة جاهزة.`) : fail('مراحل الفوز', `المتاح ${winGamificationCounts.levels} فقط.`));
+  results.push(winGamificationCounts.titles >= 300 ? pass('ألقاب الفوز', `${winGamificationCounts.titles} لقب جاهز.`) : fail('ألقاب الفوز', `المتاح ${winGamificationCounts.titles} فقط.`));
+  results.push(winGamificationCounts.rewards >= 700 ? pass('هدايا ومكافآت الفوز', `${winGamificationCounts.rewards} هدية/مكافأة جاهزة.`) : fail('هدايا ومكافآت الفوز', `المتاح ${winGamificationCounts.rewards} فقط.`));
+  const html = renderWins();
+  results.push(html.includes('<details') && html.includes('win-collapsible') ? pass('طيّ عناصر الفوز', 'المراحل والألقاب والهدايا داخل أقسام قابلة للفتح والقفل.') : warn('طيّ عناصر الفوز', 'لم يتم العثور على أقسام details واضحة.'));
+  return results;
+}
+
 function checkResetSafety() {
   const empty = createEmptyData();
   return empty && Array.isArray(empty.tasks) && empty.settings ? [pass('Reset Safety', 'شكل البيانات الافتراضي جاهز وآمن.')] : [fail('Reset Safety', 'شكل البيانات الافتراضي غير سليم.')];
@@ -191,6 +202,7 @@ export function runSystemTests() {
     ...checkYouTubeSettings(),
     ...checkDuplicateIds(),
     ...checkNotificationSoundSystem(),
+    ...checkWinGamificationScale(),
     ...checkResetSafety()
   ];
   const summary = {
