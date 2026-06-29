@@ -10,7 +10,7 @@ import { getBackendReadinessReport, initializeBackendServices, pushDataToCloud, 
 import { getAuthStatus, signInWithEmail, signOutCloud, signUpWithEmail, initializeAuthService } from '../services/authService.js';
 import { getSyncStatus } from '../services/syncService.js';
 import { getSupabaseSql } from '../services/supabaseAdapter.js';
-import { getFileServiceStatus, getSupabaseStorageSql, uploadDataUrlToSupabaseStorage } from '../services/fileService.js';
+import { canUseSupabaseStorage, getFileServiceStatus, getSupabaseStorageSql, uploadDataUrlToSupabaseStorage } from '../services/fileService.js';
 import { setData } from '../state.js';
 
 let lastQaReport = null;
@@ -160,7 +160,7 @@ function storagePanel() {
   const status = getFileServiceStatus(appState.data.settings);
   const stats = getKnowledgeFileStats();
   return `<article class="card storage-card"><h3>Supabase File Storage</h3>
-    <p class="meta">يرفع ملفات المعرفة الكبيرة مثل PDF والصور والفيديوهات إلى Supabase Storage، ويحفظ داخل البيانات الرابط والمسار فقط بدل Base64 الثقيل.</p>
+    <p class="meta">يرفع ملفات المعرفة الكبيرة مثل PDF والصور والفيديوهات إلى Supabase Storage، ويحفظ داخل البيانات الرابط والمسار فقط بدل Base64 الثقيل. لا يتم استخدام Storage إلا بعد تسجيل الدخول.</p>
     <div class="backup-breakdown">
       <span><b>وضع الملفات</b><em>${safeText(status.mode)}</em></span>
       <span><b>Bucket</b><em>${safeText(status.bucket)}</em></span>
@@ -366,6 +366,8 @@ export async function migrateKnowledgeFilesToCloud() {
   const stats = getKnowledgeFileStats();
   if (!stats.localInline.length) return toast('لا توجد ملفات محلية تحتاج نقلًا للسحابة');
   if ((appState.data.settings.backend || {}).fileStorage !== 'supabase-storage') return toast('اختر File Storage = Supabase Storage أولًا', 'error');
+  const access = await canUseSupabaseStorage(appState.data.settings);
+  if (!access.ok) return toast(access.reason, 'error');
   let moved = 0;
   let failed = 0;
   toast(`جاري نقل ${stats.localInline.length} ملف إلى Supabase Storage...`);
@@ -408,6 +410,7 @@ export function updateSeedData(checked) { updateSetting('enableSeedData', Boolea
 
 
 function updateBackendSetting(key, value) {
+  if (key === 'url') value = String(value || '').trim().replace(/\/+$/, '');
   appState.data.settings.backend = { ...(appState.data.settings.backend || {}), [key]: value };
   initializeBackendServices(appState.data.settings);
   autoSave();

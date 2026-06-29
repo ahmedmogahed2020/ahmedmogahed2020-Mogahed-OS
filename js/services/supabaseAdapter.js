@@ -5,14 +5,33 @@ let clientCache = null;
 let clientSignature = '';
 
 function getBackend(settings = {}) { return settings.backend || {}; }
+
+function normalizeSupabaseUrl(value = '') {
+  return String(value || '').trim().replace(/\/+$/, '');
+}
+
+export function isValidSupabaseProjectUrl(value = '') {
+  const url = normalizeSupabaseUrl(value);
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return ['http:', 'https:'].includes(parsed.protocol) && /\.supabase\.co$/i.test(parsed.hostname) && !parsed.pathname.replace(/\//g, '');
+  } catch {
+    return false;
+  }
+}
+
+export function getCleanSupabaseUrl(settings = {}) {
+  return normalizeSupabaseUrl(getBackend(settings).url || '');
+}
 function signature(settings = {}) {
   const backend = getBackend(settings);
-  return `${backend.url || ''}|${backend.anonKey || ''}`;
+  return `${normalizeSupabaseUrl(backend.url || '')}|${backend.anonKey || ''}`;
 }
 
 export function isSupabaseConfigured(settings = {}) {
   const backend = getBackend(settings);
-  return Boolean(backend.enabled && backend.provider === 'supabase' && backend.url && backend.anonKey);
+  return Boolean(backend.enabled && backend.provider === 'supabase' && isValidSupabaseProjectUrl(backend.url) && backend.anonKey);
 }
 
 export function getSupabaseConfigStatus(settings = {}) {
@@ -21,7 +40,8 @@ export function getSupabaseConfigStatus(settings = {}) {
   if (backend.provider !== 'supabase') missing.push('Backend Provider ليس Supabase');
   if (!backend.enabled) missing.push('Cloud غير مفعل');
   if (!backend.url) missing.push('Supabase URL ناقص');
-  if (!backend.anonKey) missing.push('Anon Key ناقص');
+  else if (!isValidSupabaseProjectUrl(backend.url)) missing.push('Supabase URL يجب أن يكون رابط المشروع مثل https://xxxx.supabase.co وليس رابط dashboard');
+  if (!backend.anonKey) missing.push('Anon/Publishable Key ناقص');
   return { ok: missing.length === 0, missing, table: SNAPSHOT_TABLE };
 }
 
@@ -54,7 +74,7 @@ export async function getSupabaseClient(settings = {}) {
   if (clientCache && clientSignature === sig) return clientCache;
   const sdk = await loadSupabaseSdk();
   const backend = getBackend(settings);
-  clientCache = sdk.createClient(backend.url, backend.anonKey, {
+  clientCache = sdk.createClient(normalizeSupabaseUrl(backend.url), backend.anonKey, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
   clientSignature = sig;

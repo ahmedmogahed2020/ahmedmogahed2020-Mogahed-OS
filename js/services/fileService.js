@@ -10,6 +10,17 @@ export function isSupabaseFileStorageEnabled(settings = {}) {
   return isSupabaseConfigured(settings) && getFileStorageMode(settings) === 'supabase-storage';
 }
 
+export async function canUseSupabaseStorage(settings = {}) {
+  if (!isSupabaseFileStorageEnabled(settings)) return { ok: false, reason: 'Supabase Storage غير مفعل أو إعدادات Supabase غير مكتملة' };
+  try {
+    const user = await getSupabaseUser(settings);
+    if (!user?.id) return { ok: false, reason: 'سجّل الدخول إلى Supabase قبل استخدام Storage' };
+    return { ok: true, user };
+  } catch (error) {
+    return { ok: false, reason: error?.message || 'تعذر التحقق من Supabase Storage' };
+  }
+}
+
 function cleanFileName(name = 'file') {
   const base = String(name || 'file')
     .replace(/[\\/:*?"<>|#%{}^~\[\]`]/g, '-')
@@ -58,6 +69,8 @@ export function prepareFileRecord(file, extra = {}) {
 
 export async function getSignedFileUrl(settings = {}, path = '', expiresIn = 60 * 60 * 24 * 7, bucketName = '') {
   if (!path) return '';
+  const access = await canUseSupabaseStorage(settings);
+  if (!access.ok) throw new Error(access.reason);
   const client = await getSupabaseClient(settings);
   const bucket = bucketName || getStorageBucket(settings);
   const { data, error } = await client.storage.from(bucket).createSignedUrl(path, expiresIn);
@@ -68,9 +81,10 @@ export async function getSignedFileUrl(settings = {}, path = '', expiresIn = 60 
 export async function uploadFileToSupabaseStorage(settings = {}, file, options = {}) {
   if (!file) throw new Error('لا يوجد ملف للرفع');
   if (!isSupabaseFileStorageEnabled(settings)) throw new Error('Supabase Storage غير مفعل من الإعدادات');
+  const access = await canUseSupabaseStorage(settings);
+  if (!access.ok) throw new Error(access.reason);
   const client = await getSupabaseClient(settings);
-  const user = await getSupabaseUser(settings);
-  if (!user?.id) throw new Error('سجّل الدخول إلى Supabase قبل رفع الملفات للسحابة');
+  const user = access.user;
 
   const bucket = options.bucket || getStorageBucket(settings);
   const kind = options.kind || getFileKind(file);
@@ -140,13 +154,17 @@ export function getSupabaseStorageSql(settings = {}) {
 export function getFileServiceStatus(settings = {}) {
   const mode = getFileStorageMode(settings);
   const config = getSupabaseConfigStatus(settings);
+  const bucket = getStorageBucket(settings);
+  const hasBucket = Boolean(bucket && /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/.test(String(bucket)));
+  const cloudReady = mode === 'supabase-storage' && config.ok && hasBucket;
+  const bucketMessage = hasBucket ? '' : '، اسم Bucket غير صالح';
   return {
     ready: true,
     mode,
-    bucket: getStorageBucket(settings),
-    cloudReady: mode === 'supabase-storage' && config.ok,
+    bucket,
+    cloudReady,
     message: mode === 'supabase-storage'
-      ? (config.ok ? 'Supabase Storage مفعل. الملفات الجديدة سترفع للسحابة عند تسجيل الدخول.' : `Supabase Storage مختار لكن الإعداد ناقص: ${config.missing.join('، ')}`)
+      ? (cloudReady ? 'Supabase Storage مفعل. سجّل الدخول قبل رفع الملفات.' : `Supabase Storage مختار لكن الإعداد ناقص: ${config.missing.join('، ')}${bucketMessage}`)
       : 'الملفات تعمل محليًا الآن. اختر Supabase Storage عند الجاهزية.'
   };
 }

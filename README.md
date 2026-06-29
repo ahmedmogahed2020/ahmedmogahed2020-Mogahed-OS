@@ -641,3 +641,15 @@ for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
 - الملفات القديمة المخزنة محليًا يمكن نقلها من زر “نقل ملفات المعرفة للسحابة”.
 - لا يتم حذف الملف المحلي أثناء النقل إلا بعد نجاح رفعه.
 
+
+
+## V20.1 Supabase Storage Guard
+
+تمت إضافة حماية إضافية عند ربط Supabase:
+
+- التحقق من أن Supabase URL هو رابط المشروع بصيغة `https://xxxx.supabase.co` وليس رابط Dashboard.
+- منع أي محاولة لاستخدام Supabase Storage قبل تسجيل الدخول.
+- تحسين رسائل الخطأ الخاصة بالـ Storage بدل ظهور رسائل خام مثل `Invalid path specified in request URL`.
+- التحقق من اسم Bucket قبل نقل ملفات المعرفة.
+
+لو ظهرت رسالة أن المزامنة تحتاج تسجيل الدخول، سجّل الدخول أولًا من قسم Supabase Database Sync ثم جرّب الرفع أو نقل الملفات.
