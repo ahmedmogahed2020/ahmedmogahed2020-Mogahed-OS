@@ -1,4 +1,4 @@
-/* V19 Mobile UX Rebuild Layer
+/* Mobile UX rebuild layer
    This file is intentionally loaded AFTER responsive.css.
    It rebuilds the mobile layout as a clean app-like experience without changing business logic. */
 
@@ -666,7 +666,7 @@
   }
 }
 
-/* V21 Backup Control Center mobile polish */
+/* Backup control center mobile polish */
 @media (max-width: 760px) {
   body[data-page="more"] .backup-control-center .page-header {
     display: grid !important;
@@ -750,4 +750,416 @@
     max-height: 260px !important;
     font-size: .72rem !important;
   }
+}
+
+/* Mobile stability contract
+   One final mobile source of truth for shell spacing, nav, FAB, quick actions, modals and overflow.
+   Kept in mobile.css so responsive.css no longer fights mobile rules. */
+@media (max-width: 820px) {
+  :root {
+    --bottom-nav-height: 76px;
+    --mobile-side-gap: 10px;
+    --mobile-bottom-clearance: calc(var(--bottom-nav-height) + 36px + env(safe-area-inset-bottom));
+  }
+
+  html,
+  body,
+  .app-shell {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+  }
+
+  body {
+    min-height: 100dvh;
+  }
+
+  .app-shell {
+    margin: 0;
+  }
+
+  .app-header {
+    display: none !important;
+  }
+
+  .main-view {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px var(--mobile-side-gap) var(--mobile-bottom-clearance) !important;
+    overflow-x: hidden !important;
+  }
+
+  .page,
+  .card,
+  .item-card,
+  .kpi-card,
+  .command-panel,
+  .knowledge-section,
+  .knowledge-library-card,
+  .knowledge-accordion,
+  .more-tile,
+  .backup-section {
+    max-width: 100% !important;
+  }
+
+  .card,
+  .item-card,
+  .kpi-card,
+  .command-panel,
+  .knowledge-section,
+  .knowledge-library-card,
+  .knowledge-accordion,
+  .more-tile {
+    overflow: hidden !important;
+  }
+
+  .page-header,
+  .section-title,
+  .modal-header {
+    min-width: 0 !important;
+  }
+
+  .page-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+  }
+
+  .page-title,
+  .page-title h2,
+  .page-title p,
+  .section-title,
+  .section-title h3,
+  .section-title p,
+  .item-card h3,
+  .card h3 {
+    min-width: 0 !important;
+    overflow-wrap: anywhere;
+  }
+
+  .grid,
+  .grid-2,
+  .grid-3,
+  .grid-4,
+  .dashboard-grid,
+  .command-layout,
+  .command-main,
+  .command-side,
+  .form-grid,
+  .settings-card .settings-grid,
+  .decision-intel-grid,
+  .backup-stats,
+  .campaign-kpis,
+  .win-kpi-grid,
+  .progress-story-grid,
+  .task-meta-grid,
+  .knowledge-upload-grid,
+  .knowledge-reader-mode,
+  .knowledge-library-shell {
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+  }
+
+  .kpi-grid,
+  .home-stack .command-kpis,
+  .home-stack > .kpi-grid.command-kpis,
+  body[data-page="more"] .more-grid,
+  .backup-status-strip,
+  .backup-breakdown {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .btn-row:not(.filters),
+  .card > .btn-row,
+  .modal-body .btn-row:not(.filters),
+  .command-hero .btn-row,
+  .pdf-viewer-actions,
+  .pdf-page-control,
+  .backup-main-actions,
+  .backup-section .btn-row {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+
+  .btn-row:not(.filters) > *,
+  .card > .btn-row > *,
+  .modal-body .btn-row:not(.filters) > *,
+  .command-hero .btn-row > *,
+  .pdf-viewer-actions > *,
+  .pdf-page-control > *,
+  .backup-main-actions > *,
+  .backup-section .btn-row > *,
+  label.btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    white-space: normal !important;
+    text-align: center !important;
+  }
+
+  .filters {
+    display: flex !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filters > * {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
+
+  .bottom-nav {
+    position: fixed !important;
+    left: var(--mobile-side-gap) !important;
+    right: var(--mobile-side-gap) !important;
+    bottom: calc(8px + env(safe-area-inset-bottom)) !important;
+    width: auto !important;
+    height: var(--bottom-nav-height) !important;
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 2px !important;
+    padding: 7px 6px !important;
+    border-radius: 24px !important;
+    box-shadow: 0 18px 45px rgba(17, 24, 39, .16) !important;
+  }
+
+  .nav-item {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding: 6px 2px !important;
+    border-radius: 17px !important;
+    overflow: hidden !important;
+  }
+
+  .nav-item span {
+    font-size: .98rem !important;
+    line-height: 1 !important;
+  }
+
+  .nav-item b {
+    font-size: .61rem !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+  }
+
+  .fab {
+    position: fixed !important;
+    z-index: var(--z-fab) !important;
+    left: 14px !important;
+    bottom: calc(var(--bottom-nav-height) + 18px + env(safe-area-inset-bottom)) !important;
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 21px !important;
+  }
+
+  .quick-actions {
+    position: fixed !important;
+    z-index: var(--z-fab) !important;
+    left: 14px !important;
+    right: auto !important;
+    bottom: calc(var(--bottom-nav-height) + 82px + env(safe-area-inset-bottom)) !important;
+    width: min(270px, calc(100vw - 28px)) !important;
+    max-width: calc(100vw - 28px) !important;
+  }
+
+  .quick-actions button {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 42px !important;
+    border-radius: 18px !important;
+    text-align: center !important;
+  }
+
+  .modal-panel {
+    inset: auto 7px 7px !important;
+    width: auto !important;
+    max-width: calc(100vw - 14px) !important;
+    max-height: min(92dvh, calc(100dvh - 14px)) !important;
+    border-radius: 26px 26px 20px 20px !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+  }
+
+  .modal-root.wide .modal-panel {
+    width: auto !important;
+    max-width: calc(100vw - 14px) !important;
+  }
+
+  .modal-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 5 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    padding: 10px !important;
+    border-radius: 26px 26px 0 0 !important;
+  }
+
+  .modal-header h3 {
+    font-size: 1rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .modal-actions {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+  }
+
+  .modal-actions .btn,
+  .modal-actions button {
+    width: auto !important;
+    min-height: 38px !important;
+    padding: 8px 10px !important;
+    border-radius: 14px !important;
+    font-size: .84rem !important;
+    white-space: nowrap !important;
+  }
+
+  .modal-body {
+    padding: 12px !important;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom)) !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  input,
+  select,
+  textarea,
+  .btn {
+    font-size: 16px !important;
+  }
+
+  iframe,
+  video,
+  object,
+  embed,
+  img,
+  canvas,
+  svg,
+  .pdf-viewer,
+  .knowledge-pdf-viewer,
+  .video-frame,
+  .youtube-frame,
+  .embed-frame {
+    max-width: 100% !important;
+  }
+
+  .video-frame,
+  .youtube-frame,
+  .embed-frame {
+    aspect-ratio: 16 / 9;
+    height: auto !important;
+  }
+
+  table,
+  .table-wrap,
+  .comparison-table,
+  .campaign-table {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .toast-root {
+    left: 10px !important;
+    right: 10px !important;
+    bottom: calc(var(--bottom-nav-height) + 82px + env(safe-area-inset-bottom)) !important;
+    width: auto !important;
+  }
+}
+
+@media (max-width: 370px) {
+  :root {
+    --mobile-side-gap: 8px;
+  }
+
+  .nav-item b {
+    font-size: .56rem !important;
+  }
+
+  .btn-row:not(.filters),
+  .card > .btn-row,
+  .modal-body .btn-row:not(.filters),
+  .command-hero .btn-row,
+  .pdf-viewer-actions,
+  .pdf-page-control,
+  .backup-main-actions,
+  .backup-section .btn-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* Backup and Supabase mobile */
+@media (max-width: 760px) {
+  .backup-hero-main {
+    grid-template-columns: 1fr !important;
+  }
+  .backup-hero-main .btn {
+    width: 100% !important;
+  }
+  .backup-flow,
+  .backup-checklist {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .backup-flow span,
+  .backup-checklist span {
+    padding: 9px !important;
+    border-radius: 14px !important;
+  }
+}
+@media (max-width: 420px) {
+  .backup-flow,
+  .backup-checklist {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Daily command mobile guard */
+@media (max-width: 760px) {
+  .daily-command-strip { padding: 12px; gap: 12px; }
+  .daily-command-head h3 { font-size: 1.05rem; }
+  .daily-command-head p { font-size: .9rem; }
+  .daily-command-lanes { grid-template-columns: 1fr; gap: 8px; }
+  .daily-lane { padding: 10px; }
+}
+
+/* Mobile daily review flow */
+@media (max-width: 720px) {
+  .daily-review-flow-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .daily-review-flow-grid span { padding: 10px 8px; text-align: center; }
+  .daily-review-flow-card .btn-row { display: grid; grid-template-columns: 1fr; }
+}
+
+/* Mobile task time polish */
+@media (max-width: 720px) {
+  .task-card-head { flex-direction: column; align-items: stretch; }
+  .task-time-chip { width: 100%; align-items: flex-start; min-width: 0; }
+  .task-time-pulse-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .task-next-alert { grid-template-columns: 1fr; align-items: stretch; }
+}
+
+
+/* Mobile daily flow bridge */
+@media (max-width: 760px) {
+  .flow-bridge-grid,
+  .task-review-flow-grid,
+  .review-flow-grid { grid-template-columns: 1fr; }
+  .home-task-review-flow .section-title,
+  .task-review-flow-card .section-title,
+  .review-flow-bridge-card .section-title { align-items: flex-start; gap: 10px; }
 }

@@ -5,6 +5,7 @@ import { closeModal, emptyState, objectFromForm, openModal, pageHeader, statusBa
 import { calculatePercentage, formatCurrency, formatDate, generateId, isPast, parseLines, safeNumber, safeText, todayISO } from '../utils.js';
 import { removeItem, simpleCard, upsert } from './shared.js';
 import { calculateCampaign } from './campaigns.js';
+import { getDailyFlowState } from './dailyFlow.js';
 
 const reviewViews = [
   ['all', 'الكل'],
@@ -95,6 +96,7 @@ function getCampaignsNeedDecision() {
 }
 
 function buildDailyDraft() {
+  const flow = getDailyFlowState();
   const tasks = getTodayTasks();
   const done = tasks.filter(task => task.status === 'مكتملة');
   const open = tasks.filter(task => task.status !== 'مكتملة');
@@ -105,7 +107,7 @@ function buildDailyDraft() {
   const blockers = open.filter(task => task.status === 'مؤجلة' || isPast(task.dueDate)).map(task => `تعطيل/تأخير: ${task.title}`).join('\n');
   const lesson = knowledge[0] ? `من المعرفة: ${knowledge[0].title}` : '';
   const tomorrowAction = [
-    open[0]?.title ? `أنهي: ${open[0].title}` : '',
+    flow.primaryTask?.title ? `أغلق أو انقل: ${flow.primaryTask.title}` : open[0]?.title ? `أنهي: ${open[0].title}` : '',
     campaigns[0]?.productName ? `احسم حملة: ${campaigns[0].productName}` : '',
     decisions[0]?.title ? `راجع قرار: ${decisions[0].title}` : ''
   ].filter(Boolean).join('\n');
@@ -119,7 +121,7 @@ function buildDailyDraft() {
     focusScore: 7,
     energyScore: 7,
     actionItems: parseLines(tomorrowAction),
-    autoSummary: `مهام اليوم: ${tasks.length} — مكتمل: ${done.length} — مفتوح: ${open.length} — معرفة حديثة: ${knowledge.length} — قرارات مستحقة: ${decisions.length}.`
+    autoSummary: `مهام اليوم: ${tasks.length} — مكتمل: ${done.length} — مفتوح: ${open.length} — متأخر: ${flow.overdue.length} — المهمة الأقرب: ${flow.primaryTask?.title || 'لا توجد'} — معرفة حديثة: ${knowledge.length} — قرارات مستحقة: ${decisions.length}.`
   };
 }
 
@@ -228,10 +230,25 @@ function renderSmartDigest() {
   </div>`;
 }
 
+
+function renderReviewFlowBridge() {
+  const flow = getDailyFlowState();
+  return `<article class="card review-flow-bridge-card">
+    <div class="section-title"><div><span class="eyebrow">تدفق اليوم</span><h3>مراجعة مبنية على تنفيذ اليوم</h3></div><span class="badge ${flow.todayReview ? 'success' : 'warning'}">${flow.todayReview ? 'موجودة' : 'جاهزة'}</span></div>
+    <div class="review-flow-grid">
+      <span><b>${safeText(flow.primaryTask?.title || 'لا توجد')}</b><small>أقرب مهمة</small></span>
+      <span><b>${safeText(flow.todayDone.length)} / ${safeText(flow.todayTasks.length)}</b><small>إنجاز اليوم</small></span>
+      <span><b>${safeText(flow.overdue.length)}</b><small>متأخر</small></span>
+    </div>
+    <p class="meta">${safeText(flow.reviewAction)}</p>
+    <div class="btn-row"><button class="btn primary" data-action="create-daily-review">افتح مراجعة اليوم</button><button class="btn ghost" data-route="tasks">راجع المهام</button></div>
+  </article>`;
+}
+
 export function renderReviews(){
   const actions = '<button class="btn primary" data-action="create-daily-review">مراجعة اليوم الذكية</button><button class="btn ghost" data-action="create-weekly-review">مراجعة الأسبوع الذكية</button><button class="btn ghost" data-action="open-review-modal" data-type="daily">مراجعة فارغة</button>';
   const reviews = getReviews().filter(reviewMatches);
-  return `<section class="page review-system">${pageHeader('المراجعات', 'Review & Reflection Pro — مراجعات تسحب من المهام والمعرفة والحملات والقرارات وتحولها لتنفيذ.', actions)}${renderStats()}${renderSmartDigest()}${renderToolbar()}<div class="grid grid-2">${reviews.length ? reviews.map(card).join('') : emptyState('لا توجد مراجعات مطابقة', 'اكتب مراجعة ذكية أو غيّر الفلتر الحالي.', actions)}</div></section>`;
+  return `<section class="page review-system">${pageHeader('المراجعات', 'Review & Reflection Pro — مراجعات تسحب من المهام والمعرفة والحملات والقرارات وتحولها لتنفيذ.', actions)}${renderStats()}${renderReviewFlowBridge()}${renderSmartDigest()}${renderToolbar()}<div class="grid grid-2">${reviews.length ? reviews.map(card).join('') : emptyState('لا توجد مراجعات مطابقة', 'اكتب مراجعة ذكية أو غيّر الفلتر الحالي.', actions)}</div></section>`;
 }
 
 function card(item){

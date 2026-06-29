@@ -55,7 +55,7 @@
 .more-tile { min-height: 118px; display: grid; align-content: center; gap: 8px; border-radius: var(--radius-lg); background: var(--surface-2); border: 1px solid var(--line); padding: 14px; box-shadow: var(--shadow-sm); }
 .more-tile span { font-size: 1.55rem; }
 
-/* V5 Settings + QA Harness */
+/* Settings and QA harness */
 .settings-card .settings-grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -114,7 +114,7 @@ body.compact-mode .grid{gap:10px;}
   .settings-card .settings-grid{grid-template-columns:1fr;}
 }
 
-/* V9 Search & Navigation Intelligence */
+/* Search and navigation */
 .command-palette{display:grid;gap:12px}
 .command-search-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface-soft);box-shadow:var(--shadow-sm)}
 .command-search-row span{width:32px;height:32px;border-radius:999px;display:grid;place-items:center;background:var(--surface);font-weight:900;color:var(--primary)}
@@ -132,3 +132,17 @@ body.compact-mode .grid{gap:10px;}
 .search-result-body b,.search-result-body .meta{overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .modal-root.wide .modal-panel{max-width:980px}
 @media (max-width: 760px){.command-grid{grid-template-columns:1fr}.command-search-row{position:sticky;top:0;z-index:2}.command-item,.search-result.pro{padding:9px}.modal-root.wide .modal-panel{max-width:100%}}
+
+/* Full QA regression harness */
+.qa-health-banner{display:flex;justify-content:space-between;gap:10px;align-items:center;border:1px solid var(--border);border-radius:18px;padding:12px 14px;margin-bottom:14px;background:var(--surface-soft);}
+.qa-health-banner b{font-size:15px;}
+.qa-health-banner span{font-size:12px;color:var(--muted);}
+.qa-health-banner.pass{border-color:rgba(22,163,74,.28);background:rgba(22,163,74,.07);}
+.qa-health-banner.warn{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.09);}
+.qa-health-banner.fail{border-color:rgba(220,38,38,.35);background:rgba(220,38,38,.09);}
+.qa-group-list{display:grid;gap:12px;}
+.qa-group{border:1px solid var(--border);border-radius:18px;background:var(--surface);overflow:hidden;}
+.qa-group summary{cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 14px;background:var(--surface-soft);}
+.qa-group summary span{font-size:12px;color:var(--muted);}
+.qa-group .qa-list{padding:12px;}
+@media (max-width: 640px){.qa-health-banner,.qa-group summary{align-items:flex-start;flex-direction:column}.qa-group summary span{line-height:1.7}}

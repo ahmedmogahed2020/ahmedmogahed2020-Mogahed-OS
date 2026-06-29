@@ -7,7 +7,7 @@
 .recommendation { background: linear-gradient(135deg, rgba(22,132,91,.12), rgba(109,61,46,.10)); border: 1px solid rgba(22,132,91,.18); border-radius: var(--radius-lg); padding: 15px; line-height: 1.85; }
 .warning-box { background: rgba(189,123,22,.12); color: #7a4a05; border-radius: var(--radius-md); padding: 12px; font-weight: 800; line-height: 1.75; }
 
-/* V4 Campaign Analyzer Pro */
+/* Campaign analyzer */
 .campaign-pro .page-header { align-items: flex-start; }
 .campaign-intel-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
 .campaign-toolbar { display: grid; gap: 10px; margin-bottom: 14px; }

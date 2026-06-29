@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.20.0';
+export const APP_VERSION = '1.31.0';
 
 export const defaultSettings = {
   userName: 'مجاهد',
@@ -18,7 +18,7 @@ export const defaultSettings = {
   lastSystemTestSummary: null,
   recentItems: [],
   claimedWinRewards: [],
-  notifications: { enabled: true, soundEnabled: true, browserNotifications: false, leadMinutes: 10, volume: 0.35, soundType: 'soft', categorySounds: { tasks: 'clear', goals: 'goal', projects: 'project', knowledge: 'knowledge', decisions: 'decision', reviews: 'review', wins: 'success', campaigns: 'campaign', emergency: 'emergency', backup: 'minimal', system: 'soft' }, focusSound: true },
+  notifications: { enabled: true, soundEnabled: true, browserNotifications: false, leadMinutes: 10, volume: 0.35, soundType: 'soft', categorySounds: { tasks: 'clear', goals: 'goal', projects: 'project', knowledge: 'knowledge', decisions: 'decision', reviews: 'review', wins: 'success', campaigns: 'campaign', emergency: 'emergency', backup: 'minimal', system: 'soft' }, focusSound: true, dailyReviewReminderEnabled: true, dailyReviewReminderTime: '21:30', lastDailyReviewPromptDate: '' },
   googleDriveBackup: { clientId: '', enabled: false, intervalMinutes: 30, keepHistory: true, lastBackupAt: null, lastBackupFileId: '', lastRestoreAt: null, status: 'غير متصل' },
   backend: { enabled: false, provider: 'local', url: '', anonKey: '', authProvider: 'local', fileStorage: 'local-reference', storageBucket: 'mogahed-os-files', syncMode: 'local-first', autoSync: false, lastSyncAt: null, lastCloudPullAt: null, lastCloudPushAt: null, migrationReady: true }
 };

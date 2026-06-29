@@ -4,11 +4,22 @@ import { closeModal, emptyState, objectFromForm, openModal, options, pageHeader,
 import { calculatePercentage, generateId, isPast, isToday, parseLines, safeNumber, safeText, todayISO } from '../utils.js';
 import { linkedFields, removeItem, upsert } from './shared.js';
 import { renderPage } from '../router.js';
+import { getDailyFlowState } from './dailyFlow.js';
 
 const taskStatuses = ['مفتوحة','قيد التنفيذ','مكتملة','مؤجلة'];
 const taskTypes = ['مهمة','إجراء سريع','عادة','متابعة'];
 const priorities = ['عالية','متوسطة','منخفضة'];
 const sources = ['يدوي','معرفة','طوارئ','حملة','مراجعة','قرار'];
+const reminderPresets = [
+  { value: '', label: 'حسب إعداد التنبيهات العام' },
+  { value: '5', label: 'قبلها بـ 5 دقائق' },
+  { value: '10', label: 'قبلها بـ 10 دقائق' },
+  { value: '15', label: 'قبلها بربع ساعة' },
+  { value: '30', label: 'قبلها بنصف ساعة' },
+  { value: '60', label: 'قبلها بساعة' },
+  { value: '120', label: 'قبلها بساعتين' },
+  { value: '1440', label: 'قبلها بيوم' }
+];
 const views = [
   ['today','اليوم'], ['week','الأسبوع'], ['open','المفتوح'], ['done','المكتمل'], ['kanban','Kanban'], ['matrix','Matrix'], ['all','الكل']
 ];
@@ -24,6 +35,7 @@ function normalizeTask(task = {}) {
     source: inferredSource,
     steps: Array.isArray(task.steps) ? task.steps : [],
     estimateMinutes: safeNumber(task.estimateMinutes, 0),
+    reminderMinutes: safeNumber(task.reminderMinutes, 0),
     energy: task.energy || 'متوسطة'
   };
 }
@@ -34,6 +46,83 @@ function getAllTasks() {
 
 function getTaskQuery() {
   return appState.filters.taskQuery || '';
+}
+
+
+function taskDateTime(task = {}) {
+  if (!task.dueDate) return null;
+  const time = task.dueTime || '23:59';
+  const date = new Date(`${task.dueDate}T${time}:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatTaskDateLabel(task = {}) {
+  if (!task.dueDate) return 'بدون موعد';
+  const today = todayISO();
+  if (task.dueDate === today) return task.dueTime ? `اليوم ${task.dueTime}` : 'اليوم بدون وقت';
+  return task.dueTime ? `${task.dueDate} · ${task.dueTime}` : `${task.dueDate} · بدون وقت`;
+}
+
+function parseReminderText(value = '') {
+  const text = String(value || '').trim();
+  if (!text) return 0;
+  const number = Number((text.match(/\d+/) || [0])[0]);
+  if (/يوم/.test(text)) return number ? number * 1440 : 1440;
+  if (/ساعت|ساعة/.test(text)) return number ? number * 60 : 60;
+  if (/ربع/.test(text)) return 15;
+  if (/نصف|نص/.test(text)) return 30;
+  if (/دقيق/.test(text)) return number || 10;
+  return number || 0;
+}
+
+export function getTaskReminderMinutes(task = {}, fallback = 10) {
+  const explicit = safeNumber(task.reminderMinutes, 0);
+  if (explicit > 0) return explicit;
+  const parsed = parseReminderText(task.reminder);
+  return parsed > 0 ? parsed : Math.max(1, safeNumber(fallback, 10));
+}
+
+function reminderLabel(task = {}) {
+  const preset = reminderPresets.find(item => String(item.value) === String(task.reminderMinutes || ''));
+  if (preset && preset.value) return preset.label;
+  if (task.reminder) return task.reminder;
+  return 'حسب الإعداد العام';
+}
+
+function taskTimeState(task = {}) {
+  if (task.status === 'مكتملة') return { key: 'done', label: 'مكتملة', className: 'success', hint: 'تم إغلاقها' };
+  if (!task.dueDate) return { key: 'no-date', label: 'بدون موعد', className: '', hint: 'حدد تاريخًا لو محتاجة متابعة' };
+  const now = new Date();
+  const today = todayISO();
+  const due = taskDateTime(task);
+  const leadMinutes = getTaskReminderMinutes(task, 10);
+  const diffMinutes = due ? Math.round((due.getTime() - now.getTime()) / 60000) : null;
+  if (task.dueDate < today || (due && diffMinutes < 0)) return { key: 'overdue', label: 'متأخرة', className: 'danger', hint: formatTaskDateLabel(task) };
+  if (task.dueDate === today && !task.dueTime) return { key: 'today-no-time', label: 'اليوم بدون وقت', className: 'warning', hint: 'حدد وقتًا لو محتاجة تنبيه' };
+  if (task.dueDate === today && diffMinutes !== null && diffMinutes <= leadMinutes) return { key: 'due-soon', label: diffMinutes <= 0 ? 'وقتها الآن' : `بعد ${Math.max(1, diffMinutes)} د`, className: 'danger', hint: formatTaskDateLabel(task) };
+  if (task.dueDate === today) return { key: 'today', label: 'اليوم', className: 'warning', hint: formatTaskDateLabel(task) };
+  return { key: 'upcoming', label: 'قادمة', className: '', hint: formatTaskDateLabel(task) };
+}
+
+function taskTimeChip(task = {}) {
+  const state = taskTimeState(task);
+  return `<span class="task-time-chip ${safeText(state.className)}"><b>${safeText(state.label)}</b><small>${safeText(state.hint)}</small></span>`;
+}
+
+export function getTaskTimePolishState(tasks = getAllTasks()) {
+  const open = tasks.filter(task => task.status !== 'مكتملة');
+  const buckets = {
+    overdue: open.filter(task => taskTimeState(task).key === 'overdue'),
+    dueSoon: open.filter(task => ['due-soon','today'].includes(taskTimeState(task).key) && task.dueTime).sort((a, b) => String(a.dueTime || '').localeCompare(String(b.dueTime || ''))),
+    todayNoTime: open.filter(task => taskTimeState(task).key === 'today-no-time'),
+    noDate: open.filter(task => taskTimeState(task).key === 'no-date')
+  };
+  return {
+    ...buckets,
+    scheduled: open.filter(task => task.dueDate && task.dueTime).length,
+    noTimeCount: open.filter(task => task.dueDate && !task.dueTime).length,
+    nearest: [...buckets.overdue, ...buckets.dueSoon, ...buckets.todayNoTime][0] || null
+  };
 }
 
 function taskMatchesQuery(task, query) {
@@ -98,14 +187,15 @@ function taskCard(task) {
   const done = task.status === 'مكتملة';
   const stepsHtml = stepProgress(task);
   const extra = `<button class="btn ${done ? 'ghost' : 'primary'}" data-action="toggle-task-complete" data-id="${safeText(task.id)}">${done ? 'إرجاع' : 'تم'}</button>`;
-  return `<article class="card item-card task-card ${done ? 'is-done' : ''}">
-    <div class="btn-row">${statusBadge(task.status)}${statusBadge(task.priority)}${sourceBadge(task)}${overdue ? '<span class="badge danger">متأخرة</span>' : ''}</div>
+  return `<article class="card item-card task-card ${done ? 'is-done' : ''} task-time-${safeText(taskTimeState(task).key)}">
+    <div class="task-card-head"><div class="btn-row">${statusBadge(task.status)}${statusBadge(task.priority)}${sourceBadge(task)}${overdue ? '<span class="badge danger">متأخرة</span>' : ''}</div>${taskTimeChip(task)}</div>
     <h3>${safeText(task.title)}</h3>
     <p>${safeText(task.description || task.notes || 'بدون وصف')}</p>
     <div class="task-meta-grid">
       <span>النوع: ${safeText(task.type)}</span>
       <span>الموعد: ${task.dueDate ? safeText(task.dueDate) : 'بدون موعد'}</span>
       <span>الوقت: ${task.dueTime ? safeText(task.dueTime) : 'بدون وقت'}</span>
+      <span>التذكير: ${safeText(reminderLabel(task))}</span>
       <span>الطاقة: ${safeText(task.energy || 'متوسطة')}</span>
       <span>الهدف: ${safeText(linkedName('goals', task.goalId))}</span>
       <span>المشروع: ${safeText(linkedName('projects', task.projectId))}</span>
@@ -138,6 +228,38 @@ function renderTaskStats() {
   </div>`;
 }
 
+
+
+function renderTaskReviewFlowBridge() {
+  const flow = getDailyFlowState();
+  return `<article class="card task-review-flow-card">
+    <div class="section-title"><div><span class="eyebrow">تدفق اليوم</span><h3>من التنفيذ إلى المراجعة</h3></div><span class="badge ${flow.readyForReview ? 'success' : 'warning'}">${flow.readyForReview ? 'راجع اليوم' : 'كمّل التنفيذ'}</span></div>
+    <div class="task-review-flow-grid">
+      <span><b>${safeText(flow.todayOpen.length)}</b><small>مفتوحة اليوم</small></span>
+      <span><b>${safeText(flow.todayDone.length)}</b><small>مكتملة اليوم</small></span>
+      <span><b>${safeText(flow.overdue.length)}</b><small>متأخرة</small></span>
+    </div>
+    <p class="meta">${safeText(flow.reviewAction)}</p>
+    <div class="btn-row"><button class="btn primary" data-action="create-daily-review">مراجعة اليوم</button><button class="btn ghost" data-route="home">الرئيسية</button></div>
+  </article>`;
+}
+
+function renderTaskTimePulse() {
+  const state = getTaskTimePolishState();
+  const lead = safeNumber(appState.data.settings?.notifications?.leadMinutes, 10);
+  const nearest = state.nearest;
+  return `<article class="card task-time-pulse-card">
+    <div class="section-title"><div><h3>وقت المهام والتنبيهات</h3><p class="meta">أي مهمة لها تاريخ + وقت تدخل تلقائيًا في التنبيهات. الافتراضي قبلها ${safeText(lead)} دقائق، أو حسب تذكير المهمة.</p></div><span class="badge">تنبيهات</span></div>
+    <div class="task-time-pulse-grid">
+      <span class="danger"><b>${safeText(state.overdue.length)}</b><small>متأخرة</small></span>
+      <span class="warning"><b>${safeText(state.dueSoon.length)}</b><small>قريبة اليوم</small></span>
+      <span><b>${safeText(state.todayNoTime.length)}</b><small>اليوم بدون وقت</small></span>
+      <span><b>${safeText(state.scheduled)}</b><small>لها تنبيه</small></span>
+    </div>
+    ${nearest ? `<div class="task-next-alert"><b>أقرب انتباه:</b><span>${safeText(nearest.title)}</span><small>${safeText(formatTaskDateLabel(nearest))} · ${safeText(reminderLabel(nearest))}</small><button class="btn ghost" data-action="edit-task" data-id="${safeText(nearest.id)}">ضبط</button></div>` : '<p class="meta">لا توجد مهمة عاجلة الآن. أضف وقتًا للمهام المهمة فقط.</p>'}
+  </article>`;
+}
+
 function renderToolbar() {
   return `<div class="task-toolbar card compact">
     <div class="filters">${views.map(([value, label]) => `<button class="filter-btn ${appState.filters.tasks === value ? 'active' : ''}" data-action="set-task-filter" data-filter="${value}">${label}</button>`).join('')}</div>
@@ -150,7 +272,7 @@ function renderTodayView(tasks) {
   const quick = tasks.filter(t => t.type === 'إجراء سريع' && t.status !== 'مكتملة');
   return `<div class="grid grid-2">
     <article class="card task-focus-card"><h3>أولوية اليوم</h3>${high[0] ? taskCard(high[0]) : '<p class="meta">حدد مهمة عالية الأولوية تبدأ بها.</p>'}</article>
-    <article class="card"><h3>إجراءات سريعة</h3><div class="today-list">${quick.length ? quick.slice(0, 4).map(t => `<div class="today-task"><div><b>${safeText(t.title)}</b><div class="meta"><span>${safeText(t.dueTime || 'بدون وقت')}</span><span>${safeText(t.source || 'يدوي')}</span></div></div><button class="btn primary" data-action="toggle-task-complete" data-id="${safeText(t.id)}">تم</button></div>`).join('') : '<p class="meta">لا توجد إجراءات سريعة الآن.</p>'}</div></article>
+    <article class="card"><h3>إجراءات سريعة</h3><div class="today-list">${quick.length ? quick.slice(0, 4).map(t => `<div class="today-task"><div><b>${safeText(t.title)}</b><div class="meta"><span>${safeText(formatTaskDateLabel(t))}</span><span>${safeText(t.source || 'يدوي')}</span></div></div><button class="btn primary" data-action="toggle-task-complete" data-id="${safeText(t.id)}">تم</button></div>`).join('') : '<p class="meta">لا توجد إجراءات سريعة الآن.</p>'}</div></article>
     <div class="grid full-span">${tasks.length ? tasks.map(taskCard).join('') : emptyState('لا توجد مهام اليوم', 'أضف مهمة واحدة واضحة أو غيّر الفلتر.', '<button class="btn primary" data-action="open-task-modal">إضافة مهمة</button>')}</div>
   </div>`;
 }
@@ -180,7 +302,7 @@ export function renderTasks() {
   const view = appState.filters.tasks || 'today';
   const tasks = filteredTasks();
   const body = view === 'kanban' ? renderKanban() : view === 'matrix' ? renderMatrix() : view === 'today' ? renderTodayView(tasks) : renderListView(tasks);
-  return `<section class="page task-system">${pageHeader('المهام', 'نظام تنفيذ مطوّر: اليوم، الأسبوع، Kanban، Matrix، خطوات فرعية، ومهام مولدة من المعرفة.', actions)}${renderTaskStats()}${renderToolbar()}${body}</section>`;
+  return `<section class="page task-system">${pageHeader('المهام', 'نظام تنفيذ مطوّر: اليوم، الأسبوع، Kanban، Matrix، خطوات فرعية، ومهام مولدة من المعرفة.', actions)}${renderTaskStats()}${renderTaskTimePulse()}${renderTaskReviewFlowBridge()}${renderToolbar()}${body}</section>`;
 }
 
 export function openTaskModal(id = '', defaults = {}) {
@@ -196,10 +318,11 @@ export function openTaskModal(id = '', defaults = {}) {
     ${linkedFields(item)}
     <label>الحالة<select name="status">${taskStatuses.map(v=>`<option ${v===item.status?'selected':''}>${v}</option>`).join('')}</select></label>
     <label>الطاقة<select name="energy">${['عالية','متوسطة','منخفضة'].map(v=>`<option ${v===item.energy?'selected':''}>${v}</option>`).join('')}</select></label>
+    <div class="full task-time-form-block"><b>وقت المهمة</b><p>التنبيه يعمل بوضوح عندما تضيف تاريخ ووقت. لو تركت التذكير على العام سيستخدم إعدادات التنبيهات.</p></div>
     <label>تاريخ التنفيذ<input type="date" name="dueDate" value="${safeText(item.dueDate || todayISO())}"></label>
     <label>الوقت<input type="time" name="dueTime" value="${safeText(item.dueTime || '')}"></label>
     <label>تقدير بالدقائق<input type="number" min="0" name="estimateMinutes" value="${safeText(item.estimateMinutes || '')}" placeholder="مثال: 25"></label>
-    <label>التذكير<input name="reminder" value="${safeText(item.reminder || '')}" placeholder="مثال: قبلها بساعة"></label>
+    <label>التذكير قبل الموعد<select name="reminderMinutes">${reminderPresets.map(option => `<option value="${safeText(option.value)}" ${String(option.value) === String(item.reminderMinutes || '') ? 'selected' : ''}>${safeText(option.label)}</option>`).join('')}</select></label>
     <label>التكرار<input name="repeat" value="${safeText(item.repeat || '')}" placeholder="يومي / أسبوعي / بدون"></label>
     <label class="full">خطوات صغيرة — كل خطوة في سطر<textarea name="stepsText" placeholder="افتح الملف\nنفذ أول تعديل\nراجع النتيجة">${safeText(stepText)}</textarea></label>
     <label class="full">ملاحظات<textarea name="notes">${safeText(item.notes || '')}</textarea></label>
@@ -209,6 +332,7 @@ export function openTaskModal(id = '', defaults = {}) {
     const d = objectFromForm(form);
     const existingSteps = item.steps || [];
     const lines = parseLines(d.stepsText);
+    const selectedReminder = reminderPresets.find(option => String(option.value) === String(d.reminderMinutes || ''));
     const steps = lines.map((title, index) => ({ id: existingSteps[index]?.id || generateId('step'), title, done: Boolean(existingSteps[index]?.done) }));
     upsert('tasks', {
       id: d.id || generateId('task'),
@@ -222,7 +346,8 @@ export function openTaskModal(id = '', defaults = {}) {
       status: d.status || 'مفتوحة',
       dueDate: d.dueDate,
       dueTime: d.dueTime,
-      reminder: d.reminder,
+      reminder: selectedReminder?.value ? selectedReminder.label : '',
+      reminderMinutes: safeNumber(d.reminderMinutes, 0),
       repeat: d.repeat,
       estimateMinutes: safeNumber(d.estimateMinutes, 0),
       energy: d.energy,

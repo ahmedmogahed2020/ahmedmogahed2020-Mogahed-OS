@@ -40,7 +40,7 @@
 @media (max-width: 560px) { .video-workspace .workspace-head { flex-direction: column; } .video-workspace .workspace-head .btn { width: 100%; } }
 
 
-/* V1 Knowledge Learning System */
+/* Knowledge learning system */
 .knowledge-learning-summary {
   display: grid;
   grid-template-columns: repeat(6, minmax(120px, 1fr));
@@ -292,7 +292,7 @@ button.tag-pill { cursor: pointer; }
   }
 }
 
-/* V15 Knowledge Library UX Redesign */
+/* Knowledge library UX redesign */
 .knowledge-library-page .page-header { margin-bottom: 12px; }
 .knowledge-strip,
 .knowledge-library-shell {

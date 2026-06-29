@@ -53,7 +53,10 @@ function defaultNotificationSettings() {
     volume: 0.35,
     soundType: 'soft',
     categorySounds: defaultSoundMap(),
-    focusSound: true
+    focusSound: true,
+    dailyReviewReminderEnabled: true,
+    dailyReviewReminderTime: '21:30',
+    lastDailyReviewPromptDate: ''
   };
 }
 
@@ -95,23 +98,90 @@ function buildReminderKey(task, phase) {
   return `${task.id}:${task.dueDate}:${task.dueTime}:${phase}`;
 }
 
+
+function parseTaskReminderMinutes(task = {}, fallback = 10) {
+  const explicit = safeNumber(task.reminderMinutes, 0);
+  if (explicit > 0) return explicit;
+  const text = String(task.reminder || '').trim();
+  const number = Number((text.match(/\d+/) || [0])[0]);
+  if (/يوم/.test(text)) return number ? number * 1440 : 1440;
+  if (/ساعت|ساعة/.test(text)) return number ? number * 60 : 60;
+  if (/ربع/.test(text)) return 15;
+  if (/نصف|نص/.test(text)) return 30;
+  if (/دقيق/.test(text)) return number || fallback;
+  return Math.max(1, safeNumber(fallback, 10));
+}
+
 function getDueReminders() {
   const settings = getSettings();
   if (!settings.enabled) return [];
   const now = new Date();
-  const leadMs = safeNumber(settings.leadMinutes, 10) * 60000;
+  const defaultLeadMinutes = safeNumber(settings.leadMinutes, 10);
   return (appState.data.tasks || [])
     .filter(task => task.status !== 'مكتملة' && task.dueDate && task.dueTime)
     .flatMap(task => {
       const due = taskDateTime(task);
       if (!due) return [];
       const diff = due.getTime() - now.getTime();
+      const leadMinutes = parseTaskReminderMinutes(task, defaultLeadMinutes);
+      const leadMs = leadMinutes * 60000;
       const items = [];
-      if (diff > 0 && diff <= leadMs) items.push({ task, phase: 'before', category: 'tasks', title: 'تذكير قريب', message: `باقي ${Math.max(1, Math.ceil(diff / 60000))} دقيقة على: ${task.title}` });
+      if (diff > 0 && diff <= leadMs) items.push({ task, phase: 'before', category: 'tasks', title: 'تذكير قريب', message: `باقي ${Math.max(1, Math.ceil(diff / 60000))} دقيقة على: ${task.title} · تذكيرها قبل ${leadMinutes} دقيقة` });
       if (diff <= 0 && diff >= -5 * 60000) items.push({ task, phase: 'due', category: 'tasks', title: 'وقت المهمة الآن', message: task.title });
       return items;
     })
     .filter(item => !wasNotified(item.task.id, buildReminderKey(item.task, item.phase)));
+}
+
+export function getDailyReviewFlowState() {
+  const settings = getSettings();
+  const today = todayISO();
+  const reviews = Array.isArray(appState.data.reviews) ? appState.data.reviews : [];
+  const todayReview = reviews.find(review => review.type === 'يومية' && String(review.date || review.createdAt || '').slice(0, 10) === today);
+  const tasks = Array.isArray(appState.data.tasks) ? appState.data.tasks : [];
+  const todayTasks = tasks.filter(task => task.dueDate === today || String(task.completedAt || task.updatedAt || '').slice(0, 10) === today);
+  const doneToday = todayTasks.filter(task => task.status === 'مكتملة').length;
+  const openToday = todayTasks.filter(task => task.status !== 'مكتملة').length;
+  const overdue = tasks.filter(task => task.status !== 'مكتملة' && task.dueDate && task.dueDate < today).length;
+  return {
+    enabled: Boolean(settings.dailyReviewReminderEnabled),
+    time: settings.dailyReviewReminderTime || '21:30',
+    completed: Boolean(todayReview),
+    todayReview,
+    doneToday,
+    openToday,
+    overdue,
+    lastPromptDate: settings.lastDailyReviewPromptDate || '',
+    shouldPrompt: Boolean(settings.dailyReviewReminderEnabled && !todayReview && settings.lastDailyReviewPromptDate !== today)
+  };
+}
+
+function isDailyReviewReminderDue() {
+  const state = getDailyReviewFlowState();
+  if (!state.shouldPrompt) return false;
+  const now = new Date();
+  const current = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  return current >= state.time;
+}
+
+export function checkDailyReviewReminder({ silent = false } = {}) {
+  if (!isDailyReviewReminderDue()) return null;
+  const state = getDailyReviewFlowState();
+  const today = todayISO();
+  appState.data.settings.notifications.lastDailyReviewPromptDate = today;
+  addNotificationLog({
+    key: `daily-review:${today}`,
+    title: 'مراجعة نهاية اليوم',
+    message: `اقفل اليوم: ${state.doneToday} مكتملة، ${state.openToday} مفتوحة، ${state.overdue} متأخرة.`,
+    type: 'daily-review',
+    category: 'reviews',
+    relatedId: today
+  });
+  if (!silent) toast('وقت مراجعة نهاية اليوم — اقفل اليوم وخطط لبكرة.', 'info');
+  playAlertSound('review', { category: 'reviews' });
+  showBrowserNotification('مراجعة نهاية اليوم', 'اقفل اليوم وخطط لبكرة داخل Mogahed OS.');
+  autoSave();
+  return state;
 }
 
 function unlockAudio() {
@@ -198,16 +268,23 @@ export function initNotifications() {
   document.addEventListener('click', unlockAudio, { once: true });
   document.addEventListener('touchstart', unlockAudio, { once: true });
   clearInterval(reminderTimer);
-  reminderTimer = setInterval(() => checkReminders({ silent: false }), 60000);
-  setTimeout(() => checkReminders({ silent: true }), 1800);
+  reminderTimer = setInterval(() => {
+    checkReminders({ silent: false });
+    checkDailyReviewReminder({ silent: false });
+  }, 60000);
+  setTimeout(() => {
+    checkReminders({ silent: true });
+    checkDailyReviewReminder({ silent: true });
+  }, 1800);
 }
 
 function getNotificationStats() {
   const log = getLog();
   const today = log.filter(x => String(x.createdAt || '').slice(0,10) === todayISO());
   const scheduled = (appState.data.tasks || []).filter(task => task.status !== 'مكتملة' && task.dueDate && task.dueTime);
+  const reviewFlow = getDailyReviewFlowState();
   const byCategory = notificationCategories.map(category => ({ ...category, count: log.filter(item => item.category === category.id).length }));
-  return { log, today, scheduled, unread: log.filter(x => !x.read), byCategory };
+  return { log, today, scheduled, unread: log.filter(x => !x.read), byCategory, reviewFlow };
 }
 
 function soundOptions(selected) {
@@ -239,20 +316,32 @@ function renderNotificationSettings() {
       <label class="setting-field"><span>التنبيه قبل المهمة بالدقائق</span><input type="number" min="1" max="240" value="${safeText(s.leadMinutes)}" data-action="notification-lead-minutes"></label>
       <label class="setting-field"><span>الصوت الافتراضي</span><select data-action="notification-sound-type">${soundOptions(s.soundType)}</select></label>
       <label class="setting-field"><span>مستوى الصوت</span><input type="range" min="0.05" max="1" step="0.05" value="${safeText(s.volume)}" data-action="notification-volume"></label>
+      <label class="setting-field"><span>ميعاد مراجعة نهاية اليوم</span><input type="time" value="${safeText(s.dailyReviewReminderTime || '21:30')}" data-action="notification-review-time"></label>
     </div>
     <div class="setting-toggles">
       <label><input type="checkbox" ${s.enabled ? 'checked' : ''} data-action="notification-enabled"> تشغيل التذكيرات داخل التطبيق</label>
       <label><input type="checkbox" ${s.soundEnabled ? 'checked' : ''} data-action="notification-sound-enabled"> تشغيل أصوات التنبيه</label>
       <label><input type="checkbox" ${s.browserNotifications ? 'checked' : ''} data-action="notification-browser-enabled"> إشعارات المتصفح عند السماح</label>
+      <label><input type="checkbox" ${s.dailyReviewReminderEnabled ? 'checked' : ''} data-action="notification-review-enabled"> تذكير مراجعة نهاية اليوم</label>
     </div>
     <div class="btn-row" style="margin-top:12px"><button class="btn primary" data-action="test-notification-sound">اختبار الصوت الافتراضي</button><button class="btn ghost" data-action="request-notification-permission">تفعيل إشعارات المتصفح</button></div>
     <p class="meta" style="margin-top:10px">التذكيرات تعمل أثناء فتح التطبيق. على GitHub Pages ستعمل داخل المتصفح بدون Backend.</p>
   </article>`;
 }
 
+function renderDailyReviewReminderPanel() {
+  const flow = getDailyReviewFlowState();
+  return `<article class="card daily-review-flow-card">
+    <div class="section-title"><div><span class="eyebrow">تدفق المراجعة</span><h3>مراجعة نهاية اليوم</h3></div><span class="badge ${flow.completed ? 'success' : 'warning'}">${flow.completed ? 'تمت اليوم' : safeText(flow.time)}</span></div>
+    <p class="meta">تنبيه واحد يوميًا عند الموعد المحدد أثناء فتح التطبيق. لا يتكرر في نفس اليوم.</p>
+    <div class="daily-review-flow-grid"><span><b>${safeText(flow.doneToday)}</b><small>مكتملة</small></span><span><b>${safeText(flow.openToday)}</b><small>مفتوحة</small></span><span><b>${safeText(flow.overdue)}</b><small>متأخرة</small></span></div>
+    <div class="btn-row"><button class="btn primary" data-action="create-daily-review">افتح مراجعة اليوم</button><button class="btn ghost" data-route="reviews">صفحة المراجعات</button></div>
+  </article>`;
+}
+
 function renderScheduledTasks() {
   const scheduled = (appState.data.tasks || []).filter(task => task.status !== 'مكتملة' && task.dueDate && task.dueTime).slice(0, 8);
-  return `<article class="card"><h3>مهام لها تذكير</h3>${scheduled.length ? `<div class="today-list">${scheduled.map(task => `<div class="today-task"><div><b>${safeText(task.title)}</b><div class="meta"><span>${safeText(task.dueDate)}</span><span>${safeText(task.dueTime)}</span><span>${safeText(task.reminder || 'تنبيه تلقائي')}</span></div></div><button class="btn ghost" data-action="edit-task" data-id="${safeText(task.id)}">تعديل</button></div>`).join('')}</div>` : '<p class="meta">لا توجد مهام بوقت محدد. أضف تاريخ ووقت للمهمة حتى يظهر التذكير.</p>'}</article>`;
+  return `<article class="card"><h3>مهام لها تذكير</h3>${scheduled.length ? `<div class="today-list">${scheduled.map(task => `<div class="today-task"><div><b>${safeText(task.title)}</b><div class="meta"><span>${safeText(task.dueDate)}</span><span>${safeText(task.dueTime)}</span><span>${safeText(task.reminder || `قبل ${parseTaskReminderMinutes(task, getSettings().leadMinutes)} دقيقة`)}</span></div></div><button class="btn ghost" data-action="edit-task" data-id="${safeText(task.id)}">تعديل</button></div>`).join('')}</div>` : '<p class="meta">لا توجد مهام بوقت محدد. أضف تاريخ ووقت للمهمة حتى يظهر التذكير.</p>'}</article>`;
 }
 
 function renderNotificationLog() {
@@ -272,8 +361,10 @@ export function notificationsPanel() {
       <article class="kpi-card"><small>مهام مجدولة</small><strong>${safeText(stats.scheduled.length)}</strong></article>
       <article class="kpi-card"><small>تنبيهات اليوم</small><strong>${safeText(stats.today.length)}</strong></article>
       <article class="kpi-card"><small>غير مقروءة</small><strong>${safeText(stats.unread.length)}</strong></article>
+      <article class="kpi-card"><small>مراجعة اليوم</small><strong>${stats.reviewFlow.completed ? 'تمت' : safeText(stats.reviewFlow.time)}</strong></article>
       <article class="kpi-card"><small>الأصوات</small><strong>${safeText(notificationSoundLibrary.length)}</strong></article>
     </div>
+    ${renderDailyReviewReminderPanel()}
     ${renderNotificationSettings()}
     ${renderCategorySoundMatrix(settings)}
     ${renderSoundLibrary(settings)}
@@ -346,3 +437,6 @@ export function clearNotificationLog() {
   renderPage();
   toast('تم مسح سجل التنبيهات');
 }
+
+export function updateDailyReviewReminderEnabled(value) { const s = getSettings(); s.dailyReviewReminderEnabled = Boolean(value); autoSave(); renderPage(); toast('تم تحديث تذكير مراجعة اليوم'); }
+export function updateDailyReviewReminderTime(value) { const s = getSettings(); s.dailyReviewReminderTime = value || '21:30'; s.lastDailyReviewPromptDate = ''; autoSave(); renderPage(); toast('تم تحديث ميعاد مراجعة اليوم'); }

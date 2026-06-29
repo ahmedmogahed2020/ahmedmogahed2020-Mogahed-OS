@@ -10,7 +10,7 @@
 .emergency-options button { min-height: 68px; border-radius: 18px; background: var(--surface-2); border: 1px solid var(--line); font-weight: 900; }
 .emergency-action { border-radius: var(--radius-lg); background: #111827; color: #fff; padding: 18px; display: grid; gap: 10px; line-height: 1.8; }
 
-/* V3 Task System Upgrade */
+/* Task system */
 .task-system { display: grid; gap: 14px; }
 .task-intel-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 .task-toolbar { display: grid; gap: 12px; }
@@ -44,7 +44,7 @@
   .task-intel-grid { grid-template-columns: repeat(6, 1fr); }
 }
 
-/* V7 Review & Reflection Pro */
+/* Review and reflection */
 .review-system { display: grid; gap: 14px; }
 .review-intel-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .review-digest-grid { display: grid; gap: 12px; }
@@ -71,7 +71,7 @@
   .review-intel-grid { grid-template-columns: repeat(6, 1fr); }
 }
 
-/* V8 Projects & Goals Intelligence */
+/* Projects and goals */
 .goal-system,
 .project-system { display: grid; gap: 14px; }
 .goal-intel-grid,
@@ -122,7 +122,7 @@
   .project-intel-grid { grid-template-columns: repeat(6, 1fr); }
 }
 
-/* V10 Win System Pro */
+/* Win system */
 .win-system { display: grid; gap: 14px; }
 .win-kpi-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .win-toolbar { display: grid; gap: 12px; }
@@ -168,7 +168,7 @@
   .win-kpi-grid { grid-template-columns: repeat(8, minmax(0, 1fr)); }
 }
 
-/* V11 Decisions / Backup / Notifications / Guide polish */
+/* Decisions, backup, notifications, guide */
 .decision-intel-grid,
 .backup-stats {
   display: grid;
@@ -310,7 +310,7 @@
   }
 }
 
-/* V12 Win gamification */
+/* Win gamification */
 .win-game-grid {
   display: grid;
   gap: 14px;
@@ -400,7 +400,7 @@
   .reward-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
 
-/* V13 Notification Sounds + Final QA polish */
+/* Notification sounds and QA polish */
 .sound-library-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -441,7 +441,7 @@
   .sound-card .btn, .sound-row .btn { width: 100%; }
 }
 
-/* V14 Win Gamification Scale: 300 stages, 300 titles, 700 rewards */
+/* Win gamification scale */
 .win-collapsible {
   padding: 0;
   overflow: hidden;
@@ -540,7 +540,7 @@
 .drive-row b, .drive-row small { color: var(--muted); font-size: 12px; }
 @media (max-width: 640px) { .drive-row { grid-template-columns: 1fr; } }
 
-/* V18 Supabase Database Sync */
+/* Supabase database sync */
 .cloud-sync-card .code-block {
   background: rgba(15, 23, 42, 0.92);
   color: #e5e7eb;
@@ -556,7 +556,7 @@
 }
 .cloud-sync-card input[type="email"], .cloud-sync-card input[type="password"] { direction: ltr; text-align: left; }
 
-/* V21 Backup Control Center UX */
+/* Backup control center */
 .more-empty-panel .empty-state.compact {
   text-align: center;
   padding: 22px;
@@ -689,3 +689,211 @@
   border-radius: var(--radius-md);
 }
 
+
+/* Backup and Supabase UX */
+.backup-hero-card {
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(37, 99, 235, .16);
+  background: linear-gradient(180deg, rgba(37,99,235,.055), rgba(255,255,255,.72));
+}
+.backup-hero-main {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: center;
+}
+.backup-hero-main small {
+  display: block;
+  color: var(--muted);
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.backup-hero-main h3 {
+  margin: 0 0 6px;
+  font-size: 1.28rem;
+}
+.backup-hero-main p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.backup-pill.ok { border-color: rgba(34,197,94,.28); background: rgba(34,197,94,.075); }
+.backup-pill.warn { border-color: rgba(245,158,11,.32); background: rgba(245,158,11,.09); }
+.backup-pill.neutral { border-color: var(--line); background: rgba(255,255,255,.6); }
+.backup-guidance {
+  border-radius: 18px;
+  padding: 11px 13px;
+  font-weight: 800;
+  line-height: 1.6;
+}
+.backup-guidance.is-ok { background: rgba(34,197,94,.09); color: #166534; border: 1px solid rgba(34,197,94,.18); }
+.backup-guidance.is-warn { background: rgba(245,158,11,.10); color: #92400e; border: 1px solid rgba(245,158,11,.20); }
+.backup-rule-card,
+.backup-file-warning {
+  border: 1px solid rgba(15, 23, 42, .08);
+}
+.backup-flow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+.backup-flow span {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 10px;
+  text-align: center;
+  font-weight: 900;
+  background: rgba(255,255,255,.7);
+}
+.backup-checklist {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0 14px;
+}
+.backup-checklist span {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 10px;
+  display: grid;
+  gap: 4px;
+  background: rgba(255,255,255,.68);
+}
+.backup-checklist span.done { border-color: rgba(34,197,94,.28); background: rgba(34,197,94,.07); }
+.backup-checklist span.todo { border-color: rgba(245,158,11,.28); background: rgba(245,158,11,.07); }
+.backup-checklist b { font-size: .86rem; }
+.backup-checklist em { font-style: normal; color: var(--muted); font-size: .78rem; font-weight: 800; }
+.backup-file-warning {
+  background: rgba(245,158,11,.08) !important;
+  border-color: rgba(245,158,11,.22) !important;
+}
+.backup-safe-actions .btn:first-child {
+  flex-basis: 220px;
+}
+
+/* Daily review and notification flow */
+.daily-review-flow-card {
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,250,252,0.94));
+}
+.daily-review-flow-card .badge.success { background: rgba(34, 197, 94, 0.12); color: #15803d; }
+.daily-review-flow-card .badge.warning { background: rgba(245, 158, 11, 0.14); color: #92400e; }
+.daily-review-flow-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+.daily-review-flow-grid span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.04);
+}
+.daily-review-flow-grid b { font-size: 1.35rem; }
+.daily-review-flow-grid small { color: var(--muted); }
+
+/* Task time and reminder polish */
+.task-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.task-time-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 112px;
+  padding: 8px 10px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text);
+  line-height: 1.2;
+}
+.task-time-chip b { font-size: .82rem; }
+.task-time-chip small { color: var(--muted); font-size: .72rem; }
+.task-time-chip.warning { background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.25); }
+.task-time-chip.danger { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.24); }
+.task-time-chip.success { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.24); }
+.task-time-pulse-card { border-inline-start: 4px solid var(--primary); }
+.task-time-pulse-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.task-time-pulse-grid span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.task-time-pulse-grid b { font-size: 1.25rem; }
+.task-time-pulse-grid small { color: var(--muted); }
+.task-time-pulse-grid .warning { background: rgba(245, 158, 11, 0.12); }
+.task-time-pulse-grid .danger { background: rgba(239, 68, 68, 0.1); }
+.task-next-alert {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.task-next-alert small { color: var(--muted); }
+.task-time-form-block {
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.task-time-form-block p { margin: 4px 0 0; color: var(--muted); font-size: .86rem; }
+
+
+/* Home, tasks, review flow integration */
+.home-task-review-flow,
+.task-review-flow-card,
+.review-flow-bridge-card {
+  border: 1px solid rgba(99, 102, 241, 0.16);
+  background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(245,247,255,0.92));
+}
+.flow-bridge-grid,
+.task-review-flow-grid,
+.review-flow-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.flow-bridge-grid > div,
+.task-review-flow-grid > span,
+.review-flow-grid > span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.72);
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
+  min-width: 0;
+}
+.flow-bridge-grid small,
+.task-review-flow-grid small,
+.review-flow-grid small { color: var(--muted); font-size: 0.76rem; }
+.flow-bridge-grid b,
+.task-review-flow-grid b,
+.review-flow-grid b { color: var(--text); line-height: 1.45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.flow-bridge-grid span { color: var(--muted); font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

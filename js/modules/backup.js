@@ -23,6 +23,33 @@ function getStoragePercent() {
   return Math.min(100, Math.round((getDataSize() / assumedLimit) * 100));
 }
 
+
+function getBackupModeDetails() {
+  const settings = appState.data.settings || {};
+  const backend = settings.backend || {};
+  const drive = settings.googleDriveBackup || {};
+  const auth = getAuthStatus(settings);
+  const sync = getSyncStatus(settings);
+  const fileStatus = getFileServiceStatus(settings);
+  const localOk = checkStorageHealth().ok;
+  const dbReady = Boolean(sync.configured);
+  const signedIn = auth.mode === 'cloud';
+  const fileReady = Boolean(fileStatus.cloudReady);
+  const mode = signedIn ? 'Supabase متصل' : dbReady ? 'Supabase جاهز للدخول' : 'Local First';
+  const next = signedIn
+    ? 'ارفع نسخة الآن أو فعّل المزامنة التلقائية بعد تجربة تصدير JSON.'
+    : dbReady
+      ? 'سجّل الدخول من قسم Supabase Database Sync ثم ارفع نسخة اختبارية.'
+      : 'احتفظ بتصدير JSON قبل أي تعديل، وأدخل URL وAnon Key عند تجهيز Supabase.';
+  return { settings, backend, drive, auth, sync, fileStatus, localOk, dbReady, signedIn, fileReady, mode, next };
+}
+
+function formatMb(bytes = 0) { return `${(safeNumber(bytes) / 1024 / 1024).toFixed(2)} MB`; }
+
+function statusPill(label, state, tone = 'neutral') {
+  return `<span class="backup-pill ${safeText(tone)}"><b>${safeText(label)}</b><em>${safeText(state)}</em></span>`;
+}
+
 function getKnowledgeFileStats() {
   const files = (appState.data.knowledge || []).flatMap(item => (item.localFiles || []).map(file => ({ item, file })));
   const localInline = files.filter(x => x.file.dataUrl && x.file.storageMode !== 'supabase-storage');
@@ -96,18 +123,29 @@ function renderBackupStats() {
 
 
 function backupStatusHero() {
-  const auth = getAuthStatus(appState.data.settings);
-  const sync = getSyncStatus(appState.data.settings);
-  const fileStatus = getFileServiceStatus(appState.data.settings);
-  const drive = appState.data.settings.googleDriveBackup || {};
-  const items = [
-    ['💾', 'محلي', checkStorageHealth().ok ? 'سليم' : 'يحتاج فحص'],
-    ['☁️', 'Google Drive', drive.connected ? 'متصل' : 'اختياري'],
-    ['🗄️', 'Supabase DB', auth.mode === 'cloud' ? 'متصل' : auth.cloudReady ? 'جاهز' : 'محلي'],
-    ['📎', 'Storage', fileStatus.cloudReady ? 'سحابي' : 'محلي']
-  ];
-  return `<div class="backup-status-strip">${items.map(([icon, title, status]) => `<span><b>${icon} ${safeText(title)}</b><em>${safeText(status)}</em></span>`).join('')}</div>
-    <div class="${sync.cloudActive ? 'recommendation' : 'warning-box'} compact-backup-message">${safeText(sync.message)}</div>`;
+  const info = getBackupModeDetails();
+  const stats = getKnowledgeFileStats();
+  const localTone = info.localOk ? 'ok' : 'warn';
+  const driveTone = info.drive.connected ? 'ok' : 'neutral';
+  const dbTone = info.signedIn ? 'ok' : info.dbReady ? 'warn' : 'neutral';
+  const filesTone = info.fileReady ? 'ok' : stats.localInline.length ? 'warn' : 'neutral';
+  return `<article class="card backup-hero-card">
+    <div class="backup-hero-main">
+      <div>
+        <small>وضع الحماية الحالي</small>
+        <h3>${safeText(info.mode)}</h3>
+        <p>${safeText(info.next)}</p>
+      </div>
+      <button class="btn primary" data-action="export-json">تصدير JSON آمن</button>
+    </div>
+    <div class="backup-status-strip">
+      ${statusPill('Local', info.localOk ? 'سليم' : 'راجع التخزين', localTone)}
+      ${statusPill('Google Drive', info.drive.connected ? 'متصل' : 'اختياري', driveTone)}
+      ${statusPill('Supabase DB', info.signedIn ? 'متصل' : info.dbReady ? 'جاهز' : 'غير مفعل', dbTone)}
+      ${statusPill('File Storage', info.fileReady ? 'سحابي' : stats.localInline.length ? 'محلي ثقيل' : 'محلي', filesTone)}
+    </div>
+    <div class="backup-guidance ${info.sync.cloudActive ? 'is-ok' : 'is-warn'}">${safeText(info.sync.message)}</div>
+  </article>`;
 }
 
 function backupSection(icon, title, description, content, open = false) {
@@ -145,10 +183,17 @@ function cloudSyncPanel() {
   const backend = settings.backend || {};
   const isSigned = auth.mode === 'cloud';
   const user = auth.user || {};
+  const setupItems = [
+    ['Supabase URL', Boolean(backend.url), backend.url ? 'موجود' : 'ناقص'],
+    ['Anon Key', Boolean(backend.anonKey), backend.anonKey ? 'موجود' : 'ناقص'],
+    ['Cloud Enabled', Boolean(backend.enabled), backend.enabled ? 'مفعل' : 'غير مفعل'],
+    ['تسجيل الدخول', isSigned, isSigned ? 'متصل' : 'مطلوب قبل الرفع']
+  ];
   return `<article class="card cloud-sync-card"><h3>Supabase Database Sync</h3>
-    <p class="meta">مزامنة قاعدة البيانات تحفظ نسخة JSON كاملة لكل مستخدم في جدول Supabase آمن بسياسات RLS. الوضع المحلي يظل شغال حتى لو السحابة غير متاحة.</p>
+    <p class="meta">هذا القسم خاص ببيانات التطبيق نفسها: الأهداف، المهام، المعرفة، القرارات، الحملات، والإعدادات. الملفات الكبيرة لها قسم منفصل اسمه File Storage.</p>
+    <div class="backup-checklist">${setupItems.map(([label, ok, text]) => `<span class="${ok ? 'done' : 'todo'}"><b>${ok ? '✅' : '○'} ${safeText(label)}</b><em>${safeText(text)}</em></span>`).join('')}</div>
     <div class="backup-breakdown">
-      <span><b>الحالة</b><em>${safeText(isSigned ? 'متصل' : auth.cloudReady ? 'جاهز للدخول' : 'محلي')}</em></span>
+      <span><b>الحالة</b><em>${safeText(isSigned ? 'متصل' : auth.cloudReady ? 'جاهز للدخول' : 'محلي فقط')}</em></span>
       <span><b>الحساب</b><em>${safeText(user.email || 'لا يوجد')}</em></span>
       <span><b>آخر مزامنة</b><em>${safeText(formatDate(backend.lastSyncAt || sync.lastSyncAt))}</em></span>
       <span><b>آخر رفع</b><em>${safeText(formatDate(backend.lastCloudPushAt || sync.lastCloudPushAt))}</em></span>
@@ -156,14 +201,14 @@ function cloudSyncPanel() {
     <div class="settings-grid" style="margin-top:14px">
       <label class="setting-field"><span>البريد الإلكتروني</span><input id="cloudEmail" type="email" placeholder="you@example.com" value="${safeText(user.email || '')}"></label>
       <label class="setting-field"><span>كلمة المرور</span><input id="cloudPassword" type="password" placeholder="••••••••"></label>
-      <label class="setting-field"><span>مزامنة تلقائية عند الحفظ</span><select data-action="backend-auto-sync"><option value="false" ${!backend.autoSync?'selected':''}>غير مفعلة</option><option value="true" ${backend.autoSync?'selected':''}>مفعلة بعد تسجيل الدخول</option></select></label>
+      <label class="setting-field"><span>مزامنة تلقائية عند الحفظ</span><select data-action="backend-auto-sync"><option value="false" ${!backend.autoSync?'selected':''}>غير مفعلة</option><option value="true" ${backend.autoSync?'selected':''}>مفعلة بعد تسجيل الدخول</option></select><small>يفضل تركها مغلقة حتى تختبر الرفع والتحميل يدويًا مرة واحدة.</small></label>
     </div>
     <div class="btn-row" style="margin-top:12px">
       <button class="btn primary" data-action="cloud-sign-in">تسجيل الدخول</button>
       <button class="btn ghost" data-action="cloud-sign-up">إنشاء حساب</button>
       <button class="btn ghost" data-action="cloud-sign-out">تسجيل خروج</button>
     </div>
-    <div class="btn-row" style="margin-top:12px">
+    <div class="btn-row backup-safe-actions" style="margin-top:12px">
       <button class="btn primary" data-action="cloud-upload">رفع المحلي للسحابة</button>
       <button class="btn ghost" data-action="cloud-download">تحميل السحابة للجهاز</button>
       <button class="btn ghost" data-action="cloud-merge">دمج المحلي والسحابة</button>
@@ -177,8 +222,8 @@ function cloudSyncPanel() {
 function backendReadinessPanel() {
   const report = getBackendReadinessReport(appState.data.settings);
   const backend = appState.data.settings.backend || {};
-  return `<article class="card backend-readiness-card"><h3>Backend Readiness</h3>
-    <p class="meta">هذه المرحلة لا تفعل باك إند بعد، لكنها جهزت طبقة التخزين والمصادقة والملفات والمزامنة للربط بـ Supabase لاحقًا.</p>
+  return `<article class="card backend-readiness-card"><h3>إعدادات Supabase المتقدمة</h3>
+    <p class="meta">افتح هذا القسم عند الربط فقط. بعد إدخال URL وAnon Key وتفعيل Cloud ستظهر الحالة في أعلى مركز النسخ بوضوح.</p>
     <div class="backup-breakdown">
       <span><b>وضع البيانات</b><em>${safeText(report.mode)}</em></span>
       <span><b>Adapter</b><em>${safeText(report.adapter)}</em></span>
@@ -186,11 +231,11 @@ function backendReadinessPanel() {
       <span><b>Sync</b><em>${safeText(report.sync.provider)}</em></span>
     </div>
     <div class="settings-grid" style="margin-top:14px">
-      <label class="setting-field"><span>Backend Provider</span><select data-action="backend-provider"><option value="local" ${backend.provider==='local'?'selected':''}>Local فقط</option><option value="supabase" ${backend.provider==='supabase'?'selected':''}>Supabase لاحقًا</option></select></label>
-      <label class="setting-field"><span>Sync Mode</span><select data-action="backend-sync-mode"><option value="local-first" ${backend.syncMode==='local-first'?'selected':''}>Local First</option><option value="cloud-first" ${backend.syncMode==='cloud-first'?'selected':''}>Cloud First لاحقًا</option></select></label>
-      <label class="setting-field wide"><span>Supabase URL</span><input value="${safeText(backend.url || '')}" placeholder="https://xxxx.supabase.co" data-action="backend-url"></label>
-      <label class="setting-field wide"><span>Supabase Anon Key</span><input type="password" value="${safeText(backend.anonKey || '')}" placeholder="eyJ..." data-action="backend-anon-key"></label>
-      <label class="setting-field"><span>File Storage</span><select data-action="backend-file-storage"><option value="local-reference" ${backend.fileStorage==='local-reference'?'selected':''}>محلي الآن</option><option value="supabase-storage" ${backend.fileStorage==='supabase-storage'?'selected':''}>Supabase Storage لاحقًا</option></select></label>
+      <label class="setting-field"><span>Backend Provider</span><select data-action="backend-provider"><option value="local" ${backend.provider==='local'?'selected':''}>Local فقط</option><option value="supabase" ${backend.provider==='supabase'?'selected':''}>Supabase</option></select></label>
+      <label class="setting-field"><span>Sync Mode</span><select data-action="backend-sync-mode"><option value="local-first" ${backend.syncMode==='local-first'?'selected':''}>Local First</option><option value="cloud-first" ${backend.syncMode==='cloud-first'?'selected':''}>Cloud First</option></select></label>
+      <label class="setting-field wide"><span>Supabase URL</span><input value="${safeText(backend.url || '')}" placeholder="https://xxxx.supabase.co" data-action="backend-url"><small>استخدم رابط المشروع فقط، وليس رابط Dashboard.</small></label>
+      <label class="setting-field wide"><span>Supabase Anon / Publishable Key</span><input type="password" value="${safeText(backend.anonKey || '')}" placeholder="eyJ..." data-action="backend-anon-key"></label>
+      <label class="setting-field"><span>File Storage</span><select data-action="backend-file-storage"><option value="local-reference" ${backend.fileStorage==='local-reference'?'selected':''}>محلي</option><option value="supabase-storage" ${backend.fileStorage==='supabase-storage'?'selected':''}>Supabase Storage</option></select></label>
       <label class="setting-field"><span>تفعيل Cloud</span><select data-action="backend-enabled"><option value="false" ${!backend.enabled?'selected':''}>غير مفعل</option><option value="true" ${backend.enabled?'selected':''}>مفعل</option></select></label>
     </div>
     <div class="qa-list" style="margin-top:14px">${report.layers.map(layer => `<div class="qa-row ${layer.ok?'pass':'warn'}"><span>${layer.ok?'✅':'⚠️'}</span><div><b>${safeText(layer.name)}</b><p>${safeText(layer.details)}</p></div></div>`).join('')}</div>
@@ -210,17 +255,22 @@ function storagePanel() {
   const backend = appState.data.settings.backend || {};
   const status = getFileServiceStatus(appState.data.settings);
   const stats = getKnowledgeFileStats();
+  const localMb = formatMb(stats.localBytes);
+  const totalMb = formatMb(stats.totalBytes);
+  const risk = stats.localBytes > 2_500_000 || stats.localInline.some(x => x.file.kind === 'video');
   return `<article class="card storage-card"><h3>Supabase File Storage</h3>
-    <p class="meta">يرفع ملفات المعرفة الكبيرة مثل PDF والصور والفيديوهات إلى Supabase Storage، ويحفظ داخل البيانات الرابط والمسار فقط بدل Base64 الثقيل. لا يتم استخدام Storage إلا بعد تسجيل الدخول.</p>
+    <p class="meta">هذا القسم خاص بملفات المعرفة الكبيرة: PDF، صور، وفيديوهات. الهدف أن البيانات تحفظ روابط ومسارات بدل Base64 داخل LocalStorage.</p>
     <div class="backup-breakdown">
       <span><b>وضع الملفات</b><em>${safeText(status.mode)}</em></span>
       <span><b>Bucket</b><em>${safeText(status.bucket)}</em></span>
-      <span><b>ملفات محلية</b><em>${safeText(stats.localInline.length)}</em></span>
-      <span><b>ملفات سحابية</b><em>${safeText(stats.cloud.length)}</em></span>
-      <span><b>حجم محلي تقريبي</b><em>${safeText((stats.localBytes / 1024 / 1024).toFixed(2))} MB</em></span>
+      <span><b>محلي داخل البيانات</b><em>${safeText(stats.localInline.length)}</em></span>
+      <span><b>سحابي</b><em>${safeText(stats.cloud.length)}</em></span>
+      <span><b>حجم محلي</b><em>${safeText(localMb)}</em></span>
+      <span><b>إجمالي الملفات</b><em>${safeText(totalMb)}</em></span>
     </div>
+    ${risk ? `<div class="warning-box" style="margin-top:12px">يوجد ملفات محلية ثقيلة. الأفضل تصدير JSON الآن ثم نقل الملفات إلى Supabase Storage قبل إضافة PDF/فيديوهات أكثر.</div>` : `<div class="recommendation" style="margin-top:12px">حجم الملفات المحلي مقبول حاليًا.</div>`}
     <div class="settings-grid" style="margin-top:14px">
-      <label class="setting-field"><span>File Storage</span><select data-action="backend-file-storage"><option value="local-reference" ${backend.fileStorage==='local-reference'?'selected':''}>محلي الآن</option><option value="supabase-storage" ${backend.fileStorage==='supabase-storage'?'selected':''}>Supabase Storage</option></select></label>
+      <label class="setting-field"><span>File Storage</span><select data-action="backend-file-storage"><option value="local-reference" ${backend.fileStorage==='local-reference'?'selected':''}>محلي</option><option value="supabase-storage" ${backend.fileStorage==='supabase-storage'?'selected':''}>Supabase Storage</option></select></label>
       <label class="setting-field"><span>Storage Bucket</span><input value="${safeText(backend.storageBucket || 'mogahed-os-files')}" data-action="backend-storage-bucket" placeholder="mogahed-os-files"></label>
     </div>
     <div class="btn-row" style="margin-top:12px">
@@ -234,17 +284,24 @@ function storagePanel() {
 
 export function backupPanel() {
   const report = backupHealthReport();
+  const stats = getKnowledgeFileStats();
   return `<section class="backup-pro backup-control-center">
-    ${pageHeader('النسخ الاحتياطي', 'مركز منظم لحماية البيانات. افتح القسم الذي تحتاجه فقط حتى لا تتوه بين الأدوات.', '<button class="btn primary" data-action="export-json">تصدير سريع</button>')}
+    ${pageHeader('النسخ الاحتياطي', 'مركز واضح: نسخة JSON أولًا، ثم Google Drive، ثم Supabase Database، ثم File Storage للملفات الكبيرة.', '<button class="btn primary" data-action="export-json">تصدير سريع</button>')}
     ${backupStatusHero()}
     ${renderBackupStats()}
+    <article class="card backup-rule-card">
+      <h3>قاعدة الأمان في المشروع</h3>
+      <p class="meta">لا تعتمد على مكان واحد فقط. قبل أي تطوير أو تجربة: صدّر JSON. لو ستستخدم السحابة: ارفع البيانات أولًا، وبعدها انقل الملفات الكبيرة للسحابة.</p>
+      <div class="backup-flow"><span>1 JSON</span><span>2 Cloud DB</span><span>3 File Storage</span><span>4 QA</span></div>
+    </article>
+    ${stats.localInline.length ? `<article class="card backup-file-warning"><h3>تنبيه ملفات المعرفة</h3><p>عندك ${safeText(stats.localInline.length)} ملف محفوظ محليًا داخل البيانات بحجم تقريبي ${safeText(formatMb(stats.localBytes))}. الملفات الكبيرة ممكن تسبب فشل الحفظ، لذلك قسم File Storage موجود لنقلها عند تجهيز Supabase.</p></article>` : ''}
 
     <div class="backup-sections">
-      ${backupSection('⚡', 'نسخة سريعة', 'تصدير واستيراد JSON وحفظ نسخة محلية فورية.', quickJsonPanel(), true)}
-      ${backupSection('☁️', 'Google Drive Backup', 'نسخ احتياطي على Google Drive بعد الاتصال بحسابك.', driveBackupPanel(), false)}
-      ${backupSection('🗄️', 'Supabase Database Sync', 'رفع وتحميل ودمج بياناتك مع قاعدة Supabase.', cloudSyncPanel(), false)}
-      ${backupSection('📎', 'Supabase File Storage', 'نقل ملفات PDF والصور والفيديوهات إلى Supabase Storage.', storagePanel(), false)}
-      ${backupSection('⚙️', 'إعدادات Backend المتقدمة', 'URL، Key، وضع التخزين، وتجهيزات السحابة. افتحها فقط عند الإعداد.', backendReadinessPanel(), false)}
+      ${backupSection('⚡', 'نسخة JSON سريعة', 'أسرع حماية قبل أي تعديل أو تجربة.', quickJsonPanel(), true)}
+      ${backupSection('☁️', 'Google Drive Backup', 'نسخة احتياطية خارج المتصفح على حساب Google Drive.', driveBackupPanel(), false)}
+      ${backupSection('🗄️', 'Supabase Database Sync', 'رفع وتحميل ودمج بيانات التطبيق فقط.', cloudSyncPanel(), false)}
+      ${backupSection('📎', 'Supabase File Storage', 'نقل PDF والصور والفيديوهات بدل تخزينها داخل LocalStorage.', storagePanel(), false)}
+      ${backupSection('⚙️', 'إعدادات Supabase المتقدمة', 'URL، Key، Cloud Mode، وStorage. افتحها فقط عند الربط.', backendReadinessPanel(), false)}
       ${backupSection('🧪', 'فحص وسلامة البيانات', 'مشاكل التخزين، IDs، محتوى النسخة، واختبار النظام.', `<article class="card backup-action-card"><h3>فحص سلامة النسخة</h3>${report.issues.map(issue => `<div class="${report.health.ok && !report.duplicates.length ? 'recommendation' : 'warning-box'}" style="margin-top:10px">${safeText(issue)}</div>`).join('')}<div class="btn-row backup-main-actions" style="margin-top:12px"><button class="btn ghost" data-action="show-qa">تشغيل اختبار النظام</button></div></article>${renderCollectionBreakdown()}`, false)}
       ${backupSection('⚠️', 'منطقة الخطر', 'مسح البيانات المحلية بعد تأكيد واضح فقط.', dangerPanel(), false)}
     </div>

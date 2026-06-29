@@ -6,22 +6,14 @@ import { linkedFields, removeItem, simpleCard, upsert } from './shared.js';
 import { openTaskModal } from './tasks.js';
 import { buildEmbedUrl, fetchYouTubeMetadata, parseYouTubeUrl, secondsToTime } from './youtube.js';
 import { refreshCloudFileUrl, uploadFileToSupabaseStorage } from '../services/fileService.js';
+import { createYouTubeRuntime } from './knowledgeYoutubeRuntime.js';
+import { knowledgeFilters, knowledgeLearningStatuses, knowledgeStatuses, knowledgeTypes } from './knowledgeConfig.js';
+import { countPdfPagesFromArrayBuffer, formatFileSize as formatUploadedFileSize, getFileKind, getLocalFiles, mergeKnowledgeFiles, readFileAsDataURL as readUploadedFileAsDataURL, validateUploads } from './knowledgeFiles.js';
+import { buildKnowledgePayload as createKnowledgePayload, collectKnowledgeMeta, isYouTubeKnowledgeType } from './knowledgeForm.js';
 
-const types = ['فيديو','Playlist','بودكاست','كتاب PDF','مقال','رابط','ملاحظة','فكرة','صور'];
-const statuses = ['جديد','قيد المراجعة','تم تلخيصه','تحول لأفعال','مؤرشف'];
-const learningStatuses = ['لم أبدأ','جاري المشاهدة','انتهيت','أحتاج مراجعة','تم تحويله لتنفيذ'];
-const knowledgeFilters = [
-  ['all', 'كل المعرفة'],
-  ['needs-review', 'يحتاج مراجعة'],
-  ['not-completed', 'غير مكتمل'],
-  ['completed', 'مكتمل'],
-  ['converted', 'تحول لتنفيذ'],
-  ['video', 'فيديو'],
-  ['playlist', 'Playlist']
-];
-const youtubePlayers = new Map();
-const progressTimers = new Map();
-let youtubeApiPromise = null;
+const types = knowledgeTypes;
+const statuses = knowledgeStatuses;
+const learningStatuses = knowledgeLearningStatuses;
 
 export function renderKnowledge() {
   const actions = '<button class="btn primary" data-action="open-knowledge-modal">إضافة معرفة</button>';
@@ -450,15 +442,13 @@ function renderTimedNotes(item, activeVideoId = '') {
   </button>`).join('')}</div>`;
 }
 
-function getLocalFiles(item = {}) {
-  return Array.isArray(item.localFiles) ? item.localFiles : [];
-}
 
 function formatFileSize(bytes = 0) {
-  const size = safeNumber(bytes);
-  if (!size) return '0 KB';
-  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  return formatUploadedFileSize(bytes, safeNumber);
+}
+
+function readFileAsDataURL(file) {
+  return readUploadedFileAsDataURL(file, { generateId });
 }
 
 function renderLocalFileSummary(item = {}) {
@@ -561,21 +551,6 @@ function renderImagesWorkspace(item = {}) {
 function renderTextKnowledgeWorkspace(item = {}) {
   const meta = getKnowledgeMeta(item);
   return `<div class="knowledge-section text-knowledge-workspace"><h4>محتوى ${safeText(item.type || 'المعرفة')}</h4><label>المحتوى / الملاحظات<textarea readonly>${safeText(meta.contentText || item.summary || item.notes || '')}</textarea></label><p class="meta">هذا النوع لا يعرض أدوات فيديو أو PDF حتى لا تختلط البيانات.</p></div>`;
-}
-
-function countPdfPagesFromText(text = '') {
-  const matches = String(text).match(/\/Type\s*\/Page(?!s)\b/g);
-  return matches ? matches.length : 0;
-}
-
-async function countPdfPagesFromArrayBuffer(buffer) {
-  try {
-    const bytes = new Uint8Array(buffer);
-    let text = '';
-    const chunk = 0x8000;
-    for (let i = 0; i < bytes.length; i += chunk) text += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
-    return countPdfPagesFromText(text);
-  } catch { return 0; }
 }
 
 function inferTitleFromUrl(url = '') {
@@ -728,120 +703,13 @@ export function refreshKnowledgeTypeFields(type = '') {
 }
 
 
-function collectKnowledgeMeta(data = {}) {
-  const metaKeys = ['author','source','sourceType','durationMinutes','episode','pages','currentPage','readingTime','imageCount','contentText','keyQuestion','purpose'];
-  return Object.fromEntries(metaKeys.map(key => [key, data[key] || '']).filter(([, value]) => String(value || '').trim() !== ''));
-}
-
-function isYouTubeKnowledgeType(type = '') {
-  return type === 'فيديو' || type === 'Playlist';
-}
-
-function buildKnowledgePayload(existing = {}, data) {
-  const keepMedia = data.url === existing.url && isYouTubeKnowledgeType(data.type);
-  const meta = collectKnowledgeMeta(data);
-  const contentText = meta.contentText || '';
-  return {
-    id: data.id || generateId('know'),
-    title: data.title,
-    type: data.type,
-    url: data.url || '',
-    fileName: data.fileName || '',
-    category: data.category || '',
-    status: data.status || 'جديد',
-    meta,
-    summary: isYouTubeKnowledgeType(data.type) ? (existing.summary || '') : contentText,
-    notes: isYouTubeKnowledgeType(data.type) ? (existing.notes || '') : contentText,
-    extractedIdeas: existing.extractedIdeas || [],
-    extractedActions: existing.extractedActions || [],
-    linkedGoalId: data.goalId,
-    linkedProjectId: data.projectId,
-    lastReviewAt: existing.lastReviewAt || null,
-    youtube: keepMedia ? existing.youtube : undefined,
-    videoProgress: keepMedia ? existing.videoProgress : undefined,
-    timedNotes: keepMedia ? existing.timedNotes : [],
-    videoContent: keepMedia ? existing.videoContent : {},
-    localFiles: existing.localFiles || [],
-    readingProgress: existing.readingProgress || {}
-  };
-}
-
-function getFileKind(file = {}) {
-  const type = String(file.type || '');
-  if (type === 'application/pdf' || String(file.name || '').toLowerCase().endsWith('.pdf')) return 'pdf';
-  if (type.startsWith('image/')) return 'image';
-  if (type.startsWith('video/')) return 'video';
-  return 'file';
-}
-
-async function readFileAsDataURL(file) {
-  const dataUrl = await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-  const payload = { id: generateId('file'), name: file.name, type: file.type, size: file.size, kind: getFileKind(file), dataUrl, createdAt: new Date().toISOString(), storageMode: 'local-inline' };
-  if (payload.kind === 'pdf') {
-    try { payload.pageCount = await countPdfPagesFromArrayBuffer(await file.arrayBuffer()); } catch { payload.pageCount = 0; }
-  }
-  return payload;
-}
-
-function validateUploads(uploaded = [], knowledgeType = '') {
-  if (knowledgeType === 'كتاب PDF' && uploaded.some(file => file.kind !== 'pdf')) throw new Error('نوع الكتاب يقبل ملفات PDF فقط.');
-  if (knowledgeType === 'صور' && uploaded.some(file => file.kind !== 'image')) throw new Error('نوع الصور يقبل ملفات صور فقط.');
-  if ((knowledgeType === 'فيديو' || knowledgeType === 'Playlist') && uploaded.some(file => file.kind !== 'video')) throw new Error('نوع الفيديو يقبل ملفات فيديو فقط.');
-}
-
-async function readFileForConfiguredStorage(file, itemId) {
-  const wantsCloud = appState.data.settings?.backend?.fileStorage === 'supabase-storage';
-  if (wantsCloud) {
-    try {
-      const uploaded = await uploadFileToSupabaseStorage(appState.data.settings, file, { itemId, folder: 'knowledge', kind: getFileKind(file) });
-      if (uploaded.kind === 'pdf') {
-        try { uploaded.pageCount = await countPdfPagesFromArrayBuffer(await file.arrayBuffer()); } catch { uploaded.pageCount = 0; }
-      }
-      return uploaded;
-    } catch (error) {
-      toast(`تعذر رفع ${file.name} للسحابة، سيتم حفظه محليًا: ${error.message}`, 'error');
-    }
-  }
-  return readFileAsDataURL(file);
-}
-
-async function collectLocalUploads(form, knowledgeType = '', itemId = '') {
-  const input = form.querySelector('input[name="localFiles"]');
-  const files = Array.from(input?.files || []);
-  if (!files.length) return [];
-  const wantsCloud = appState.data.settings?.backend?.fileStorage === 'supabase-storage';
-  const totalSize = files.reduce((sum, file) => sum + file.size, 0);
-  const maxSingle = wantsCloud ? 50 * 1024 * 1024 : 8 * 1024 * 1024;
-  const maxBatch = wantsCloud ? 120 * 1024 * 1024 : 14 * 1024 * 1024;
-  const tooLarge = files.find(file => file.size > maxSingle);
-  if (tooLarge) throw new Error(`الملف ${tooLarge.name} كبير جدًا. الحد الحالي ${wantsCloud ? '50MB مع Supabase Storage' : '8MB للتخزين المحلي'}.`);
-  if (totalSize > maxBatch) throw new Error(`إجمالي الملفات كبير جدًا. الحد الحالي ${wantsCloud ? '120MB مع Supabase Storage' : '14MB للتخزين المحلي'}.`);
-  const uploaded = await Promise.all(files.map(file => readFileForConfiguredStorage(file, itemId || generateId('know'))));
-  validateUploads(uploaded, knowledgeType);
-  return uploaded;
-}
-
-function mergeKnowledgeFiles(existingFiles = [], newFiles = [], knowledgeType = '') {
-  if (!newFiles.length) return existingFiles;
-  if (knowledgeType === 'صور') return [...existingFiles.filter(file => file.kind === 'image'), ...newFiles];
-  if (knowledgeType === 'كتاب PDF') return [...existingFiles.filter(file => file.kind !== 'pdf'), ...newFiles.filter(file => file.kind === 'pdf')].slice(-1);
-  if (knowledgeType === 'فيديو') return [...existingFiles.filter(file => file.kind !== 'video'), ...newFiles.filter(file => file.kind === 'video')].slice(-1);
-  if (knowledgeType === 'Playlist') return [...existingFiles.filter(file => file.kind !== 'video'), ...newFiles.filter(file => file.kind === 'video')];
-  return [...existingFiles, ...newFiles];
-}
-
 async function saveKnowledge(existing = {}) {
   const form = document.getElementById('entityForm'); if (!form.reportValidity()) return;
   const data = objectFromForm(form);
   try {
     const provisionalId = data.id || existing.id || generateId('know');
     data.id = provisionalId;
-    const payload = buildKnowledgePayload(existing, data);
+    const payload = createKnowledgePayload(existing, data, { generateId });
     const uploads = await collectLocalUploads(form, data.type, payload.id);
     payload.localFiles = mergeKnowledgeFiles(existing.localFiles || [], uploads, data.type);
     if (!payload.fileName && payload.localFiles.length) payload.fileName = payload.localFiles[0].name;
@@ -897,7 +765,7 @@ export async function fetchKnowledgeMetadataFromForm() {
 
     const data = objectFromForm(form);
     const existing = appState.data.knowledge.find(x => x.id === data.id) || {};
-    const payload = buildKnowledgePayload(existing, data);
+    const payload = createKnowledgePayload(existing, data, { generateId });
     payload.youtube = meta.youtube;
     payload.summary = meta.summary || existing.summary || '';
     payload.videoProgress = existing.videoProgress || { byVideo: {}, completedVideoIds: [], watchedSeconds: 0, percentage: 0 };
@@ -1032,16 +900,7 @@ export function selectKnowledgeVideo(id, videoId) {
   autoSave();
 
   const startSeconds = safeNumber(item.videoProgress?.byVideo?.[videoId]);
-  const record = youtubePlayers.get(id);
-  const player = record?.player || record;
-  if (player?.loadVideoById) {
-    clearProgressTimer(id);
-    record.videoId = videoId;
-    try {
-      player.loadVideoById({ videoId, startSeconds });
-    } catch {
-      player.loadVideoById(videoId, startSeconds);
-    }
+  if (loadVideoInPlayer(id, videoId, startSeconds)) {
     refreshKnowledgeCardMedia(id);
     return;
   }
@@ -1259,153 +1118,16 @@ export function reviewKnowledge(id) { const item = appState.data.knowledge.find(
 export function editKnowledge(id) { openKnowledgeModal(id); }
 export function deleteKnowledge(id) { removeItem('knowledge', id); }
 
-function loadYouTubeIframeApi() {
-  if (window.YT?.Player) return Promise.resolve(window.YT);
-  if (youtubeApiPromise) return youtubeApiPromise;
-  youtubeApiPromise = new Promise(resolve => {
-    const previous = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = () => { previous?.(); resolve(window.YT); };
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    document.head.appendChild(tag);
-  });
-  return youtubeApiPromise;
-}
+const youtubeRuntime = createYouTubeRuntime({
+  appState,
+  autoSave,
+  saveData,
+  safeNumber,
+  renderVideoProgress,
+  renderItemLearningBadges,
+  renderCurrentVideoWorkspace,
+  renderTimedNotes,
+  selectKnowledgeVideo
+});
 
-
-function getPlayer(id) {
-  const record = youtubePlayers.get(id);
-  return record?.player || record || null;
-}
-
-function getPlayerVars(start = 0) {
-  const vars = { enablejsapi: 1, playsinline: 1, rel: 0, start: Math.floor(start) };
-  const origin = getSafeOrigin();
-  if (origin) vars.origin = origin;
-  return vars;
-}
-
-function initYouTubePlayers() {
-  const nodes = Array.from(document.querySelectorAll('.youtube-player'));
-  cleanupDetachedPlayers(nodes);
-  if (!nodes.length) return;
-  loadYouTubeIframeApi().then(YT => {
-    nodes.forEach(node => {
-      const id = node.dataset.knowledgeId;
-      const videoId = node.dataset.videoId;
-      if (!id || !videoId) return;
-      const existing = youtubePlayers.get(id);
-      const existingPlayer = existing?.player || existing;
-      const existingFrame = existingPlayer?.getIframe?.();
-      const isSameLivePlayer = existing?.videoId === videoId && existingFrame?.isConnected;
-      if (isSameLivePlayer) return;
-      destroyPlayer(id);
-
-      const item = appState.data.knowledge.find(k => k.id === id);
-      const start = safeNumber(item?.videoProgress?.byVideo?.[videoId]);
-      const player = new YT.Player(node.id, {
-        videoId,
-        playerVars: getPlayerVars(start),
-        events: {
-          onStateChange: event => handlePlayerState(id, event.data, YT.PlayerState),
-          onReady: () => updateProgressView(id)
-        }
-      });
-      youtubePlayers.set(id, { player, videoId, nodeId: node.id });
-    });
-  });
-}
-
-function handlePlayerState(id, state, states) {
-  const item = appState.data.knowledge.find(k => k.id === id);
-  const videoId = item?.youtube?.currentVideoId || item?.youtube?.videoId || youtubePlayers.get(id)?.videoId || '';
-  if (!videoId) return;
-  if (state === states.PLAYING) startProgressTimer(id, videoId);
-  if ([states.PAUSED, states.ENDED, states.BUFFERING].includes(state)) savePlayerProgress(id, videoId, state === states.ENDED);
-  if (state === states.ENDED) {
-    clearProgressTimer(id);
-    const next = getNextPlaylistVideo(item, videoId);
-    if (next) selectKnowledgeVideo(id, next.videoId);
-  }
-}
-
-function startProgressTimer(id, videoId) {
-  clearProgressTimer(id);
-  progressTimers.set(id, window.setInterval(() => {
-    savePlayerProgress(id, videoId, false, true);
-    updateProgressView(id);
-  }, 3000));
-}
-
-function clearProgressTimer(id) {
-  window.clearInterval(progressTimers.get(id));
-  progressTimers.delete(id);
-}
-
-function savePlayerProgress(id, videoId, completed = false, quiet = false) {
-  const item = appState.data.knowledge.find(k => k.id === id);
-  const record = youtubePlayers.get(id);
-  const player = record?.player || record;
-  if (!item || !player?.getCurrentTime || !videoId) return;
-  const seconds = Math.floor(player.getCurrentTime() || 0);
-  const duration = Math.floor(player.getDuration?.() || item.youtube?.durationSeconds || 0);
-  item.videoProgress = item.videoProgress || { byVideo: {}, completedVideoIds: [], watchedSeconds: 0, percentage: 0 };
-  item.videoProgress.byVideo = item.videoProgress.byVideo || {};
-  item.videoProgress.completedVideoIds = item.videoProgress.completedVideoIds || [];
-  item.videoProgress.byVideo[videoId] = Math.max(safeNumber(item.videoProgress.byVideo[videoId]), seconds);
-  item.videoProgress.watchedSeconds = item.videoProgress.byVideo[videoId];
-  item.videoProgress.percentage = duration ? Math.min(100, Math.round((item.videoProgress.byVideo[videoId] / duration) * 100)) : 0;
-  if ((completed || item.videoProgress.percentage >= 95) && !item.videoProgress.completedVideoIds.includes(videoId)) item.videoProgress.completedVideoIds.push(videoId);
-  if (quiet) autoSave(); else saveData();
-}
-
-function updateProgressView(id) {
-  const card = document.querySelector(`[data-knowledge-id="${CSS.escape(id)}"]`)?.closest('.item-card');
-  const item = appState.data.knowledge.find(k => k.id === id);
-  const progressNode = card?.querySelector('.knowledge-progress');
-  if (progressNode && item) progressNode.outerHTML = renderVideoProgress(item);
-}
-
-function refreshKnowledgeCardMedia(id) {
-  const item = appState.data.knowledge.find(k => k.id === id);
-  const card = document.querySelector(`[data-knowledge-id="${CSS.escape(id)}"]`)?.closest('.item-card');
-  if (!item || !card) return;
-  updateProgressView(id);
-  const badgesNode = card.querySelector('.learning-badges');
-  if (badgesNode) badgesNode.outerHTML = renderItemLearningBadges(item, item.youtube.currentVideoId);
-  const workspaceNode = card.querySelector('[data-video-workspace]');
-  if (workspaceNode) workspaceNode.outerHTML = renderCurrentVideoWorkspace(item, item.youtube.currentVideoId);
-  const notesSection = card.querySelector('.timed-note-form')?.closest('.knowledge-section');
-  const notesNode = notesSection?.querySelector('.timed-notes, .meta');
-  if (notesNode) notesNode.outerHTML = renderTimedNotes(item, item.youtube.currentVideoId);
-  card.querySelectorAll('.playlist-item').forEach(button => {
-    button.classList.toggle('active', button.dataset.videoId === item.youtube.currentVideoId);
-  });
-}
-
-function cleanupDetachedPlayers(nodes = []) {
-  const liveIds = new Set(nodes.map(node => node.dataset.knowledgeId).filter(Boolean));
-  youtubePlayers.forEach((record, id) => {
-    const player = record?.player || record;
-    const frame = player?.getIframe?.();
-    if (!liveIds.has(id) || (frame && !frame.isConnected)) destroyPlayer(id);
-  });
-}
-
-function destroyPlayer(id) {
-  clearProgressTimer(id);
-  const record = youtubePlayers.get(id);
-  const player = record?.player || record;
-  try { player?.destroy?.(); } catch {}
-  youtubePlayers.delete(id);
-}
-
-function getSafeOrigin() {
-  return location.origin && location.origin !== 'null' ? location.origin : window.location.protocol === 'file:' ? '' : location.origin;
-}
-
-function getNextPlaylistVideo(item, videoId) {
-  const list = item?.youtube?.playlistItems || [];
-  const index = list.findIndex(video => video.videoId === videoId);
-  return index >= 0 ? list[index + 1] : null;
-}
+const { initYouTubePlayers, getPlayer, savePlayerProgress, clearProgressTimer, refreshKnowledgeCardMedia, loadVideoInPlayer } = youtubeRuntime;

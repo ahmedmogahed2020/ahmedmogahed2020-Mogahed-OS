@@ -4,6 +4,7 @@ import { byUpdatedDesc, calculatePercentage, formatCurrency, formatDate, isPast,
 import { calculateCampaign } from './campaigns.js';
 import { secondsToTime } from './youtube.js';
 import { getWinIntelligence } from './wins.js';
+import { getDailyFlowState } from './dailyFlow.js';
 
 const DONE_LEARNING_STATUSES = ['انتهيت', 'تم تحويله لتنفيذ'];
 
@@ -283,7 +284,13 @@ function getHomeCommandCenter(m) {
   if (campaignsNeedDecision.length) warnings.push('فيه حملة تحتاج قرار قبل التوسع.');
   if (lateProjects.length) warnings.push('فيه مشروع متأخر محتاج إنقاذ.');
   const focusTask = topTasks[0] || d.tasks.find(t => t.status !== 'مكتملة') || null;
-  return { topTasks, todayTasks, urgentTasks, dailyTarget, todayDone, dailyProgress, learningProgress, learningTargetSeconds, reviewKnowledge, actionableKnowledge, campaignsNeedDecision, lateProjects, warnings, focusTask };
+  const nextTask = topTasks.find(t => t.id !== focusTask?.id) || null;
+  const parkTasks = topTasks.filter(t => t.id !== focusTask?.id && t.id !== nextTask?.id).slice(0, 2);
+  const commandModeStatus = warnings.length ? 'إنقاذ هادئ' : topTasks.length ? 'تنفيذ مباشر' : 'يوم خفيف';
+  const commandInstruction = focusTask
+    ? `ابدأ بـ ${focusTask.title}. لا تفتح أي صفحة تانية قبل أول خطوة.`
+    : 'اختر مهمة واحدة صغيرة فقط. النظام مش محتاج تخطيط زيادة دلوقتي.';
+  return { topTasks, todayTasks, urgentTasks, dailyTarget, todayDone, dailyProgress, learningProgress, learningTargetSeconds, reviewKnowledge, actionableKnowledge, campaignsNeedDecision, lateProjects, warnings, focusTask, nextTask, parkTasks, commandModeStatus, commandInstruction };
 }
 
 function renderCommandList(items, emptyText, renderer) {
@@ -293,6 +300,56 @@ function renderCommandList(items, emptyText, renderer) {
 
 function renderTopTask(task, index) {
   return `<div class="command-task"><span class="command-rank">${safeText(index + 1)}</span><div><b>${safeText(task.title)}</b><div class="meta"><span>${safeText(task.dueDate ? formatDate(task.dueDate) : 'بدون تاريخ')}</span><span>${safeText(task.priority || 'بدون أولوية')}</span><span>${safeText(task.source || 'يدوي')}</span></div></div><button class="btn primary" data-action="complete-task" data-id="${safeText(task.id)}">تم</button></div>`;
+}
+
+function getDailyReviewCommandState() {
+  const today = todayISO();
+  const reviews = Array.isArray(appState.data.reviews) ? appState.data.reviews : [];
+  const todayReview = reviews.find(review => review.type === 'يومية' && String(review.date || review.createdAt || '').slice(0, 10) === today);
+  const tasks = Array.isArray(appState.data.tasks) ? appState.data.tasks : [];
+  const todayTasks = tasks.filter(task => task.dueDate === today || String(task.completedAt || task.updatedAt || '').slice(0, 10) === today);
+  const doneToday = todayTasks.filter(task => task.status === 'مكتملة').length;
+  const openToday = todayTasks.filter(task => task.status !== 'مكتملة').length;
+  const overdue = tasks.filter(task => task.status !== 'مكتملة' && task.dueDate && isPast(task.dueDate)).length;
+  const settings = appState.data.settings?.notifications || {};
+  return {
+    completed: Boolean(todayReview),
+    doneToday,
+    openToday,
+    overdue,
+    time: settings.dailyReviewReminderTime || '21:30',
+    enabled: settings.dailyReviewReminderEnabled !== false,
+    nextAction: todayReview ? 'راجع ما كتبته أو حوّل الأفعال لمهام.' : openToday ? 'اقفل المفتوح أو انقله لبكرة بقرار واضح.' : 'اكتب ملخص اليوم وخطة بكرة.'
+  };
+}
+
+function renderDailyReviewFlowCard() {
+  const state = getDailyReviewCommandState();
+  return `<article class="card daily-review-flow-card">
+    <div class="section-title"><div><span class="eyebrow">إغلاق اليوم</span><h3>${state.completed ? 'مراجعة اليوم تمت' : 'مراجعة نهاية اليوم'}</h3></div><span class="badge ${state.completed ? 'success' : 'warning'}">${state.completed ? 'تم' : safeText(state.time)}</span></div>
+    <p class="meta">${safeText(state.nextAction)}</p>
+    <div class="daily-review-flow-grid">
+      <span><b>${safeText(state.doneToday)}</b><small>مكتملة اليوم</small></span>
+      <span><b>${safeText(state.openToday)}</b><small>مفتوحة اليوم</small></span>
+      <span><b>${safeText(state.overdue)}</b><small>متأخرة</small></span>
+    </div>
+    <div class="btn-row"><button class="btn primary" data-action="create-daily-review">افتح مراجعة اليوم</button><button class="btn ghost" data-action="show-notifications">إعداد التنبيه</button></div>
+  </article>`;
+}
+
+
+function renderHomeTasksReviewBridge(flow = getDailyFlowState()) {
+  const task = flow.primaryTask;
+  return `<article class="card home-task-review-flow">
+    <div class="section-title"><div><span class="eyebrow">تدفق اليوم</span><h3>المهام ⇄ الرئيسية ⇄ مراجعة اليوم</h3></div><span class="badge ${flow.readyForReview ? 'success' : 'warning'}">${flow.readyForReview ? 'جاهز للمراجعة' : 'نفّذ أولًا'}</span></div>
+    <p class="meta">${safeText(flow.summary)}</p>
+    <div class="flow-bridge-grid">
+      <div><small>ابدأ الآن</small><b>${safeText(task?.title || 'لا توجد مهمة مفتوحة')}</b><span>${safeText(flow.timeState.label)}</span></div>
+      <div><small>حالة اليوم</small><b>${safeText(flow.todayDone.length)} مكتمل / ${safeText(flow.todayOpen.length)} مفتوح</b><span>${safeText(flow.overdue.length)} متأخر</span></div>
+      <div><small>المراجعة</small><b>${flow.todayReview ? 'مكتوبة اليوم' : 'لم تُكتب بعد'}</b><span>${safeText(flow.reviewAction)}</span></div>
+    </div>
+    <div class="btn-row"><button class="btn primary" data-route="tasks">فتح المهام</button><button class="btn ghost" data-action="create-daily-review">مراجعة اليوم</button></div>
+  </article>`;
 }
 
 export function startFocusSession() {
@@ -320,17 +377,18 @@ export function renderHome() {
   const m = getMetrics();
   const k = m.knowledgeIntel;
   const command = getHomeCommandCenter(m);
+  const flow = getDailyFlowState();
   const executiveSignal = command.warnings[0] || (command.topTasks.length ? 'اليوم واضح: ابدأ بأهم 3 مهام فقط.' : 'اليوم خفيف. أضف مهمة واحدة تقربك من هدفك.');
   return `<section class="page home-stack command-center">
     <article class="command-hero">
       <div class="command-hero-copy">
         <span class="eyebrow">مركز القيادة اليومي</span>
         <h2>أهلاً يا ${safeText(appState.data.settings.userName || 'مجاهد')} 👋</h2>
-        <p>${safeText(executiveSignal)}</p>
+        <p>${safeText(flow.summary || executiveSignal)}</p>
         <div class="btn-row">
-          <button class="btn primary" data-action="start-focus-session">ابدأ جلسة تركيز</button>
+          <button class="btn primary" data-action="start-focus-session">ابدأ الآن</button>
+          <button class="btn ghost" data-action="open-emergency">طوارئ تشتت</button>
           <button class="btn ghost" data-action="open-task-modal">إضافة مهمة</button>
-          <button class="btn ghost" data-action="open-knowledge-modal">إضافة معرفة</button>
           <button class="btn dark" data-route="dashboard">Dashboard كامل</button>
         </div>
       </div>
@@ -338,6 +396,18 @@ export function renderHome() {
         <div class="progress-ring command-ring" style="--value:${safeText(Math.min(100, command.dailyProgress))}"><strong>${safeText(command.dailyProgress)}%</strong></div>
         <b>تقدم اليوم</b>
         <span>${safeText(command.todayDone)} من ${safeText(command.dailyTarget)} مهام مستهدفة</span>
+      </div>
+    </article>
+
+    <article class="card daily-command-strip">
+      <div class="daily-command-head">
+        <div><span class="eyebrow">وضع اليوم</span><h3>${safeText(command.commandModeStatus)}</h3></div>
+        <p>${safeText(command.commandInstruction)}</p>
+      </div>
+      <div class="daily-command-lanes">
+        <div class="daily-lane now"><small>الآن</small><b>${safeText(flow.primaryTask?.title || command.focusTask?.title || 'أضف مهمة واحدة')}</b><span>${safeText(flow.timeState?.label || 'أول خطوة فقط')}</span></div>
+        <div class="daily-lane next"><small>بعدها</small><b>${safeText(command.nextTask?.title || command.reviewKnowledge[0]?.title || 'مراجعة معرفة قصيرة')}</b><span>${safeText(command.nextTask?.priority || command.reviewKnowledge[0]?.reviewAt || 'اختياري')}</span></div>
+        <div class="daily-lane park"><small>اتركه لاحقًا</small><b>${safeText(command.parkTasks[0]?.title || command.campaignsNeedDecision[0]?.campaign.productName || 'لا تفتح زحمة جديدة')}</b><span>مش دلوقتي</span></div>
       </div>
     </article>
 
@@ -352,6 +422,10 @@ export function renderHome() {
     </div>
 
     ${command.warnings.length ? `<article class="command-alerts">${command.warnings.map(w => `<div><b>تنبيه</b><span>${safeText(w)}</span></div>`).join('')}</article>` : ''}
+
+    ${renderDailyReviewFlowCard()}
+
+    ${renderHomeTasksReviewBridge(flow)}
 
     <div class="command-layout">
       <section class="command-main">

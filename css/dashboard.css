@@ -13,7 +13,7 @@
 .mini-chart { display: flex; align-items: end; gap: 6px; height: 84px; padding: 10px; background: var(--surface-2); border-radius: var(--radius-md); border: 1px solid var(--line); }
 .mini-chart span { flex: 1; min-height: 8px; border-radius: 999px 999px 4px 4px; background: var(--primary-soft); border: 1px solid rgba(109,61,46,.12); }
 
-/* V2 Dashboard Intelligence */
+/* Dashboard intelligence */
 .knowledge-intel-section { display: grid; gap: 12px; margin-top: 14px; }
 .knowledge-hero { background: linear-gradient(135deg, #111827, #2f241f); }
 .knowledge-ring { background: conic-gradient(var(--accent) calc(var(--value) * 1%), rgba(255,255,255,.16) 0); }
@@ -33,7 +33,7 @@
 .dashboard-warning-card span { line-height: 1.8; font-weight: 800; }
 .home-knowledge-intel { display: grid; gap: 12px; }
 
-/* V6 Home Command Center Pro */
+/* Home command center */
 .command-center { gap: 16px; }
 .command-hero { display: grid; gap: 16px; border-radius: var(--radius-xl); padding: 18px; background: linear-gradient(135deg, #111827, #2f241f 55%, #6d3d2e); color: #fff; box-shadow: var(--shadow-md); overflow: hidden; position: relative; }
 .command-hero::after { content: ""; position: absolute; inset-inline-start: -50px; bottom: -70px; width: 190px; height: 190px; border-radius: 50%; background: rgba(255,255,255,.08); pointer-events: none; }
@@ -112,4 +112,21 @@
 }
 @media (max-width: 640px) {
   .command-hero .btn-row .btn { flex: 1 1 145px; }
+}
+
+/* Daily command mode */
+.daily-command-strip { display: grid; gap: 14px; border: 1px solid rgba(124, 58, 237, .16); background: linear-gradient(180deg, var(--surface), var(--surface-2)); }
+.daily-command-head { display: grid; gap: 8px; }
+.daily-command-head h3 { margin: 2px 0 0; font-size: 1.25rem; }
+.daily-command-head p { color: var(--text); font-weight: 850; line-height: 1.8; }
+.daily-command-lanes { display: grid; gap: 10px; }
+.daily-lane { display: grid; gap: 6px; border: 1px solid var(--line); border-radius: var(--radius-md); padding: 12px; background: var(--surface); min-width: 0; }
+.daily-lane small { color: var(--muted); font-weight: 900; }
+.daily-lane b { line-height: 1.55; overflow-wrap: anywhere; }
+.daily-lane span { color: var(--muted); font-size: .82rem; font-weight: 850; }
+.daily-lane.now { border-color: rgba(124, 58, 237, .28); box-shadow: var(--shadow-sm); }
+
+@media (min-width: 760px) {
+  .daily-command-head { grid-template-columns: 220px 1fr; align-items: center; }
+  .daily-command-lanes { grid-template-columns: 1.2fr 1fr 1fr; }
 }

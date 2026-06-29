@@ -14,7 +14,7 @@ import { openCampaignModal, editCampaign, deleteCampaign, viewCampaign, campaign
 import { openSearchModal, jumpTo, openSearchResult, openRecentItem, runSearchCommand, clearRecentItems } from './modules/search.js';
 import { startFocusSession } from './modules/dashboard.js';
 import { doBackup, doClear, doExport, doImport, forceSaveData, showBackup, showSettings, showQA, showNotifications, showGuide, runQA, updateUserName, updateYouTubeApiKey, updateStoreName, updateCurrency, updateDailyTaskTarget, updateLearningMinutesTarget, updateQuietMode, updateCompactMode, updateSeedData, updateBackendProvider, updateBackendUrl, updateBackendAnonKey, updateBackendSyncMode, updateBackendFileStorage, updateBackendStorageBucket, updateBackendEnabled, updateBackendAutoSync, migrateKnowledgeFilesToCloud, cloudSignIn, cloudSignUp, cloudSignOut, cloudUpload, cloudDownload, cloudMerge, cloudStatus } from './modules/backup.js';
-import { initNotifications, testNotificationSound, testCategorySound, requestNotificationPermission, updateNotificationEnabled, updateNotificationSoundEnabled, updateNotificationBrowserEnabled, updateNotificationLeadMinutes, updateNotificationVolume, updateNotificationSoundType, updateNotificationCategorySound, resetNotificationSounds, markNotificationRead, clearNotificationLog } from './modules/notifications.js';
+import { initNotifications, testNotificationSound, testCategorySound, requestNotificationPermission, updateNotificationEnabled, updateNotificationSoundEnabled, updateNotificationBrowserEnabled, updateNotificationLeadMinutes, updateNotificationVolume, updateNotificationSoundType, updateNotificationCategorySound, resetNotificationSounds, markNotificationRead, clearNotificationLog, updateDailyReviewReminderEnabled, updateDailyReviewReminderTime } from './modules/notifications.js';
 import { connectGoogleDrive, disconnectGoogleDrive, uploadDriveBackup, listDriveBackups, restoreLatestDriveBackup, updateDriveClientId, updateDriveEnabled, updateDriveInterval, updateDriveKeepHistory, startDriveAutoBackup } from './modules/driveBackup.js';
 import { initializeBackendServices } from './services/dataService.js';
 
@@ -66,6 +66,7 @@ function handleChange(event) {
   if (el.matches('[data-action="notification-enabled"]')) updateNotificationEnabled(el.checked);
   if (el.matches('[data-action="notification-sound-enabled"]')) updateNotificationSoundEnabled(el.checked);
   if (el.matches('[data-action="notification-browser-enabled"]')) updateNotificationBrowserEnabled(el.checked);
+  if (el.matches('[data-action="notification-review-enabled"]')) updateDailyReviewReminderEnabled(el.checked);
   if (el.matches('[data-action="notification-sound-type"]')) updateNotificationSoundType(el.value);
   if (el.matches('[data-action="notification-category-sound"]')) updateNotificationCategorySound(el.dataset.category, el.value);
   if (el.matches('[data-action="drive-enabled"]')) updateDriveEnabled(el.checked);
@@ -96,6 +97,7 @@ function handleInput(event) {
   if (el.matches('[data-action="decision-search"]')) setDecisionSearch(el.value);
   if (el.matches('[data-action="notification-lead-minutes"]')) updateNotificationLeadMinutes(el.value);
   if (el.matches('[data-action="notification-volume"]')) updateNotificationVolume(el.value);
+  if (el.matches('[data-action="notification-review-time"]')) updateDailyReviewReminderTime(el.value);
   if (el.matches('[data-action="drive-client-id"]')) updateDriveClientId(el.value);
   if (el.matches('[data-action="drive-interval"]')) updateDriveInterval(el.value);
   if (el.matches('[data-action="backend-url"]')) updateBackendUrl(el.value);
