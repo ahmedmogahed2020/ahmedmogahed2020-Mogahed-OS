@@ -665,3 +665,89 @@
     font-size: .56rem !important;
   }
 }
+
+/* V21 Backup Control Center mobile polish */
+@media (max-width: 760px) {
+  body[data-page="more"] .backup-control-center .page-header {
+    display: grid !important;
+    padding: 8px 2px 0 !important;
+  }
+  .backup-status-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+  .backup-status-strip span {
+    padding: 10px !important;
+    border-radius: 18px !important;
+  }
+  .backup-status-strip b {
+    font-size: .78rem !important;
+  }
+  .backup-status-strip em {
+    font-size: .88rem !important;
+  }
+  .backup-section {
+    border-radius: 20px !important;
+  }
+  .backup-section > summary {
+    grid-template-columns: 38px 1fr !important;
+    min-height: 68px !important;
+    padding: 12px !important;
+    gap: 10px !important;
+  }
+  .backup-section > summary > span {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 14px !important;
+    font-size: 1.08rem !important;
+  }
+  .backup-section > summary b {
+    font-size: .9rem !important;
+  }
+  .backup-section > summary small {
+    font-size: .74rem !important;
+    line-height: 1.45 !important;
+  }
+  .backup-section-body {
+    padding: 0 10px 10px !important;
+  }
+  .backup-section-body > .card {
+    margin-top: 10px !important;
+    padding: 12px !important;
+  }
+  .backup-breakdown {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+  .backup-breakdown span {
+    display: grid !important;
+    gap: 4px !important;
+    text-align: center !important;
+    justify-content: stretch !important;
+    padding: 9px !important;
+  }
+  .backup-main-actions,
+  .backup-section .btn-row {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+  .backup-main-actions .btn,
+  .backup-section .btn-row .btn,
+  .backup-section label.btn {
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+  .backup-section .settings-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+  .backup-section input,
+  .backup-section select {
+    min-height: 44px !important;
+  }
+  .backup-control-center .code-block {
+    max-height: 260px !important;
+    font-size: .72rem !important;
+  }
+}

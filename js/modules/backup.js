@@ -57,21 +57,30 @@ function backupHealthReport() {
   return { health, duplicates, sizePercent, issues };
 }
 
+function moreEmptyPanel() {
+  return `<article class="card more-empty-panel">
+    <div class="empty-state compact">
+      <b>اختر أداة من الأعلى</b>
+      <p>تم فصل أدوات المزيد عن بعضها حتى لا تبدأ الصفحة مزدحمة. افتح النسخ الاحتياطي أو الإعدادات أو التنبيهات عند الحاجة فقط.</p>
+    </div>
+  </article>`;
+}
+
 export function renderMore() {
-  return `<section class="page">${pageHeader('المزيد', 'أدوات متقدمة منظمة في Grid مناسب للموبايل.', '')}
+  return `<section class="page more-page">${pageHeader('المزيد', 'أدوات متقدمة منظمة في Grid مناسب للموبايل.', '')}
     <div class="more-grid">
       <button class="more-tile" data-route="dashboard"><span>📊</span><b>Dashboard</b><small>لوحة أداء كاملة</small></button>
       <button class="more-tile" data-route="decisions"><span>⚖️</span><b>القرارات</b><small>Decision Journal</small></button>
       <button class="more-tile" data-route="reviews"><span>📝</span><b>المراجعات</b><small>يومية وأسبوعية</small></button>
       <button class="more-tile" data-route="wins"><span>🏆</span><b>لوحة الفوز</b><small>سجل الانتصارات</small></button>
       <button class="more-tile" data-route="campaigns"><span>📣</span><b>تحليل الحملات</b><small>تسعير وربحية</small></button>
-      <button class="more-tile" data-action="show-backup"><span>🛡️</span><b>النسخ الاحتياطي</b><small>تصدير واستيراد</small></button>
+      <button class="more-tile" data-action="show-backup"><span>🛡️</span><b>النسخ الاحتياطي</b><small>حماية ومزامنة</small></button>
       <button class="more-tile" data-action="show-notifications"><span>🔔</span><b>التنبيهات</b><small>تذكيرات وأصوات</small></button>
       <button class="more-tile" data-action="show-guide"><span>📘</span><b>تعليمات</b><small>دليل المستخدم</small></button>
       <button class="more-tile" data-action="show-settings"><span>⚙️</span><b>الإعدادات</b><small>بيانات النظام</small></button>
       <button class="more-tile" data-action="show-qa"><span>🧪</span><b>System Health</b><small>اختبار النظام</small></button>
     </div>
-    <div id="morePanel">${backupPanel()}</div>
+    <div id="morePanel">${moreEmptyPanel()}</div>
   </section>`;
 }
 
@@ -83,6 +92,48 @@ function renderBackupStats() {
     <article class="kpi-card"><small>آخر حفظ</small><strong>${safeText(formatDate(appState.data.settings.lastSavedAt))}</strong></article>
     <article class="kpi-card"><small>مشاكل IDs</small><strong>${safeText(report.duplicates.length)}</strong></article>
   </div>`;
+}
+
+
+function backupStatusHero() {
+  const auth = getAuthStatus(appState.data.settings);
+  const sync = getSyncStatus(appState.data.settings);
+  const fileStatus = getFileServiceStatus(appState.data.settings);
+  const drive = appState.data.settings.googleDriveBackup || {};
+  const items = [
+    ['💾', 'محلي', checkStorageHealth().ok ? 'سليم' : 'يحتاج فحص'],
+    ['☁️', 'Google Drive', drive.connected ? 'متصل' : 'اختياري'],
+    ['🗄️', 'Supabase DB', auth.mode === 'cloud' ? 'متصل' : auth.cloudReady ? 'جاهز' : 'محلي'],
+    ['📎', 'Storage', fileStatus.cloudReady ? 'سحابي' : 'محلي']
+  ];
+  return `<div class="backup-status-strip">${items.map(([icon, title, status]) => `<span><b>${icon} ${safeText(title)}</b><em>${safeText(status)}</em></span>`).join('')}</div>
+    <div class="${sync.cloudActive ? 'recommendation' : 'warning-box'} compact-backup-message">${safeText(sync.message)}</div>`;
+}
+
+function backupSection(icon, title, description, content, open = false) {
+  return `<details class="backup-section" ${open ? 'open' : ''}>
+    <summary><span>${safeText(icon)}</span><div><b>${safeText(title)}</b><small>${safeText(description)}</small></div></summary>
+    <div class="backup-section-body">${content}</div>
+  </details>`;
+}
+
+function quickJsonPanel() {
+  return `<article class="card backup-action-card"><h3>نسخة JSON سريعة</h3>
+    <p class="meta">استخدمها قبل أي تجربة كبيرة أو قبل تحديث المشروع. هذه أسرع طريقة لحفظ نسخة خارج المتصفح.</p>
+    <div class="btn-row backup-main-actions">
+      <button class="btn primary" data-action="export-json">تصدير JSON</button>
+      <label class="btn ghost">استيراد JSON<input class="sr-only" type="file" accept="application/json" data-action="import-json"></label>
+      <button class="btn ghost" data-action="backup-date">نسخة بتاريخ اليوم</button>
+      <button class="btn ghost" data-action="force-save-data">حفظ الآن</button>
+    </div>
+  </article>`;
+}
+
+function dangerPanel() {
+  return `<article class="card backup-action-card danger-soft"><h3>منطقة الخطر</h3>
+    <p class="meta">لا تستخدم المسح قبل تصدير JSON أو رفع نسخة إلى Google Drive / Supabase.</p>
+    <div class="btn-row backup-main-actions"><button class="btn danger" data-action="clear-data">مسح كل البيانات المحلية</button><button class="btn ghost" data-action="show-qa">تشغيل اختبار النظام</button></div>
+  </article>`;
 }
 
 
@@ -183,30 +234,20 @@ function storagePanel() {
 
 export function backupPanel() {
   const report = backupHealthReport();
-  return `<section class="backup-pro">
-    ${pageHeader('النسخ الاحتياطي', 'مركز حماية البيانات: تصدير، استيراد، فحص سلامة، ومسح آمن.', '<button class="btn primary" data-action="export-json">تصدير الآن</button>')}
+  return `<section class="backup-pro backup-control-center">
+    ${pageHeader('النسخ الاحتياطي', 'مركز منظم لحماية البيانات. افتح القسم الذي تحتاجه فقط حتى لا تتوه بين الأدوات.', '<button class="btn primary" data-action="export-json">تصدير سريع</button>')}
+    ${backupStatusHero()}
     ${renderBackupStats()}
-    ${driveBackupPanel()}
-    ${cloudSyncPanel()}
-    ${storagePanel()}
-    ${backendReadinessPanel()}
-    <div class="grid grid-2">
-      <article class="card"><h3>إجراءات النسخ</h3>
-        <p class="meta">احتفظ بملف JSON خارج المتصفح قبل أي تعديل كبير أو رفع نسخة جديدة.</p>
-        <div class="btn-row" style="margin-top:12px">
-          <button class="btn primary" data-action="export-json">تصدير JSON</button>
-          <label class="btn ghost">استيراد JSON<input class="sr-only" type="file" accept="application/json" data-action="import-json"></label>
-          <button class="btn ghost" data-action="backup-date">نسخة بتاريخ اليوم</button>
-          <button class="btn ghost" data-action="force-save-data">حفظ الآن</button>
-        </div>
-      </article>
-      <article class="card"><h3>منطقة الخطر</h3>
-        <p class="meta">المسح يمسح بيانات LocalStorage من هذا المتصفح فقط. لا تستخدمه قبل التصدير.</p>
-        <div class="btn-row" style="margin-top:12px"><button class="btn danger" data-action="clear-data">مسح كل البيانات</button><button class="btn ghost" data-action="show-qa">تشغيل اختبار النظام</button></div>
-      </article>
+
+    <div class="backup-sections">
+      ${backupSection('⚡', 'نسخة سريعة', 'تصدير واستيراد JSON وحفظ نسخة محلية فورية.', quickJsonPanel(), true)}
+      ${backupSection('☁️', 'Google Drive Backup', 'نسخ احتياطي على Google Drive بعد الاتصال بحسابك.', driveBackupPanel(), false)}
+      ${backupSection('🗄️', 'Supabase Database Sync', 'رفع وتحميل ودمج بياناتك مع قاعدة Supabase.', cloudSyncPanel(), false)}
+      ${backupSection('📎', 'Supabase File Storage', 'نقل ملفات PDF والصور والفيديوهات إلى Supabase Storage.', storagePanel(), false)}
+      ${backupSection('⚙️', 'إعدادات Backend المتقدمة', 'URL، Key، وضع التخزين، وتجهيزات السحابة. افتحها فقط عند الإعداد.', backendReadinessPanel(), false)}
+      ${backupSection('🧪', 'فحص وسلامة البيانات', 'مشاكل التخزين، IDs، محتوى النسخة، واختبار النظام.', `<article class="card backup-action-card"><h3>فحص سلامة النسخة</h3>${report.issues.map(issue => `<div class="${report.health.ok && !report.duplicates.length ? 'recommendation' : 'warning-box'}" style="margin-top:10px">${safeText(issue)}</div>`).join('')}<div class="btn-row backup-main-actions" style="margin-top:12px"><button class="btn ghost" data-action="show-qa">تشغيل اختبار النظام</button></div></article>${renderCollectionBreakdown()}`, false)}
+      ${backupSection('⚠️', 'منطقة الخطر', 'مسح البيانات المحلية بعد تأكيد واضح فقط.', dangerPanel(), false)}
     </div>
-    <article class="card"><h3>فحص سلامة النسخة</h3>${report.issues.map(issue => `<div class="${report.health.ok && !report.duplicates.length ? 'recommendation' : 'warning-box'}" style="margin-top:10px">${safeText(issue)}</div>`).join('')}</article>
-    ${renderCollectionBreakdown()}
   </section>`;
 }
 
