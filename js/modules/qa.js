@@ -229,7 +229,7 @@ function checkSupabaseFileStorage() {
   return results;
 }
 
-function runSystemTests() {
+export function runSystemTests() {
   const startedAt = new Date().toISOString();
   const results = [
     ...checkRoutes(),
